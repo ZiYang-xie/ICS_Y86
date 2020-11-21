@@ -28,7 +28,7 @@ class StdInstr {
     uint_fast8_t id_;
 
     bool reg_flag_;
-    uint_fast8_t reg_id_;
+    Register reg_id_;
 
     bool imm_flag_;
     int_fast64_t imm_;

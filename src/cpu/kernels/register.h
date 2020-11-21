@@ -2,7 +2,7 @@
 #define kREGISTEkR
 #pragma once
 
-enum kRegistekR {
+enum Register {
     kRax = 0,
     kRcx = 1,
     kRdx = 2,
