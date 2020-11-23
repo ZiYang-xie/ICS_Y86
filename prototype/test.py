@@ -4,7 +4,14 @@ import numpy as np
 
 from controler import Controler
 
+RAX = 0
+RCX = 1
+RDX = 2
+RBX = 3
 RSP = 4
+RBP = 5
+RSI = 6
+RDI = 7
 
 
 def reverse_str(s):
@@ -284,6 +291,12 @@ class TestSingleInstr(unittest.TestCase):
         self.assertEqual(c.dev.PC, 0x101)
         self.assertEqual(c.dev.Reg[RSP], 0x148)
         self.assertEqual(read_8_bytes(c.dev, 0x148), 0x9)
+        c.reset()
+        c.flash_code("803800000000000000")
+        c.dev.Reg[RSP] = 0x200
+        c.run()
+        self.assertEqual(c.dev.Reg[RSP], 0x1f8)
+        self.assertEqual(c.dev.PC, 0x39)
 
     def test_ret(self):
         c = Controler()
@@ -313,10 +326,33 @@ class TestSingleInstr(unittest.TestCase):
         c = Controler()
         c.flash_code("b010")
         c.dev.Reg[RSP] = 0x148
-        write_8_bytes(c.dev,0x148,0xdeadbeef)
+        write_8_bytes(c.dev, 0x148, 0xdeadbeef)
         c.run()
         self.assertEqual(c.dev.Reg[RSP], 0x150)
-        self.assertEqual(c.dev.Reg[1],0xdeadbeef)
+        self.assertEqual(c.dev.Reg[1], 0xdeadbeef)
+
+
+class TestMultiInstr(unittest.TestCase):
+
+    # asum.yo
+    def test_asum(self):
+        c = Controler()
+        c.flash_code(
+            "30f4000200000000000080380000000000000000000000000d000d000d000000c000c000c000000"
+            "0000b000b000b000000a000a000a0000030f7180000000000000030f6040000000000000"
+            "08056000000000000009030f8080000000000000030f9010000000000000063006266708"
+            "70000000000000050a7000000000000000060a06087619674770000000000000090")
+        c.run(debug=False)
+        self.assertEqual(c.dev.PC, 0x14)
+        self.assertEqual(c.dev.State, c.dev.HLT)
+        self.assertEqual(c.dev.Reg[RAX], 0xabcdabcdabcd)
+        self.assertEqual(c.dev.Reg[RSP], 0x200)
+        self.assertEqual(c.dev.Reg[RSI], 0)
+        self.assertEqual(c.dev.Reg[RDI], 0x38)
+        self.assertEqual(c.dev.Reg[8], 0x8)
+        self.assertEqual(c.dev.Reg[9], 0x1)
+        self.assertEqual(c.dev.Reg[10], 0xa000a000a000)
+        print(c.dev)
 
 
 if __name__ == '__main__':

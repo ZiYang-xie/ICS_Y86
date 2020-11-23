@@ -18,31 +18,29 @@ class Devices:
 
     def __str__(self):
         res = "-----------------------\n"
-        res += "PC: " + str(self.PC) + '\n'
-        res += "ZF: " + str(self.ZF) + "\tSF: " + \
-            str(self.SF) + "\tOF: " + str(self.OF) + '\n'
+        res += "PC: " + hex(
+            self.PC) + " \t" + " ".join(list(map(lambda a: hex(a), self.Mem[self.PC: self.PC + 10]))) + '\n'
+        res += "ZF: " + hex(self.ZF) + "\tSF: " + \
+               hex(self.SF) + "\tOF: " + hex(self.OF) + '\n'
         reg_list = (
             "%rax", "%rcx", "%rdx", "%rbx",
             "%rsp", "%rbp", "%rsi", "%rdi",
             "%r8", "%r9", "%r10", "%r11",
             "%r12", "%r13", "%r14")
-        for i in range(4):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
+        for i in range(5):
+            res += reg_list[i] + ': ' + hex(self.Reg[i]) + '\t'
         res += '\n'
-        for i in range(4, 8):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
+        for i in range(5, 10):
+            res += reg_list[i] + ': ' + hex(self.Reg[i]) + '\t'
         res += '\n'
-        for i in range(8, 12):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
-        res += '\n'
-        for i in range(12, 15):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
+        for i in range(10, 15):
+            res += reg_list[i] + ': ' + hex(self.Reg[i]) + '\t'
         res += '\n'
         return res
 
     def str_memcpy(self, start_pos, s: str):
-        if len(s)+start_pos > len(self.Mem):
+        if len(s) + start_pos > len(self.Mem):
             raise ValueError("string is too long ")
-        for i in range(0,len(s),2):
-            self.Mem[start_pos] = int(s[i+1], 16)+(int(s[i], 16) << 4)
+        for i in range(0, len(s), 2):
+            self.Mem[start_pos] = int(s[i + 1], 16) + (int(s[i], 16) << 4)
             start_pos += 1

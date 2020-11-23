@@ -80,10 +80,17 @@ class OPq(instr):
         self.valE = choice[self.ifun](self.valB, self.valA)
         if self.valE == 0:
             self.storage.ZF = 1
-        elif self.valE < 0:
+        else:
+            self.storage.ZF = 0
+        if self.valE < 0:
             self.storage.SF = 1
-        elif self.valE >= (1 << 64) or self.valE <= -(1 << 64):
+        else:
+            self.storage.SF = 0
+
+        if self.valE >= (1 << 64) or self.valE <= -(1 << 64):
             self.storage.OF = 1
+        else:
+            self.storage.OF = 0
 
     def Write_back(self):
         self.storage.Reg[self.rb] = self.valE
@@ -145,7 +152,7 @@ class mrmovq(instr):
     def Fetch(self):
         super(mrmovq, self).Fetch()
         self.valC = self.read_8_bytes(self.storage.PC + 2)
-        self.valP = self.storage.PC + 20
+        self.valP = self.storage.PC + 10
 
     def Decode(self):
         self.valB = self.storage.Reg[self.rb]
