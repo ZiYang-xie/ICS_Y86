@@ -13,7 +13,7 @@ class Controler:
 
 
     def get_instr(self) -> instr:
-        tmp = self.dev.Mem[self.dev.PC] & 0xf
+        tmp = self.dev.Mem[self.dev.PC] >> 4
         choice = (instr.halt, instr.nop, instr.rrmovq, instr.irmovq, instr.rmmovq, instr.mrmovq, instr.OPq, instr.jXX, instr.call, instr.ret, instr.pushq, instr.popq)
         return choice[tmp](self.dev)
 

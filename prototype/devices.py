@@ -12,7 +12,7 @@ class Devices:
         self.SF = 0
         self.OF = 0
         self.PC = 0
-        self.Reg = np.zeros(15, dtype=np.int64)
+        self.Reg = np.zeros(15, dtype=np.uint64)
         self.Mem = np.zeros(size, dtype=np.uint8)
         self.State = Devices.AOK
 
@@ -44,5 +44,5 @@ class Devices:
         if len(s)+start_pos > len(self.Mem):
             raise ValueError("string is too long ")
         for i in range(0,len(s),2):
-            self.Mem[start_pos] = int(s[i], 16)+(int(s[i+1], 16) << 4)
+            self.Mem[start_pos] = int(s[i+1], 16)+(int(s[i], 16) << 4)
             start_pos += 1

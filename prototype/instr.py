@@ -1,4 +1,7 @@
 from devices import Devices
+import numpy as np
+
+
 class instr:
     def __init__(self, storage: Devices):
         self.storage = storage
@@ -15,8 +18,8 @@ class instr:
         self.cnd = 0
 
     def Fetch(self):
-        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
-        self.ra,self.rb = self.read_split_byte(self.storage.PC+1)
+        self.icode, self.ifun = self.read_split_byte(self.storage.PC)
+        self.ra, self.rb = self.read_split_byte(self.storage.PC+1)
 
     def Decode(self):
         pass
@@ -33,28 +36,31 @@ class instr:
     def PC_update(self):
         self.storage.PC = self.valP
 
-    def write_8_bytes(self, start_pos, val)->None:
+    def write_8_bytes(self, start_pos, val) -> None:
         while val > 0:
-            self.storage.Mem[start_pos] = val&0xff
-            val = val >> 8
+            self.storage.Mem[int(start_pos)] = val & np.uint64(0xff)
+            val = val >> np.uint64(8)
+            start_pos += 1
 
-    def read_8_bytes(self, start_pos)->int:
+    def read_8_bytes(self, start_pos) -> int:
         res = 0
         for i in range(8):
-            res += self.storage.Mem[start_pos+i] << (8*i)
+            res += (self.storage.Mem[int(start_pos+i)] << np.uint64(8*i))
         return res
 
-    def read_split_byte(self, pos)->(int, int):
-        return self.storage.Mem[pos]&0xf, self.storage.Mem[pos]>>4
+    def read_split_byte(self, pos) -> (int, int):
+        return self.storage.Mem[pos] >> 4, self.storage.Mem[pos] & 0xf
 
     def CC(self):
         return (True,
-                self.storage.ZF == 1 or (self.storage.SF ^ self.storage.OF) == 1,
+                self.storage.ZF == 1 or (
+                    self.storage.SF ^ self.storage.OF) == 1,
                 (self.storage.SF ^ self.storage.OF) == 1,
                 self.storage.ZF == 1,
                 self.storage.ZF == 0,
                 (self.storage.SF ^ self.storage.OF) == 0,
-                self.storage.ZF == 0 or (self.storage.SF ^ self.storage.OF) == 0
+                self.storage.ZF == 0 or (
+                    self.storage.SF ^ self.storage.OF) == 0
                 )
 
 
@@ -69,7 +75,8 @@ class OPq(instr):
         self.valB = self.storage.Reg[self.rb]
 
     def Execute(self):
-        choice = (lambda x, y: x + y, lambda x, y: x - y, lambda x, y: x & y, lambda x, y: x ^ y)
+        choice = (lambda x, y: x + y, lambda x, y: x - y,
+                  lambda x, y: x & y, lambda x, y: x ^ y)
         self.valE = choice[self.ifun](self.valB, self.valA)
         if self.valE == 0:
             self.storage.ZF = 1
@@ -112,7 +119,7 @@ class irmovq(instr):
         self.valE = 0 + self.valC
 
     def Write_back(self):
-        self.storage.Reg[self.rb] = self.valE
+        self.storage.Reg[self.rb] = int(self.valE) & 0xffffffffffffffff
 
 
 class rmmovq(instr):
@@ -147,10 +154,10 @@ class mrmovq(instr):
         self.valE = self.valB + self.valC
 
     def Memory(self):
-        self.valM = self.read_8_bytes(self.storage.PC + 2)
+        self.valM = self.read_8_bytes(self.valE)
 
     def Write_back(self):
-        self.storage.Reg[self.ra] = self.valM
+        self.storage.Reg[self.ra] = int(self.valM) & 0xffffffffffffffff
 
 
 class pushq(instr):
@@ -196,7 +203,7 @@ class popq(instr):
 
 class jXX(instr):
     def Fetch(self):
-        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
+        self.icode, self.ifun = self.read_split_byte(self.storage.PC)
         self.valC = self.read_8_bytes(self.storage.PC + 1)
         self.valP = self.storage.PC + 9
 
@@ -213,7 +220,7 @@ class jXX(instr):
 
 class call(instr):
     def Fetch(self):
-        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
+        self.icode, self.ifun = self.read_split_byte(self.storage.PC)
         self.valC = self.read_8_bytes(self.storage.PC + 1)
         self.valP = self.storage.PC + 9
 
@@ -235,7 +242,7 @@ class call(instr):
 
 class ret(instr):
     def Fetch(self):
-        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
+        self.icode, self.ifun = self.read_split_byte(self.storage.PC)
         self.valP = self.storage.PC
 
     def Decode(self):
