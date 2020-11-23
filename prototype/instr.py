@@ -38,14 +38,14 @@ class instr:
 
     def write_8_bytes(self, start_pos, val) -> None:
         while val > 0:
-            self.storage.Mem[int(start_pos)] = val & np.uint64(0xff)
-            val = val >> np.uint64(8)
+            self.storage.Mem[int(start_pos)] = int(val) & 0xff
+            val = int(val) >> 8
             start_pos += 1
 
     def read_8_bytes(self, start_pos) -> int:
-        res = 0
+        res = int(0)
         for i in range(8):
-            res += (self.storage.Mem[int(start_pos+i)] << np.uint64(8*i))
+            res += (int(self.storage.Mem[int(start_pos+i)]) << (8*i))
         return res
 
     def read_split_byte(self, pos) -> (int, int):
@@ -243,11 +243,11 @@ class call(instr):
 class ret(instr):
     def Fetch(self):
         self.icode, self.ifun = self.read_split_byte(self.storage.PC)
-        self.valP = self.storage.PC
+        self.valP = self.storage.PC + 1
 
     def Decode(self):
         self.valA = self.storage.Reg[4]
-        self.valA = self.storage.Reg[4]
+        self.valB = self.storage.Reg[4]
 
     def Execute(self):
         self.valE = self.valB + 8
