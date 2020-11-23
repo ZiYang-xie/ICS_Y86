@@ -33,3 +33,6 @@
 
 # MacOSX
 .DS_Store
+
+# PyCharm
+.idea
