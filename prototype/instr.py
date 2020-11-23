@@ -1,45 +1,4 @@
-class Devices:
-    AOK = 1
-    HLT = 2
-    ADR = 3
-    INS = 4
-
-    def __init__(self, size=200):
-        self.ZF = 0
-        self.SF = 0
-        self.OF = 0
-        self.PC = 0
-        self.Reg = [0 for _ in range(15)]
-        self.Mem = "0" * size
-        self.State = Devices.AOK
-
-    def __str__(self):
-        res = "-----------------------\n"
-        res += "PC: " + str(self.PC) + '\n'
-        res += "ZF: " + str(self.ZF) + "\tSF: " + str(self.SF) + "\tOF: " + str(self.OF) + '\n'
-        reg_list = (
-            "%rax", "%rcx", "%rdx", "%rbx",
-            "%rsp", "%rbp", "%rsi", "%rdi",
-            "%r8", "%r9", "%r10", "%r11",
-            "%r12", "%r13", "%r14")
-        for i in range(4):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
-        res += '\n'
-        for i in range(4, 8):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
-        res += '\n'
-        for i in range(8, 12):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
-        res += '\n'
-        for i in range(12, 15):
-            res += reg_list[i] + ': ' + str(self.Reg[i]) + '\t'
-        res += '\n'
-        return res
-
-    def insert_code(self, s):
-        self.Mem = s + self.Mem
-
-
+from devices import Devices
 class instr:
     def __init__(self, storage: Devices):
         self.storage = storage
@@ -56,10 +15,8 @@ class instr:
         self.cnd = 0
 
     def Fetch(self):
-        self.ifun = self.read_half_byte(self.storage.PC + 0)
-        self.icode = self.read_half_byte(self.storage.PC + 1)
-        self.ra = self.read_half_byte(self.storage.PC + 4)
-        self.rb = self.read_half_byte(self.storage.PC + 3)
+        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
+        self.ra,self.rb = self.read_split_byte(self.storage.PC+1)
 
     def Decode(self):
         pass
@@ -76,34 +33,19 @@ class instr:
     def PC_update(self):
         self.storage.PC = self.valP
 
-    @staticmethod
-    def reverse_str(s):
-        if len(s) % 2 != 0:
-            raise ValueError("s must have even length")
-        if s == "":
-            return ""
-        else:
-            return instr.reverse_str(s[2:]) + s[0:2]
+    def write_8_bytes(self, start_pos, val)->None:
+        while val > 0:
+            self.storage.Mem[start_pos] = val&0xff
+            val = val >> 8
 
-    @staticmethod
-    def str2int(s):
-        return int(instr.reverse_str(s), 16)
+    def read_8_bytes(self, start_pos)->int:
+        res = 0
+        for i in range(8):
+            res += self.storage.Mem[start_pos+i] << (8*i)
+        return res
 
-    @staticmethod
-    def int2str(n):
-        s = hex(n)[2:]
-        while len(s) < 16:
-            s = '0' + s
-        return instr.reverse_str(s)
-
-    def write_8_bytes(self, start_pos, val):
-        self.storage.Mem = self.storage.Mem[:start_pos] + instr.int2str(val) + self.storage.Mem[start_pos + 16:]
-
-    def read_8_bytes(self, start_pos):
-        return instr.str2int(self.storage.Mem[start_pos:start_pos + 16])
-
-    def read_half_byte(self, pos):
-        return int(self.storage.Mem[pos], 16)
+    def read_split_byte(self, pos)->(int, int):
+        return self.storage.Mem[pos]&0xf, self.storage.Mem[pos]>>4
 
     def CC(self):
         return (True,
@@ -120,7 +62,7 @@ class OPq(instr):
 
     def Fetch(self):
         super(OPq, self).Fetch()
-        self.valP = self.storage.PC + 4
+        self.valP = self.storage.PC + 2
 
     def Decode(self):
         self.valA = self.storage.Reg[self.ra]
@@ -144,7 +86,7 @@ class rrmovq(instr):
 
     def Fetch(self):
         super(rrmovq, self).Fetch()
-        self.valP = self.storage.PC + 4
+        self.valP = self.storage.PC + 2
 
     def Decode(self):
         self.valA = self.storage.Reg[self.ra]
@@ -152,7 +94,7 @@ class rrmovq(instr):
     def Execute(self):
         choice = self.CC()
         self.cnd = choice[self.ifun]
-        self.valE = 0 + self.valE
+        self.valE = 0 + self.valA
 
     def Write_back(self):
         if self.cnd:
@@ -163,8 +105,8 @@ class irmovq(instr):
 
     def Fetch(self):
         super(irmovq, self).Fetch()
-        self.valC = self.read_8_bytes(self.storage.PC + 4)
-        self.valP = self.storage.PC + 20
+        self.valC = self.read_8_bytes(self.storage.PC + 2)
+        self.valP = self.storage.PC + 10
 
     def Execute(self):
         self.valE = 0 + self.valC
@@ -177,8 +119,8 @@ class rmmovq(instr):
 
     def Fetch(self):
         super(rmmovq, self).Fetch()
-        self.valC = self.read_8_bytes(self.storage.PC + 4)
-        self.valP = self.storage.PC + 20
+        self.valC = self.read_8_bytes(self.storage.PC + 2)
+        self.valP = self.storage.PC + 10
 
     def Decode(self):
         self.valA = self.storage.Reg[self.ra]
@@ -195,7 +137,7 @@ class mrmovq(instr):
 
     def Fetch(self):
         super(mrmovq, self).Fetch()
-        self.valC = instr.str2int(self.storage.Mem[self.storage.PC + 4:self.storage.PC + 20])
+        self.valC = self.read_8_bytes(self.storage.PC + 2)
         self.valP = self.storage.PC + 20
 
     def Decode(self):
@@ -205,7 +147,7 @@ class mrmovq(instr):
         self.valE = self.valB + self.valC
 
     def Memory(self):
-        self.valM = self.read_8_bytes(self.storage.PC + 4)
+        self.valM = self.read_8_bytes(self.storage.PC + 2)
 
     def Write_back(self):
         self.storage.Reg[self.ra] = self.valM
@@ -215,7 +157,7 @@ class pushq(instr):
 
     def Fetch(self):
         super(pushq, self).Fetch()
-        self.valP = self.storage.PC + 4
+        self.valP = self.storage.PC + 2
 
     def Decode(self):
         self.valA = self.storage.Reg[self.ra]
@@ -235,7 +177,7 @@ class popq(instr):
 
     def Fetch(self):
         super(popq, self).Fetch()
-        self.valP = self.storage.PC + 4
+        self.valP = self.storage.PC + 2
 
     def Decode(self):
         self.valA = self.storage.Reg[4]
@@ -254,10 +196,9 @@ class popq(instr):
 
 class jXX(instr):
     def Fetch(self):
-        self.icode = self.read_half_byte(self.storage.PC + 0)
-        self.ifun = self.read_half_byte(self.storage.PC + 1)
-        self.valC = self.read_8_bytes(self.storage.PC + 2)
-        self.valP = self.storage.PC + 18
+        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
+        self.valC = self.read_8_bytes(self.storage.PC + 1)
+        self.valP = self.storage.PC + 9
 
     def Execute(self):
         choice = self.CC()
@@ -272,10 +213,9 @@ class jXX(instr):
 
 class call(instr):
     def Fetch(self):
-        self.icode = self.read_half_byte(self.storage.PC + 0)
-        self.ifun = self.read_half_byte(self.storage.PC + 1)
-        self.valC = self.read_8_bytes(self.storage.PC + 2)
-        self.valP = self.storage.PC + 18
+        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
+        self.valC = self.read_8_bytes(self.storage.PC + 1)
+        self.valP = self.storage.PC + 9
 
     def Decode(self):
         self.valB = self.storage.Reg[4]
@@ -295,9 +235,8 @@ class call(instr):
 
 class ret(instr):
     def Fetch(self):
-        self.icode = self.read_half_byte(self.storage.PC + 0)
-        self.ifun = self.read_half_byte(self.storage.PC + 1)
-        self.valP = self.storage.PC + 4
+        self.icode,self.ifun = self.read_split_byte(self.storage.PC)
+        self.valP = self.storage.PC
 
     def Decode(self):
         self.valA = self.storage.Reg[4]
@@ -317,34 +256,13 @@ class ret(instr):
 
 
 class halt(instr):
+    def Fetch(self):
+        self.valP = self.storage.PC + 1
+
     def Write_back(self):
         self.storage.State = self.storage.HLT
 
 
 class nop(instr):
     def Fetch(self):
-        self.valP = self.storage.PC + 2
-
-
-def get_instr(dev: Devices) -> instr:
-    tmp = int(dev.Mem[dev.PC], 16)
-    choice = (halt, nop, rrmovq, irmovq, rmmovq, mrmovq, OPq, jXX, call, ret, pushq, popq)
-    return choice[tmp](dev)
-
-
-def run(dev: Devices):
-    while dev.State == dev.AOK:
-        ins = get_instr(dev)
-        ins.Fetch()
-        ins.Decode()
-        ins.Execute()
-        ins.Memory()
-        ins.Write_back()
-        ins.PC_update()
-        print(dev)
-
-
-if __name__ == '__main__':
-    d = Devices()
-    d.insert_code("30f8080000000000000000")
-    run(d)
+        self.valP = self.storage.PC + 1

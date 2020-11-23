@@ -34,5 +34,16 @@
 # MacOSX
 .DS_Store
 
-# PyCharm
+# PyCharm & Clion
 .idea
+
+# VScode
+.vscode
+
+# TestCode
+y86-code
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
