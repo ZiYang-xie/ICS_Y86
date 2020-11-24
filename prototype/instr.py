@@ -3,6 +3,8 @@ import numpy as np
 
 
 class instr:
+    # 如果是在cpp中，可以加一个handle类的，这样Fetch阶段更符合逻辑，在取指令的同时，可以执行子类的操作，然后可以做更多的封装，这里的
+    # 封装太粗了，例如，可以把所有的mov都放成一类
     def __init__(self, storage: Devices):
         self.storage = storage
         self.ifun = 0
