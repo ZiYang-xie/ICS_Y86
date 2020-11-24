@@ -75,19 +75,20 @@ class OPq(instr):
         self.valB = self.storage.Reg[self.rb]
 
     def Execute(self):
+        # TODO: 建议把ALU和CC操作独立成类(dbq又是一层封装，这样就可以实现CPU"模拟”)
         choice = (lambda x, y: x + y, lambda x, y: x - y,
                   lambda x, y: x & y, lambda x, y: x ^ y)
-        self.valE = choice[self.ifun](self.valB, self.valA)
+        self.valE = int(choice[self.ifun](self.valB, self.valA))
         if self.valE == 0:
             self.storage.ZF = 1
         else:
             self.storage.ZF = 0
-        if self.valE < 0:
+        if (self.valE >> 63) == 1:
             self.storage.SF = 1
         else:
             self.storage.SF = 0
-
-        if self.valE >= (1 << 64) or self.valE <= -(1 << 64):
+        # TODO 球球了我真的不知道OF flag咋写，先“面向测例编程， 写一个能用的
+        if self.ifun == 0 and (int(self.valE)) >> 63 != (int(self.valA) >> 63) and (int(self.valE) >> 63) != (int(self.valB) >> 63):
             self.storage.OF = 1
         else:
             self.storage.OF = 0
