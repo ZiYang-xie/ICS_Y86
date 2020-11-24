@@ -90,7 +90,13 @@ class OPq(instr):
         else:
             self.storage.SF = 0
         # TODO 球球了我真的不知道OF flag咋写，先“面向测例编程， 写一个能用的
-        if self.ifun == 0 and (int(self.valE)) >> 63 != (int(self.valA) >> 63) and (int(self.valE) >> 63) != (int(self.valB) >> 63):
+        e_sign = int(self.valE) >> 63
+        a_sign = int(self.valA) >> 63
+        b_sign = int(self.valB) >> 63
+        add_flag = self.ifun == 0 and e_sign != a_sign and e_sign != b_sign
+        sub_flag = self.ifun == 1 and ((e_sign == 1 and a_sign == 1 and b_sign == 0) or (
+            e_sign == 0 and a_sign == 0 and b_sign == 1))
+        if add_flag or sub_flag:
             self.storage.OF = 1
         else:
             self.storage.OF = 0

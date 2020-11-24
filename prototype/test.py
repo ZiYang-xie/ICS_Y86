@@ -205,59 +205,66 @@ class TestSingleInstr(unittest.TestCase):
         c.dev.Reg[2] = 0x03
         c.run()
         self.assertEqual(c.dev.Reg[2], 0x13)
-        self.assertEqual(c.dev.ZF,0)
-        self.assertEqual(c.dev.SF,0)
-        self.assertEqual(c.dev.OF,0)
+        self.assertEqual(c.dev.ZF, 0)
+        self.assertEqual(c.dev.SF, 0)
+        self.assertEqual(c.dev.OF, 0)
         c.flash_code("6112")
         c.reset()
         c.dev.Reg[1] = 0x10
         c.dev.Reg[2] = 0x03
         c.run()
         self.assertEqual(c.dev.Reg[2], np.uint64(0x3 - 0x10))
-        self.assertEqual(c.dev.ZF,0)
-        self.assertEqual(c.dev.SF,1)
-        self.assertEqual(c.dev.OF,0)
+        self.assertEqual(c.dev.ZF, 0)
+        self.assertEqual(c.dev.SF, 1)
+        self.assertEqual(c.dev.OF, 0)
         c.flash_code("6212")
         c.reset()
         c.dev.Reg[1] = 0xf
         c.dev.Reg[2] = 0x7
         c.run()
         self.assertEqual(c.dev.Reg[2], np.uint64(0x7))
-        self.assertEqual(c.dev.ZF,0)
-        self.assertEqual(c.dev.SF,0)
-        self.assertEqual(c.dev.OF,0)
+        self.assertEqual(c.dev.ZF, 0)
+        self.assertEqual(c.dev.SF, 0)
+        self.assertEqual(c.dev.OF, 0)
         c.flash_code("6312")
         c.reset()
         c.dev.Reg[1] = 0xf
         c.dev.Reg[2] = 0x7
         c.run()
         self.assertEqual(c.dev.Reg[2], np.uint64(0x8))
-        self.assertEqual(c.dev.ZF,0)
-        self.assertEqual(c.dev.SF,0)
-        self.assertEqual(c.dev.OF,0)
+        self.assertEqual(c.dev.ZF, 0)
+        self.assertEqual(c.dev.SF, 0)
+        self.assertEqual(c.dev.OF, 0)
         c.flash_code("6012")
         c.reset()
         c.dev.Reg[1] = 0x0
         c.dev.Reg[2] = 0x0
         c.run()
-        self.assertEqual(c.dev.ZF,1)
-        self.assertEqual(c.dev.SF,0)
-        self.assertEqual(c.dev.OF,0)
+        self.assertEqual(c.dev.ZF, 1)
+        self.assertEqual(c.dev.SF, 0)
+        self.assertEqual(c.dev.OF, 0)
         c.reset()
         c.dev.Reg[1] = -1
         c.dev.Reg[2] = 0
         c.run()
-        self.assertEqual(c.dev.ZF,0)
-        self.assertEqual(c.dev.SF,1)
-        self.assertEqual(c.dev.OF,0)
+        self.assertEqual(c.dev.ZF, 0)
+        self.assertEqual(c.dev.SF, 1)
+        self.assertEqual(c.dev.OF, 0)
         c.reset()
         c.dev.Reg[1] = 0x7fffffffffffffff
         c.dev.Reg[2] = 0x7fffffffffffffff
         c.run()
-        self.assertEqual(c.dev.ZF,0)
-        self.assertEqual(c.dev.SF,0)
-        self.assertEqual(c.dev.OF,1)
-
+        self.assertEqual(c.dev.ZF, 0)
+        self.assertEqual(c.dev.SF, 1)
+        self.assertEqual(c.dev.OF, 1)
+        c.flash_code("6112")
+        c.reset()
+        c.dev.Reg[1] = 0x8000000000000000
+        c.dev.Reg[2] = 0x7fffffffffffffff
+        c.run()
+        self.assertEqual(c.dev.ZF, 0)
+        self.assertEqual(c.dev.SF, 1)
+        self.assertEqual(c.dev.OF, 1)
 
     def test_jXX(self):
         c = Controler()
