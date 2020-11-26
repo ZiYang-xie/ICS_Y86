@@ -13,7 +13,6 @@ RBP = 5
 RSI = 6
 RDI = 7
 
-
 def reverse_str(s):
     if len(s) % 2 != 0:
         raise ValueError("s must have even length")
@@ -46,6 +45,13 @@ def read_8_bytes(dev, start_pos) -> int:
     for i in range(8):
         res += dev.Mem[start_pos + i] << (8 * i)
     return np.uint64(res)
+
+def read_flash_code(file_path = "../test/y86-code/raw_code"):
+    code_list = []
+    with open(file_path) as f:
+        for line in f.readlines():
+            code_list.append(str(line))
+    return code_list
 
 
 class TestDevices(unittest.TestCase):
@@ -375,26 +381,28 @@ class TestSingleInstr(unittest.TestCase):
 
 
 class TestMultiInstr(unittest.TestCase):
-
+    
     # asum.yo
-    def test_asum(self):
+    def test_(self):
+        code_list = read_flash_code()
         c = Controler()
-        c.flash_code(
-            "30f4000200000000000080380000000000000000000000000d000d000d000000c000c000c000000"
-            "0000b000b000b000000a000a000a0000030f7180000000000000030f6040000000000000"
-            "08056000000000000009030f8080000000000000030f9010000000000000063006266708"
-            "70000000000000050a7000000000000000060a06087619674770000000000000090")
         c.run(debug=False)
-        self.assertEqual(c.dev.PC, 0x14)
-        self.assertEqual(c.dev.State, c.dev.HLT)
-        self.assertEqual(c.dev.Reg[RAX], 0xabcdabcdabcd)
-        self.assertEqual(c.dev.Reg[RSP], 0x200)
-        self.assertEqual(c.dev.Reg[RSI], 0)
-        self.assertEqual(c.dev.Reg[RDI], 0x38)
-        self.assertEqual(c.dev.Reg[8], 0x8)
-        self.assertEqual(c.dev.Reg[9], 0x1)
-        self.assertEqual(c.dev.Reg[10], 0xa000a000a000)
-       # print(c.dev)
+        for idx in range(0, 20):
+            c.flash_code(code_list[idx].strip())
+            self.assertEqual(c.dev.PC, 0x14)
+            self.assertEqual(c.dev.State, c.dev.HLT)
+            self.assertEqual(c.dev.Reg[RAX], 0xabcdabcdabcd)
+            self.assertEqual(c.dev.Reg[RSP], 0x200)
+            self.assertEqual(c.dev.Reg[RSI], 0)
+            self.assertEqual(c.dev.Reg[RDI], 0x38)
+            self.assertEqual(c.dev.Reg[8], 0x8)
+            self.assertEqual(c.dev.Reg[9], 0x1)
+            self.assertEqual(c.dev.Reg[10], 0xa000a000a000)
+        
+        
+        #print(c.dev)
+
+
 
 
 if __name__ == '__main__':
