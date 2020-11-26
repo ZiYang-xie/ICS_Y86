@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from controler import Controler
+from checker import *
 
 RAX = 0
 RCX = 1
@@ -382,23 +383,38 @@ class TestSingleInstr(unittest.TestCase):
 
 class TestMultiInstr(unittest.TestCase):
     
-    # asum.yo
+    # all_the_test
     def test_(self):
+        file_list = getFileName("/home/xzy/Desktop/ICS/ICSPJ/prototype/test/y86-code/test_ans")
+        overall = processText(file_list)
         code_list = read_flash_code()
         c = Controler()
         c.run(debug=False)
         for idx in range(0, 20):
             c.flash_code(code_list[idx].strip())
-            self.assertEqual(c.dev.PC, 0x14)
-            self.assertEqual(c.dev.State, c.dev.HLT)
-            self.assertEqual(c.dev.Reg[RAX], 0xabcdabcdabcd)
-            self.assertEqual(c.dev.Reg[RSP], 0x200)
-            self.assertEqual(c.dev.Reg[RSI], 0)
-            self.assertEqual(c.dev.Reg[RDI], 0x38)
-            self.assertEqual(c.dev.Reg[8], 0x8)
-            self.assertEqual(c.dev.Reg[9], 0x1)
-            self.assertEqual(c.dev.Reg[10], 0xa000a000a000)
-        
+            # self.assertEqual(c.dev.PC, 0x14)
+            # self.assertEqual(c.dev.State, c.dev.HLT)
+            if(len(overall[idx][1])):
+                self.assertEqual(c.dev.Reg[RAX], overall[idx][1][0][0])
+            if(len(overall[idx][2])):
+                self.assertEqual(c.dev.Reg[RBX], overall[idx][2][0][0])
+            if(len(overall[idx][3])):
+                self.assertEqual(c.dev.Reg[RCX], overall[idx][3][0][0])
+            if(len(overall[idx][4])):
+                self.assertEqual(c.dev.Reg[RDX], overall[idx][4][0][0])
+            if(len(overall[idx][5])):
+                self.assertEqual(c.dev.Reg[RBP], overall[idx][5][0][0])
+            #if(len(overall[idx][6])):
+                #self.assertEqual(c.dev.Reg[RSP], overall[idx][6][0][0])
+            if(len(overall[idx][7])):
+                self.assertEqual(c.dev.Reg[RSI], overall[idx][7][0][0])
+            if(len(overall[idx][8])):
+                self.assertEqual(c.dev.Reg[RDI], overall[idx][8][0][0])
+            if(len(overall[idx][9])):
+                self.assertEqual(c.dev.Reg[8], overall[idx][9][0][0])
+            if(len(overall[idx][10])):
+                self.assertEqual(c.dev.Reg[9], overall[idx][10][0][0])
+            
         
         #print(c.dev)
 
