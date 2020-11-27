@@ -40,6 +40,9 @@
 # VScode
 .vscode
 
+# Generated Test
+**/generated
+
 # Python
 __pycache__/
 *.py[cod]
