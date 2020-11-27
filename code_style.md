@@ -20,7 +20,7 @@ vscode中, 我的format设定为`{ BasedOnStyle: Google, IndentWidth: 4 }`
 
 - 类的变量: 普通变量后加下划线, 如: my_class_variable_name_(Struct仅允许使用Plain Data, 因此变量命名和普通变量一样)
 
-- 常量: 用const和constexpr声明的, 使用第一个字母为k加上每个单词开头大写, 如kMyConst
+- 常量: 全大写命名
 
 - 函数: 每个单词开头大写, 如: MyFunction(int my_data)
 
