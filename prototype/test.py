@@ -385,7 +385,7 @@ class TestMultiInstr(unittest.TestCase):
     
     # all_the_test
     def test_(self):
-        file_list = getFileName("../test/y86-code/test_ans")
+        file_list = getFileName("../test/y86_code/test_ans")
         overall = processText(file_list)
         code_list = read_flash_code()
         c = Controler()
