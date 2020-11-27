@@ -384,38 +384,27 @@ class TestSingleInstr(unittest.TestCase):
 class TestMultiInstr(unittest.TestCase):
     
     # all_the_test
-    def test_(self):
-        file_list = getFileName("../test/y86_code/test_ans")
-        overall = processText(file_list)
-        code_list = read_flash_code()
+    def test_abs_asum(self):
         c = Controler()
+        c.flash_code("30f4000200000000000080380000000000000000000000000d000d000d000000c000c000c0000000000b000b000b000000a000a000a0000030f7180000000000000030f604000000000000008056000000000000009030f8080000000000000030f901000000000000006300626670870000000000000050a7000000000000000060a0608761967477000000000000009000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
         c.run(debug=False)
-        for idx in range(0, 20):
-            c.flash_code(code_list[idx].strip())
-            # self.assertEqual(c.dev.PC, 0x14)
-            # self.assertEqual(c.dev.State, c.dev.HLT)
-            if(len(overall[idx][1])):
-                self.assertEqual(c.dev.Reg[RAX], overall[idx][1][0][0])
-            if(len(overall[idx][2])):
-                self.assertEqual(c.dev.Reg[RBX], overall[idx][2][0][0])
-            if(len(overall[idx][3])):
-                self.assertEqual(c.dev.Reg[RCX], overall[idx][3][0][0])
-            if(len(overall[idx][4])):
-                self.assertEqual(c.dev.Reg[RDX], overall[idx][4][0][0])
-            if(len(overall[idx][5])):
-                self.assertEqual(c.dev.Reg[RBP], overall[idx][5][0][0])
-            #if(len(overall[idx][6])):
-                #self.assertEqual(c.dev.Reg[RSP], overall[idx][6][0][0])
-            if(len(overall[idx][7])):
-                self.assertEqual(c.dev.Reg[RSI], overall[idx][7][0][0])
-            if(len(overall[idx][8])):
-                self.assertEqual(c.dev.Reg[RDI], overall[idx][8][0][0])
-            if(len(overall[idx][9])):
-                self.assertEqual(c.dev.Reg[8], overall[idx][9][0][0])
-            if(len(overall[idx][10])):
-                self.assertEqual(c.dev.Reg[9], overall[idx][10][0][0])
-            
-        
+        self.assertEqual(c.dev.PC, 0x14)
+        self.assertEqual(c.dev.State, c.dev.HLT)
+        self.assertEqual(c.dev.Reg[RAX], 0xabcdabcdabcd)
+        self.assertEqual(c.dev.Reg[RBX], 0x0)
+        self.assertEqual(c.dev.Reg[RCX], 0x0)
+        self.assertEqual(c.dev.Reg[RDX], 0x0)
+        self.assertEqual(c.dev.Reg[RBP], 0x0)
+        self.assertEqual(c.dev.Reg[RSP], 0x200)
+        self.assertEqual(c.dev.Reg[RSI], 0x0)
+        self.assertEqual(c.dev.Reg[RDI], 0x38)
+        self.assertEqual(c.dev.Reg[8], 0x8)
+        self.assertEqual(c.dev.Reg[9], 0x1)
+        self.assertEqual(c.dev.Reg[10], 0xa000a000a000)
+        self.assertEqual(c.dev.Reg[11], 0x0)
+        self.assertEqual(c.dev.Reg[12], 0x0)
+        self.assertEqual(c.dev.Reg[13], 0x0)
+        self.assertEqual(c.dev.Reg[14], 0x0)
         #print(c.dev)
 
 
