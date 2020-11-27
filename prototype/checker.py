@@ -1,7 +1,7 @@
 # 用以处理ans文本
 import os
 
-path = "/home/xzy/Desktop/ICS/ICSPJ/prototype/test/y86-code/test_ans"
+path = "../test/y86-code/test_ans"
 
 def getFileName(path):
     file_list = []
