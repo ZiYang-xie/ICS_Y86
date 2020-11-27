@@ -47,7 +47,7 @@ def read_8_bytes(dev, start_pos) -> int:
         res += dev.Mem[start_pos + i] << (8 * i)
     return np.uint64(res)
 
-def read_flash_code(file_path = "../test/y86-code/raw_code"):
+def read_flash_code(file_path = "../test/y86_code/raw_code"):
     code_list = []
     with open(file_path) as f:
         for line in f.readlines():

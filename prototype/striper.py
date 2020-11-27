@@ -1,6 +1,6 @@
 import sys
 import os
-path = "../test/y86-code/test_yo"
+path = "../test/y86_code/test_yo"
 
 def getFileName(path):
     file_list = []
