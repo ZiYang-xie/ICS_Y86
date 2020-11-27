@@ -40,9 +40,6 @@
 # VScode
 .vscode
 
-# TestCode
-y86-code
-
 # Python
 __pycache__/
 *.py[cod]

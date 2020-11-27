@@ -1,0 +1,95 @@
+Y86-64 Processor: pipe-std.hcl
+36 bytes of code read
+
+Cycle 0. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x0
+D: instr = nop, rA = ----, rB = ----, valC = 0x0, valP = 0x0, Stat = BUB
+E: instr = nop, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = ----, dstM = ----, Stat = BUB
+M: instr = nop, Cnd = 0, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0x0, imem_instr = irmovq, f_instr = irmovq
+	Execute: ALU: + 0x0 0x0 --> 0x0
+
+Cycle 1. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0xa
+D: instr = irmovq, rA = ----, rB = %rax, valC = 0x1, valP = 0xa, Stat = AOK
+E: instr = nop, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = ----, dstM = ----, Stat = BUB
+M: instr = nop, Cnd = 1, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0xa, imem_instr = xorq, f_instr = xorq
+	Execute: ALU: + 0x0 0x0 --> 0x0
+
+Cycle 2. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0xc
+D: instr = xorq, rA = %rsp, rB = %rsp, valC = 0x0, valP = 0xc, Stat = AOK
+E: instr = irmovq, valC = 0x1, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = %rax, dstM = ----, Stat = AOK
+M: instr = nop, Cnd = 1, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0xc, imem_instr = pushq, f_instr = pushq
+	Execute: ALU: + 0x1 0x0 --> 0x1
+
+Cycle 3. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0xe
+D: instr = pushq, rA = %rax, rB = ----, valC = 0x0, valP = 0xe, Stat = AOK
+E: instr = xorq, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = %rsp, srcB = %rsp, dstE = %rsp, dstM = ----, Stat = AOK
+M: instr = irmovq, Cnd = 1, valE = 0x1, valA = 0x0
+   dstE = %rax, dstM = ----, Stat = AOK
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0xe, imem_instr = addq, f_instr = addq
+	Execute: ALU: ^ 0x0 0x0 --> 0x0
+	Execute: New cc = Z=1 S=0 O=0
+
+Cycle 4. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x10
+D: instr = addq, rA = %rax, rB = %rax, valC = 0x0, valP = 0x10, Stat = AOK
+E: instr = pushq, valC = 0x0, valA = 0x1, valB = 0x0
+   srcA = %rax, srcB = %rsp, dstE = %rsp, dstM = ----, Stat = AOK
+M: instr = xorq, Cnd = 1, valE = 0x0, valA = 0x0
+   dstE = %rsp, dstM = ----, Stat = AOK
+W: instr = irmovq, valE = 0x1, valM = 0x0, dstE = %rax, dstM = ----, Stat = AOK
+	Fetch: f_pc = 0x10, imem_instr = irmovq, f_instr = irmovq
+	Execute: ALU: + 0xfffffffffffffff8 0x0 --> 0xfffffffffffffff8
+	Writeback: Wrote 0x1 to register %rax
+
+Cycle 5. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x1a
+D: instr = irmovq, rA = ----, rB = %rax, valC = 0x2, valP = 0x1a, Stat = AOK
+E: instr = addq, valC = 0x0, valA = 0x1, valB = 0x1
+   srcA = %rax, srcB = %rax, dstE = %rax, dstM = ----, Stat = AOK
+M: instr = pushq, Cnd = 1, valE = 0xfffffffffffffff8, valA = 0x1
+   dstE = %rsp, dstM = ----, Stat = AOK
+W: instr = xorq, valE = 0x0, valM = 0x0, dstE = %rsp, dstM = ----, Stat = AOK
+	Fetch: f_pc = 0x1a, imem_instr = irmovq, f_instr = irmovq
+	Memory: Invalid address 0xfffffffffffffff8
+	Execute: ALU: + 0x1 0x1 --> 0x2
+	Writeback: Wrote 0x0 to register %rsp
+	Couldn't write to address 0xfffffffffffffff8
+
+Cycle 6. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x24
+D: instr = irmovq, rA = ----, rB = %rax, valC = 0x3, valP = 0x24, Stat = AOK
+E: instr = irmovq, valC = 0x2, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = %rax, dstM = ----, Stat = AOK
+M: instr = nop, Cnd = 0, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = pushq, valE = 0xfffffffffffffff8, valM = 0x0, dstE = %rsp, dstM = ----, Stat = ADR
+	Fetch: f_pc = 0x24, imem_instr = halt, f_instr = halt
+	Execute: ALU: + 0x2 0x0 --> 0x2
+7 instructions executed
+Status = ADR
+Condition Codes: Z=1 S=0 O=0
+Changed Register State:
+%rax:	0x0000000000000000	0x0000000000000001
+Changed Memory State:
+PC = 0xc, Invalid stack address 0xfffffffffffffff8
+ISA Register != Pipeline Register File
+%rsp:	0xfffffffffffffff8	0x0000000000000000
+ISA Check Fails
+CPI: 3 cycles/3 instructions = 1.00
