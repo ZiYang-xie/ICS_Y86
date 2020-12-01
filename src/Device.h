@@ -23,6 +23,7 @@ private:
   M_Reg M{};
   m_wire m{};
   W_Reg W{};
+public:
   //读取在pos处的高4个比特
   //注意: 该函数不会检查pos的合法性
   [[nodiscard]] uint8_t ReadHigh4Bits(uint64_t pos) const;
@@ -35,6 +36,7 @@ private:
   //在pos出的8个字节写入val
   //注意: 该函数不会检查pos的合法性
   void Write8Bytes(uint64_t pos, uint64_t val);
+private:
   //更新predPC，该操作在Fetch阶段的最后执行
   void SetFPredPc();
   //判断地址是否合法
