@@ -9,9 +9,10 @@
 #include <iostream>
 class Controller {
 private:
-  Device d;
   std::string scopy;
 public:
+  //TODO:后期再放进Private
+  Device d;
   //将s写入Mem，同时还原所有的寄存器
   //若写入成功，则返回True，否则返回False
  bool FlashCode(std::string s);

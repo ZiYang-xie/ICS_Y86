@@ -18,8 +18,8 @@ void Controller::Run(std::ostream &os) {
     d.Execute();
     d.Memory();
     d.Writeback();
-    for(int i = 0;i<15;i++){
-      os<<d.Reg[i]<<' ';
+    for(unsigned long long i : d.Reg){
+      os<<i<<' ';
     }
   }
 }

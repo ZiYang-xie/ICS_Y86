@@ -10,21 +10,23 @@ Device::Device(std::string str) {
   memset(Reg, 0, REG_SIZE);
   memset(CFLAG, 0, 3);
   memset(Mem, 0, MEM_SIZE);
+  Stat = SAOK;
   if (str.length() >= MEM_SIZE - RESERVED_SIZE) {
     throw std::domain_error("String is too long to flash");
   }
   int i = 0;
   auto p = str.begin();
   while (p!=str.end()) {
-    Mem[i++] = CharToUint8(*p++);
+    Mem[i] = 16*CharToUint8(*p++)+CharToUint8(*p++);
+    i++;
   }
 }
 bool Device::IfAddrValid(uint64_t pos) {
   return pos >= 0 && pos <= MEM_SIZE - RESERVED_SIZE;
 }
 bool Device::IfInstrValid(uint8_t icode) { return icode >= 0 && icode <= 0xe; }
-uint8_t Device::ReadHigh4Bits(uint64_t pos) const { return Mem[pos] & 0xf0u; }
-uint8_t Device::ReadLow4Bits(uint64_t pos) const { return Mem[pos] & 0x0fu; }
+uint8_t Device::ReadHigh4Bits(uint64_t pos) const { return (Mem[pos] & 0xf0u)>>4u; }
+uint8_t Device::ReadLow4Bits(uint64_t pos) const { return (Mem[pos] & 0x0fu) ; }
 uint64_t Device::Read8Bytes(uint64_t pos) const {
   return *(uint64_t *)(Mem + pos);
 }
@@ -44,19 +46,19 @@ void Device::Fetch() {
   } else {
     f_pc = F.predPC;
   }
-  f.icode = ReadLow4Bits(f_pc);
-  f.ifun = ReadHigh4Bits(f_pc);
-  if (IfInstrValid(f.icode)) {
+  f.icode = ReadHigh4Bits(f_pc);
+  f.ifun = ReadLow4Bits(f_pc);
+  if (!IfInstrValid(f.icode)) {
     f.Stat = SINS;
   } else if (f.icode == IHALT) {
     f.Stat = SHLT;
   }
   bool need_regids =
-      In(f.icode, IIRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ, IRMMOVQ, IMRMOVQ);
+      In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ, IRMMOVQ, IMRMOVQ);
   bool need_valC = In(f.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL);
   if (need_regids) {
-    f.ra = ReadLow4Bits(f_pc + 1);
-    f.rb = ReadHigh4Bits(f_pc + 1);
+    f.ra = ReadHigh4Bits(f_pc + 1);
+    f.rb = ReadLow4Bits(f_pc + 1);
   }
   if (need_valC) {
     f.valC = ReadHigh4Bits(f_pc + need_regids + 1);
@@ -90,7 +92,7 @@ void Device::Decode() {
     return;
   }
   //写srcA
-  if (In(D.icode, IIRMOVQ, IRMMOVQ, IOPQ, IPUSHQ)) {
+  if (In(D.icode, IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ)) {
     d.srcA = D.rA;
   } else if (In(D.icode, IPOPQ, IRET)) {
     d.srcA = RRSP;
@@ -161,7 +163,7 @@ void Device::Execute() {
   }
   uint64_t aluA, aluB;
   // 设置aluA
-  if (In(E.icode, IIRMOVQ, IOPQ)) {
+  if (In(E.icode, IRRMOVQ, IOPQ)) {
     aluA = E.valA;
   } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ)) {
     aluA = E.valC;
@@ -186,7 +188,7 @@ void Device::Execute() {
   if (E.icode == IOPQ) {
     alufun = E.ifun;
   } else {
-    alufun = ALUAND;
+    alufun = ALUADD;
   }
   // 设置set_cc
   bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
@@ -254,6 +256,8 @@ bool Device::cond() const {
     return (CFLAG[CSF] == CFLAG[COF]);
   case BG:
     return !CFLAG[CZF] && (CFLAG[CSF] == CFLAG[COF]);
+  default:
+    return false;
   }
 }
 void Device::E2M() {
