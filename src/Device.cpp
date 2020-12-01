@@ -4,19 +4,19 @@
 #include "Device.h"
 #include "instr.h"
 #include "util.h"
-#include <cstring>
 #include <stdexcept>
-
-Device::Device(const char *str) {
+#include <string>
+Device::Device(std::string str) {
   memset(Reg, 0, REG_SIZE);
   memset(CFLAG, 0, 3);
   memset(Mem, 0, MEM_SIZE);
-  if (strlen(str) >= MEM_SIZE - RESERVED_SIZE) {
+  if (str.length() >= MEM_SIZE - RESERVED_SIZE) {
     throw std::domain_error("String is too long to flash");
   }
   int i = 0;
-  while (str) {
-    Mem[i++] = CharToUint8(*str++);
+  auto p = str.begin();
+  while (p!=str.end()) {
+    Mem[i++] = CharToUint8(*p++);
   }
 }
 bool Device::IfAddrValid(uint64_t pos) {
@@ -32,6 +32,10 @@ void Device::Write8Bytes(uint64_t pos, uint64_t val) {
   *(uint64_t *)(Mem + pos) = val;
 }
 void Device::Fetch() {
+  uint8_t c = GetFControl();
+  if (c == CSTALL) {
+    return;
+  }
   uint8_t f_pc;
   if (M.icode == IJXX && !M.Cnd) {
     f_pc = M.valA; // JXX但是没有成功跳转的情况
@@ -59,6 +63,7 @@ void Device::Fetch() {
   }
   f.valP = f_pc + 1 + need_regids + 8 * need_valC;
   SetFPredPc();
+  F2D();
 }
 void Device::SetFPredPc() {
   if (In(f.icode, IJXX, ICALL)) {
@@ -77,7 +82,13 @@ void Device::F2D() {
   D.valP = f.valP;
 }
 void Device::Decode() {
-  F2D();
+  uint8_t c = GetDControl();
+  if (c == CSTALL) {
+    return;
+  } else if (c == CBUBBLE) {
+    D.reset();
+    return;
+  }
   //写srcA
   if (In(D.icode, IIRMOVQ, IRMMOVQ, IOPQ, IPUSHQ)) {
     d.srcA = D.rA;
@@ -140,9 +151,14 @@ void Device::Decode() {
   } else {
     d.valB = rvalB;
   }
+  D2E();
 }
 void Device::Execute() {
-  D2E();
+  uint8_t c = GetEControl();
+  if (c == CBUBBLE) {
+    E.reset();
+    return;
+  }
   uint64_t aluA, aluB;
   // 设置aluA
   if (In(E.icode, IIRMOVQ, IOPQ)) {
@@ -153,15 +169,16 @@ void Device::Execute() {
     aluA = -8;
   } else if (In(E.icode, IRET, IPOPQ)) {
     aluA = 8;
-  } else{
-    aluA = 0xdeadbeef; //这一条语句仅仅是为了方便后期debug和方式clang啰嗦我可能的未定义变量，下同
+  } else {
+    aluA =
+        0xdeadbeef; //这一条语句仅仅是为了方便后期debug和方式clang啰嗦我可能的未定义变量，下同
   }
   // 设置aluB
   if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ)) {
     aluB = E.valB;
   } else if (In(E.icode, IRRMOVQ, IIRMOVQ)) {
     aluB = 0;
-  } else{
+  } else {
     aluB = 0xdeadbeef;
   }
   // 设置alufun
@@ -186,11 +203,12 @@ void Device::Execute() {
   }
   e.Cnd = cond();
   // 写dstE和dstM
-  if(E.icode == IRRMOVQ && !e.Cnd){
+  if (E.icode == IRRMOVQ && !e.Cnd) {
     e.dstE = RNONE;
-  }else{
+  } else {
     e.dstE = E.dstE;
   }
+  E2M();
 }
 void Device::D2E() {
   E.stat = D.stat;
@@ -225,17 +243,17 @@ bool Device::cond() const {
   case BALWAYS:
     return true;
   case BLE:
-    return CFLAG[CZF] || (CFLAG[CSF]^CFLAG[COF]);
+    return CFLAG[CZF] || (CFLAG[CSF] ^ CFLAG[COF]);
   case BL:
-    return CFLAG[CSF]^CFLAG[COF];
+    return CFLAG[CSF] ^ CFLAG[COF];
   case BE:
     return CFLAG[CZF];
   case BNE:
     return !CFLAG[CZF];
   case BGE:
-    return (CFLAG[CSF]==CFLAG[COF]);
+    return (CFLAG[CSF] == CFLAG[COF]);
   case BG:
-    return !CFLAG[CZF] && (CFLAG[CSF]==CFLAG[COF]);
+    return !CFLAG[CZF] && (CFLAG[CSF] == CFLAG[COF]);
   }
 }
 void Device::E2M() {
@@ -248,35 +266,35 @@ void Device::E2M() {
   M.dstM = E.dstM;
 }
 void Device::Memory() {
-  E2M();
   // 写stat
   m.stat = M.stat;
   // 取mem_addr
   uint64_t mem_addr;
-  if(In(M.icode,IRMMOVQ,IPUSHQ,ICALL,IMRMOVQ)){
+  if (In(M.icode, IRMMOVQ, IPUSHQ, ICALL, IMRMOVQ)) {
     mem_addr = M.valE;
-  } else if(In(M.icode,IPOPQ,IRET)){
+  } else if (In(M.icode, IPOPQ, IRET)) {
     mem_addr = M.valA;
-  } else{
+  } else {
     mem_addr = 0xdeadbeef;
   }
   // 算MemRead和MemWrite
-  bool mem_read = In(M.icode,IMRMOVQ,IPOPQ,IRET);
-  bool mem_write = In(M.icode,IRMMOVQ,IPUSHQ,ICALL);
+  bool mem_read = In(M.icode, IMRMOVQ, IPOPQ, IRET);
+  bool mem_write = In(M.icode, IRMMOVQ, IPUSHQ, ICALL);
   // 读内存
-  if(mem_read){
-    if(IfAddrValid(mem_addr)){
+  if (mem_read) {
+    if (IfAddrValid(mem_addr)) {
       m.valM = Read8Bytes(Mem[mem_addr]);
-    }else{
+    } else {
       m.stat = SADR;
     }
-  } else if(mem_write){
-    if(IfAddrValid(mem_addr)){
-      Write8Bytes(mem_addr,M.valA);
-    }else{
+  } else if (mem_write) {
+    if (IfAddrValid(mem_addr)) {
+      Write8Bytes(mem_addr, M.valA);
+    } else {
       m.stat = SADR;
     }
   }
+  M2W();
 }
 void Device::M2W() {
   W.stat = m.stat;
@@ -285,4 +303,49 @@ void Device::M2W() {
   W.valM = m.valM;
   W.dstE = M.dstE;
   W.dstM = M.dstM;
+}
+void Device::Writeback() {
+  //写回寄存器
+  if (W.dstE != RNONE) {
+    Reg[W.dstE] = W.valE;
+  }
+  if (W.dstM != RNONE) {
+    Reg[W.dstM] = W.valM;
+  }
+  //设置状态码
+  if (W.stat == SBUB) {
+    Stat = SAOK;
+  } else {
+    Stat = W.stat;
+  }
+}
+bool Device::IfLoadUseH() const {
+  return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
+}
+bool Device::IfMispredicted() const { return E.icode == IJXX && !e.Cnd; }
+bool Device::IfRet() const {
+  return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
+}
+uint8_t Device::GetFControl() const {
+  if (IfLoadUseH() || IfRet()) {
+    return CSTALL;
+  } else {
+    return CNORMAL;
+  }
+}
+uint8_t Device::GetDControl() const {
+  if (IfLoadUseH()) {
+    return CSTALL;
+  } else if (IfRet() || IfMispredicted()) {
+    return CBUBBLE;
+  } else {
+    return CNORMAL;
+  }
+}
+uint8_t Device::GetEControl() const {
+  if (IfMispredicted() || IfLoadUseH()) {
+    return CBUBBLE;
+  } else {
+    return CNORMAL;
+  }
 }
