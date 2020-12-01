@@ -22,14 +22,12 @@ enum{
     R12 = 0xc,
     R13 = 0xd,
     R14 = 0xe,
-    R15 = 0xf
-};
-
-enum{
+    R15 = 0xf,
     ZF = 0,
     SF = 1,
     OF = 2
 };
+
 
 class FlashCodeTest : public testing::Test
 {
