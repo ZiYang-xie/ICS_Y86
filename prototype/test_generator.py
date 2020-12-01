@@ -65,20 +65,19 @@ def writePy(overall_list, code_file_list, write_path):
     for file in overall_list:
         debugState = "False"
         func_name = "test_" + file[0][:-3].replace('-','_')
-        fileObject.write("def " + func_name + "(self):\n")
-        fileObject.write("\tc = Controler()\n")
-        fileObject.write("\tc.flash_code('" + getFlashCode(code_file_list, file[0]) + "')\n")
-        fileObject.write("\tc.run(debug=" + debugState + ")\n")
-        assertHead = "self.assertEqual("
+        fileObject.write("TEST_F(RealCodeTest, " + func_name + ")\n{\n")
+        fileObject.write("\tc.FlashCode('" + getFlashCode(code_file_list, file[0]) + "')\n")
+        fileObject.write("\tc.RUN()\n")
+        assertHead = "ASSERT_EQ("
         list_ = ["State", "RAX", "RBX", "RCX", "RDX", "RBP", "RSP", "RSI", "RDI", "R8", "R9", "R10", "R11", "R12", "R13", "R14"]
         for code_res in file[1]:
             for item in list_:
                 if(code_res[0] == item):
                     if(item == "State"):
-                        fileObject.write("\t" + assertHead + "c.dev.State, c.dev." + code_res[1] + ")\n")
+                        fileObject.write("\t" + assertHead + "c.d.Stat, c.d.S" + code_res[1] + ")\n")
                     else:
-                        fileObject.write("\t" + assertHead + "c.dev.Reg[" + item + "], " + code_res[2] + ")\n")
-        fileObject.write("\n\n")
+                        fileObject.write("\t" + assertHead + "c.d.Reg[" + item + "], " + code_res[2] + ")\n")
+        fileObject.write("}\n\n")
             
 
 if __name__ == "__main__":

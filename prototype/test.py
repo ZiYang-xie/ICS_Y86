@@ -3,7 +3,6 @@ import unittest
 import numpy as np
 
 from controler import Controler
-from checker import *
 
 RAX = 0
 RCX = 1
@@ -599,14 +598,6 @@ class TestMultiInstr(unittest.TestCase):
         self.assertEqual(c.dev.Reg[RBP], 0x0000000000000004)
         self.assertEqual(c.dev.Reg[RSI], 0x0000000000000001)
         self.assertEqual(c.dev.Reg[RDI], 0x0000000000000002)
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
