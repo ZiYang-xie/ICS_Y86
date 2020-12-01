@@ -81,10 +81,12 @@ struct d_wire{
   uint64_t valB;
 };
 struct e_wire{
+  bool Cnd;
   uint8_t dstE;
   uint64_t valE;
 };
 struct m_wire{
+  uint8_t stat;
   uint64_t valM;
 };
 

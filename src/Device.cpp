@@ -7,9 +7,7 @@
 #include <cstring>
 #include <stdexcept>
 
-Device::Device(const char *str)
-    : Reg{}, Mem{}, CFLAG{}, Stat{SAOK}, F{}, D{}, E{}, M{}, W{}, f{}, d{}, e{},
-      m{} {
+Device::Device(const char *str) {
   memset(Reg, 0, REG_SIZE);
   memset(CFLAG, 0, 3);
   memset(Mem, 0, MEM_SIZE);
@@ -145,6 +143,54 @@ void Device::Decode() {
 }
 void Device::Execute() {
   D2E();
+  uint64_t aluA, aluB;
+  // 设置aluA
+  if (In(E.icode, IIRMOVQ, IOPQ)) {
+    aluA = E.valA;
+  } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ)) {
+    aluA = E.valC;
+  } else if (In(E.icode, ICALL, IPUSHQ)) {
+    aluA = -8;
+  } else if (In(E.icode, IRET, IPOPQ)) {
+    aluA = 8;
+  } else{
+    aluA = 0xdeadbeef; //这一条语句仅仅是为了方便后期debug和方式clang啰嗦我可能的未定义变量，下同
+  }
+  // 设置aluB
+  if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ)) {
+    aluB = E.valB;
+  } else if (In(E.icode, IRRMOVQ, IIRMOVQ)) {
+    aluB = 0;
+  } else{
+    aluB = 0xdeadbeef;
+  }
+  // 设置alufun
+  uint8_t alufun;
+  if (E.icode == IOPQ) {
+    alufun = E.ifun;
+  } else {
+    alufun = ALUAND;
+  }
+  // 设置set_cc
+  bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
+                !In(W.stat, SADR, SINS, SHLT);
+  // ALU计算
+  auto func = GetALUFunc(alufun);
+  e.valE = func(aluA, aluB);
+  // 计算cnd
+  if (set_cc) {
+    CFLAG[CZF] = (e.valE == 0);
+    CFLAG[CSF] = (((int64_t)e.valE) < 0);
+    CFLAG[COF] = (((int64_t)aluA < 0 == (int64_t)aluB < 0) &&
+                  ((int64_t)e.valE < 0 != (int64_t)aluA < 0));
+  }
+  e.Cnd = cond();
+  // 写dstE和dstM
+  if(E.icode == IRRMOVQ && !e.Cnd){
+    e.dstE = RNONE;
+  }else{
+    e.dstE = E.dstE;
+  }
 }
 void Device::D2E() {
   E.stat = D.stat;
@@ -158,7 +204,7 @@ void Device::D2E() {
   E.srcA = d.srcA;
   E.srcB = d.srcB;
 }
-std::function<int(int, int)> Device::GetALUFunc(uint8_t ifun) {
+std::function<uint64_t(uint64_t, uint64_t)> Device::GetALUFunc(uint8_t ifun) {
   switch (ifun) {
   case ALUADD:
     return [](uint64_t a, uint64_t b) { return a + b; };
@@ -173,4 +219,70 @@ std::function<int(int, int)> Device::GetALUFunc(uint8_t ifun) {
     E.stat = SINS;
     return [](uint64_t a, uint64_t b) { return 0; };
   }
+}
+bool Device::cond() const {
+  switch (E.ifun) {
+  case BALWAYS:
+    return true;
+  case BLE:
+    return CFLAG[CZF] || (CFLAG[CSF]^CFLAG[COF]);
+  case BL:
+    return CFLAG[CSF]^CFLAG[COF];
+  case BE:
+    return CFLAG[CZF];
+  case BNE:
+    return !CFLAG[CZF];
+  case BGE:
+    return (CFLAG[CSF]==CFLAG[COF]);
+  case BG:
+    return !CFLAG[CZF] && (CFLAG[CSF]==CFLAG[COF]);
+  }
+}
+void Device::E2M() {
+  M.stat = E.stat;
+  M.icode = E.icode;
+  M.Cnd = e.Cnd;
+  M.valE = e.valE;
+  M.valA = E.valA;
+  M.dstE = e.dstE;
+  M.dstM = E.dstM;
+}
+void Device::Memory() {
+  E2M();
+  // 写stat
+  m.stat = M.stat;
+  // 取mem_addr
+  uint64_t mem_addr;
+  if(In(M.icode,IRMMOVQ,IPUSHQ,ICALL,IMRMOVQ)){
+    mem_addr = M.valE;
+  } else if(In(M.icode,IPOPQ,IRET)){
+    mem_addr = M.valA;
+  } else{
+    mem_addr = 0xdeadbeef;
+  }
+  // 算MemRead和MemWrite
+  bool mem_read = In(M.icode,IMRMOVQ,IPOPQ,IRET);
+  bool mem_write = In(M.icode,IRMMOVQ,IPUSHQ,ICALL);
+  // 读内存
+  if(mem_read){
+    if(IfAddrValid(mem_addr)){
+      m.valM = Read8Bytes(Mem[mem_addr]);
+    }else{
+      m.stat = SADR;
+    }
+  } else if(mem_write){
+    if(IfAddrValid(mem_addr)){
+      Write8Bytes(mem_addr,M.valA);
+    }else{
+      m.stat = SADR;
+    }
+  }
+}
+void Device::M2W() {
+  W.stat = m.stat;
+  W.icode = M.icode;
+  W.valE = M.valE;
+  W.valM = m.valM;
+  W.dstE = M.dstE;
+  W.dstM = M.dstM;
 }

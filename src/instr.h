@@ -22,6 +22,14 @@ const uint8_t ALUADD = 0;
 const uint8_t ALUSUB = 1;
 const uint8_t ALUAND = 2;
 const uint8_t ALUXOR = 3;
+// Branch
+const uint8_t BALWAYS = 0;
+const uint8_t BLE = 1;
+const uint8_t BL = 2;
+const uint8_t BE = 3;
+const uint8_t BNE = 4;
+const uint8_t BGE = 5;
+const uint8_t BG = 6;
 
 
 
