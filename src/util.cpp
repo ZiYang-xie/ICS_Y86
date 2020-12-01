@@ -14,3 +14,5 @@ uint8_t CharToUint8(char c) {
     exit(1);
   }
 }
+
+

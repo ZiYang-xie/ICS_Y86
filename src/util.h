@@ -21,4 +21,5 @@ template <typename T, typename... List> bool In(T lhs, T first, List... list) {
 // 合理的输入取值范围为 0-9 a-f A-F，建议使用小写字母以保持统一
 // 若不在该范围内，会抛出异常
 uint8_t CharToUint8(char c);
+
 #endif // ICS_Y86_UTIL_H
