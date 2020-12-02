@@ -19,6 +19,9 @@ void Controller::Run(std::ostream &os) {
         d.Execute();
         d.Memory();
         d.Writeback();
+        d.SetFControl();
+        d.SetDControl();
+        d.SetEControl();
         d.F2D();
         d.D2E();
         d.E2M();

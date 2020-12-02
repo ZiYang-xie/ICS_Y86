@@ -31,6 +31,7 @@ const uint8_t SADR = 3;
 const uint8_t SINS = 4;
 const uint8_t SBUB = 5;
 struct W_Reg {
+
   uint8_t stat{SAOK};
   uint8_t icode{};
   uint64_t valE{};
@@ -40,6 +41,7 @@ struct W_Reg {
   void reset();
 };
 struct M_Reg {
+
   uint8_t stat{SAOK};
   uint8_t icode{};
   bool Cnd{};
@@ -50,6 +52,7 @@ struct M_Reg {
   void reset();
 };
 struct E_Reg {
+    uint8_t control {CNORMAL};
   uint8_t stat{SAOK};
   uint8_t icode{};
   uint8_t ifun{};
@@ -63,6 +66,7 @@ struct E_Reg {
   void reset();
 };
 struct D_Reg {
+    uint8_t control {CNORMAL};
   uint8_t stat{SAOK};
   uint8_t icode{};
   uint8_t ifun{};
@@ -73,7 +77,8 @@ struct D_Reg {
   void reset();
 };
 struct F_Reg {
-  uint64_t predPC;
+    uint8_t control{CNORMAL};
+  uint64_t predPC{0};
   void reset();
 };
 struct f_wire {
@@ -86,6 +91,7 @@ struct f_wire {
   uint64_t valP{};
 };
 struct d_wire {
+    bool ifForwading{false};
     uint8_t stat{SAOK};
     uint8_t icode{INOP};
     uint8_t ifun{};

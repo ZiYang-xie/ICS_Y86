@@ -38,14 +38,13 @@ void Device::Write8Bytes(uint64_t pos, uint64_t val) {
     *(uint64_t *)(Mem + pos) = val;
 }
 void Device::Fetch() {
-    uint8_t c = GetFControl();
-    if (c == CSTALL) {
+    if (F.control == CSTALL) {
         return;
     }
     uint64_t f_pc;
     if (M.icode == IJXX && !M.Cnd) {
         f_pc = M.valA;  // JXX但是没有成功跳转的情况
-    } else if (M.icode == IRET) {
+    } else if (W.icode == IRET) {
         f_pc = W.valM;  // Ret的情况，后期使用硬件栈时可以删去这一句话
     } else {
         f_pc = F.predPC;
@@ -70,7 +69,7 @@ void Device::Fetch() {
         f.valC = Read8Bytes(f_pc + need_regids + 1);
     }
     f.valP = f_pc + 1 + need_regids + 8 * need_valC;
-    if (In(SHLT, D.stat, E.stat, M.stat, W.stat)) {
+    if (In(SHLT, f.Stat)) {
         F.predPC = f_pc;
     } else {
         SetFPredPc();
@@ -93,12 +92,10 @@ void Device::F2D() {
     D.valP = f.valP;
 }
 void Device::Decode() {
-    uint8_t c = GetDControl();
-    if (c == CSTALL) {
+    if (D.control == CSTALL) {
         return;
-    } else if (c == CBUBBLE) {
+    } else if (D.control == CBUBBLE) {
         D.reset();
-        return;
     }
     //写srcA
     if (In(D.icode, IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ)) {
@@ -133,45 +130,17 @@ void Device::Decode() {
     uint64_t rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
     uint64_t rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
     //写valA，下面主要在处理forwarding的情况
-    if (In(D.icode, ICALL, IJXX)) {
-        d.valA = D.valP;
-    } else if (d.srcA == e.dstE) {
-        d.valA = e.valE;
-    } else if (d.srcA == M.dstM) {
-        d.valA = m.valM;
-    } else if (d.srcA == M.dstE) {
-        d.valA = M.valE;
-    } else if (d.srcA == W.dstM) {
-        d.valA = W.valM;
-    } else if (d.srcA == W.dstE) {
-        d.valA = W.valE;
-    } else {
-        d.valA = rvalA;
-    }
+    d.valA = rvalA;
     //写valB，下面主要在处理forwarding的情况
-    if (d.srcB == e.dstE) {
-        d.valB = e.valE;
-    } else if (d.srcB == M.dstM) {
-        d.valB = m.valM;
-    } else if (d.srcB == M.dstE) {
-        d.valB = M.valE;
-    } else if (d.srcB == W.dstM) {
-        d.valB = W.valM;
-    } else if (d.srcB == W.dstE) {
-        d.valB = W.valE;
-    } else {
-        d.valB = rvalB;
-    }
+    d.valB = rvalB;
     d.stat = D.stat;
     d.icode = D.icode;
     d.ifun = D.ifun;
     d.valC = D.valC;
 }
 void Device::Execute() {
-    uint8_t c = GetEControl();
-    if (c == CBUBBLE) {
+    if (E.control == CBUBBLE) {
         E.reset();
-        return;
     }
     uint64_t aluA, aluB;
     // 设置aluA
@@ -227,6 +196,8 @@ void Device::Execute() {
     e.icode = E.icode;
     e.valA = E.valA;
     e.dstM = E.dstM;
+     SetdsrcA();
+    SetdsrcB();
 }
 void Device::D2E() {
     E.stat = d.stat;
@@ -306,18 +277,26 @@ void Device::Memory() {
             m.valM = Read8Bytes(mem_addr);
         } else {
             m.stat = SADR;
+            if(In(M.icode,IPUSHQ,IPOPQ)){
+                M.valE = 0;
+            }
         }
     } else if (mem_write) {
         if (IfAddrValid(mem_addr)) {
             Write8Bytes(mem_addr, M.valA);
         } else {
             m.stat = SADR;
+            if(In(M.icode,IPUSHQ,IPOPQ)){
+                M.valE = 0;
+            }
         }
     }
     m.icode = M.icode;
     m.valE = M.valE;
     m.dstE = M.dstE;
     m.dstM = M.dstM;
+    SetdsrcA();
+    SetdsrcB();
 }
 void Device::M2W() {
     W.stat = m.stat;
@@ -341,37 +320,67 @@ void Device::Writeback() {
     } else {
         Stat = W.stat;
     }
+    SetdsrcA();
+    SetdsrcB();
 }
 bool Device::IfLoadUseH() const {
     return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
 }
 bool Device::IfMispredicted() const { return E.icode == IJXX && !e.Cnd; }
 bool Device::IfRet() const {
-    return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
+    return In(IRET,D.icode,E.icode,M.icode);
 }
-uint8_t Device::GetFControl() const {
+void Device::SetFControl()  {
     if (IfLoadUseH() || IfRet()) {
-        return CSTALL;
+        F.control = CSTALL;
     } else {
-        return CNORMAL;
+        F.control = CNORMAL;
     }
 }
-uint8_t Device::GetDControl() const {
+void Device::SetDControl()  {
     if (IfLoadUseH()) {
-        return CSTALL;
+        D.control = CSTALL;
     } else if (IfRet() || IfMispredicted()) {
-        return CBUBBLE;
+        D.control =  CBUBBLE;
     } else {
-        return CNORMAL;
+        D.control =  CNORMAL;
     }
 }
-uint8_t Device::GetEControl() const {
+void Device::SetEControl()  {
     if (IfMispredicted() || IfLoadUseH()) {
-        return CBUBBLE;
+        E.control = CBUBBLE;
     } else {
-        return CNORMAL;
+        E.control = CNORMAL;
     }
 }
 uint64_t Device::GetPC() const {
-    return F.predPC;
+    return F.predPC+1;
+}
+void Device::SetdsrcA() {
+    if (In(D.icode, ICALL, IJXX)) {
+        d.valA = D.valP;
+    } else if (d.srcA == e.dstE) {
+        d.valA = e.valE;
+    } else if (d.srcA == M.dstM) {
+        d.valA = m.valM;
+    } else if (d.srcA == M.dstE) {
+        d.valA = M.valE;
+    } else if (d.srcA == W.dstM) {
+        d.valA = W.valM;
+    } else if (d.srcA == W.dstE) {
+        d.valA = W.valE;
+    }
+}
+void Device::SetdsrcB() {
+    if (d.srcB == e.dstE) {
+        d.valB = e.valE;
+    } else if (d.srcB == M.dstM) {
+        d.valB = m.valM;
+    } else if (d.srcB == M.dstE) {
+        d.valB = M.valE;
+    } else if (d.srcB == W.dstM) {
+        d.valB = W.valM;
+    } else if (d.srcB == W.dstE) {
+        d.valB = W.valE;
+    }
 }

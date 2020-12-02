@@ -41,12 +41,6 @@ class Device {
     [[nodiscard]] bool IfMispredicted() const;
     // 判断是否在处理ret
     [[nodiscard]] bool IfRet() const;
-    //取F的状态码
-    [[nodiscard]] uint8_t GetFControl() const;
-    //取D的状态码
-    [[nodiscard]] uint8_t GetDControl() const;
-    //取E的状态码
-    [[nodiscard]] uint8_t GetEControl() const;
 
    public:
     const static uint8_t SAOK = 1;
@@ -96,6 +90,16 @@ class Device {
     void M2W();
     //返回程序结束时的PC值
     [[nodiscard]] uint64_t GetPC() const;
+    //取F的状态码
+    void SetFControl();
+    //取D的状态码
+    void SetDControl();
+    //取E的状态码
+    void SetEControl() ;
+    void SetdsrcA();
+    void SetdsrcB();
+
+
 };
 
 #endif  // ICS_Y86_DEVICE_H

@@ -12,11 +12,13 @@ void W_Reg::reset() {
 }
 void M_Reg::reset() {
   stat = Device::SBUB;
+  icode = INOP;
   dstE = RNONE;
   dstM = RNONE;
 }
 void E_Reg::reset() {
   stat = Device::SBUB;
+  icode = INOP;
   dstE = RNONE;
   dstM = RNONE;
   srcA = RNONE;
@@ -24,5 +26,8 @@ void E_Reg::reset() {
 }
 void D_Reg::reset() {
   stat = Device::SBUB;
+  icode = INOP;
+  rA = RNONE;
+  rB = RNONE;
 }
 void F_Reg::reset() {}
