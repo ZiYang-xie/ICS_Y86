@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
-
+#include <cstring>
 #include "pipeline_registers.h"
 #ifndef ICS_Y86_DEVICE_H
 #define ICS_Y86_DEVICE_H
