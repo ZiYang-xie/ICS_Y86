@@ -102,8 +102,8 @@ void Device::Decode() {
     d.srcA = RNONE;
   }
   //写srcB
-  if (In(D.icode, IOPQ, IRMMOVQ)) {
-    d.srcB = D.rA;
+  if (In(D.icode, IOPQ, IRMMOVQ, IMRMOVQ)) {
+    d.srcB = D.rB;
   } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
     d.srcB = RRSP;
   } else {

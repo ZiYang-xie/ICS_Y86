@@ -280,18 +280,18 @@ TEST_F(InstrTest, test_irmovq)
 TEST_F(InstrTest, test_rmmovq)
 {
     c.FlashCode("40120001000000000000");
-    c.d.Reg[RAX] = 0xdeadbeef;
+    c.d.Reg[1] = 0xdeadbeef;
     c.Run();
     ASSERT_EQ(c.d.Read8Bytes(0x100), 0xdeadbeef);
     
     c.FlashCode("40120001000000000000");
-    c.Reset();
+    c.d.Reg[1] = 0xffffffffffffffff;
+    c.Run();
     ASSERT_EQ(c.d.Read8Bytes(0x100), 0xffffffffffffffff);
 
     c.FlashCode("40120001000000000000");
-    c.Reset();
-    c.d.Reg[RAX] = 0xdeadbeef;
-    c.d.Reg[RCX] = 0x10;
+    c.d.Reg[1] = 0xdeadbeef;
+    c.d.Reg[2] = 0x10;
     c.Run();
     ASSERT_EQ(c.d.Read8Bytes(0x110), 0xdeadbeef);
 }
@@ -301,18 +301,18 @@ TEST_F(InstrTest, test_mrmovq)
     c.FlashCode("50120001000000000000");
     c.d.Write8Bytes(0x100, 0xdeadbeef);
     c.Run();
-    ASSERT_EQ(c.d.Reg[RCX], 0xdeadbeef);
+    ASSERT_EQ(c.d.Reg[1], 0xdeadbeef);
     c.FlashCode("50120001000000000000");
     c.Reset();
     c.d.Write8Bytes(0x100, 0xffffffffffffffff);
     c.Run();
-    ASSERT_EQ(c.d.Reg[RCX], 0xffffffffffffffff);
+    ASSERT_EQ(c.d.Reg[1], 0xffffffffffffffff);
     c.FlashCode("50120001000000000000");
     c.Reset();
     c.d.Write8Bytes(0x110, 0xdeadbeef);
-    c.d.Reg[RDX] = 0x10;
+    c.d.Reg[2] = 0x10;
     c.Run();
-    ASSERT_EQ(c.d.Reg[RCX], 0xdeadbeef);
+    ASSERT_EQ(c.d.Reg[1], 0xdeadbeef);
 }
 
 TEST_F(InstrTest, test_OPq)
