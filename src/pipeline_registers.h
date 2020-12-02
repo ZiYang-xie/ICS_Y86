@@ -86,6 +86,10 @@ struct f_wire {
   uint64_t valP{};
 };
 struct d_wire {
+    uint8_t stat{SAOK};
+    uint8_t icode{INOP};
+    uint8_t ifun{};
+    uint64_t valC{};
   uint64_t SelFwdA{};
   uint64_t FwdB{};
   uint8_t dstE{RNONE};
@@ -97,10 +101,18 @@ struct d_wire {
 };
 struct e_wire {
   bool Cnd{};
+  uint8_t stat{SAOK};
+  uint8_t icode{INOP};
   uint8_t dstE{RNONE};
   uint64_t valE{};
+  uint64_t valA{};
+  uint64_t dstM{};
 };
 struct m_wire {
+    uint8_t icode{INOP};
+    uint64_t valE{};
+    uint64_t dstE{};
+    uint64_t dstM{};
   uint8_t stat{SAOK};
   uint64_t valM{};
 };

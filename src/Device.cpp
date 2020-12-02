@@ -158,6 +158,10 @@ void Device::Decode() {
     } else {
         d.valB = rvalB;
     }
+    d.stat = D.stat;
+    d.icode = D.icode;
+    d.ifun = D.ifun;
+    d.valC = D.valC;
 }
 void Device::Execute() {
     uint8_t c = GetEControl();
@@ -215,12 +219,16 @@ void Device::Execute() {
     } else {
         e.dstE = E.dstE;
     }
+    e.stat = E.stat;
+    e.icode = E.icode;
+    e.valA = E.valA;
+    e.dstM = E.dstM;
 }
 void Device::D2E() {
-    E.stat = D.stat;
-    E.icode = D.icode;
-    E.ifun = D.ifun;
-    E.valC = D.valC;
+    E.stat = d.stat;
+    E.icode = d.icode;
+    E.ifun = d.ifun;
+    E.valC = d.valC;
     E.valA = d.valA;
     E.valB = d.valB;
     E.dstE = d.dstE;
@@ -265,13 +273,13 @@ bool Device::cond() const {
     }
 }
 void Device::E2M() {
-    M.stat = E.stat;
-    M.icode = E.icode;
+    M.stat = e.stat;
+    M.icode = e.icode;
     M.Cnd = e.Cnd;
     M.valE = e.valE;
-    M.valA = E.valA;
+    M.valA = e.valA;
     M.dstE = e.dstE;
-    M.dstM = E.dstM;
+    M.dstM = e.dstM;
 }
 void Device::Memory() {
     // 写stat
@@ -302,14 +310,18 @@ void Device::Memory() {
             m.stat = SADR;
         }
     }
+    m.icode = M.icode;
+    m.valE = M.valE;
+    m.dstE = M.dstE;
+    m.dstM = M.dstM;
 }
 void Device::M2W() {
     W.stat = m.stat;
-    W.icode = M.icode;
-    W.valE = M.valE;
+    W.icode = m.icode;
+    W.valE = m.valE;
     W.valM = m.valM;
-    W.dstE = M.dstE;
-    W.dstM = M.dstM;
+    W.dstE =  m.dstE;
+    W.dstM = m.dstM;
 }
 void Device::Writeback() {
     //写回寄存器
