@@ -349,7 +349,7 @@ void Device::SetDControl() {
     }
 }
 void Device::SetEControl() {
-    if (IfMispredicted() || IfLoadUseH() ||M.icode == IRET) {
+    if (IfMispredicted() || IfLoadUseH() || E.icode == IRET) {
         E.control = CBUBBLE;
     } else {
         E.control = CNORMAL;
