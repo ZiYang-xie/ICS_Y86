@@ -26,9 +26,9 @@ void Controller::Run(std::ostream &os) {
         d.D2E();
         d.E2M();
         d.M2W();
-        os << "Cycle " << idx++ << ": ";
+        os << "Cycle " << std::dec << idx++ << ": ";
         for (unsigned long long i : d.Reg) {
-            os << i << ' ';
+            os << "0x" << std::hex << i << "  ";
         }
         os << std::endl;
     }
