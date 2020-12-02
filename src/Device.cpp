@@ -368,3 +368,4 @@ uint8_t Device::GetEControl() const {
         return CNORMAL;
     }
 }
+uint64_t Device::GetPC() const { return 0; }

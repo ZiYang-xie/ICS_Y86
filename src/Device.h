@@ -94,6 +94,8 @@ class Device {
     void E2M();
     //从M中取值，放入W
     void M2W();
+    //返回程序结束时的PC值
+    uint64_t GetPC() const;
 };
 
 #endif  // ICS_Y86_DEVICE_H
