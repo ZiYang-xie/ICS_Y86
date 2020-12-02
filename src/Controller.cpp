@@ -53,7 +53,7 @@ void Controller::Output(std::ostream & os, int& idx) {
     os << "E_Reg:\nControl: " << ControlList[d.E.control] << "\t\t" << "Stat: " << StatList[d.E.stat] << "\t";
     if(d.E.icode | d.E.ifun)
         os << "icode: " << std::hex << d.E.icode << "\t" << "ifun: " << d.E.ifun << "\t";
-    os << "valC: 0x" << std::hex << d.E.valC << "\t" << "valA: 0x" <<  d.E.valA << "\t" << "valB: 0x" <<  d.E.valB;
+    os << "valC: 0x" << std::hex << d.E.valC << "\t" << "valA: 0x" <<  d.E.valA << "\t" << "valB: 0x" <<  d.E.valB << "\t";
     os << "srcA: " << RegList[d.E.srcA] << "\t" << "srcB: " << RegList[d.E.srcB] << "\t" << "dstE: " << RegList[d.E.dstE] << "\t" << "detM: " << RegList[d.E.dstM] << "\n\n";
 
     os << "M_Reg:\n" << "Stat: " << StatList[d.M.stat] << "\t";
