@@ -196,7 +196,7 @@ void Device::Execute() {
     e.icode = E.icode;
     e.valA = E.valA;
     e.dstM = E.dstM;
-     SetdsrcA();
+    SetdsrcA();
     SetdsrcB();
 }
 void Device::D2E() {
@@ -277,7 +277,7 @@ void Device::Memory() {
             m.valM = Read8Bytes(mem_addr);
         } else {
             m.stat = SADR;
-            if(In(M.icode,IPUSHQ,IPOPQ)){
+            if (In(M.icode, IPUSHQ, IPOPQ)) {
                 M.valE = 0;
             }
         }
@@ -286,7 +286,7 @@ void Device::Memory() {
             Write8Bytes(mem_addr, M.valA);
         } else {
             m.stat = SADR;
-            if(In(M.icode,IPUSHQ,IPOPQ)){
+            if (In(M.icode, IPUSHQ, IPOPQ)) {
                 M.valE = 0;
             }
         }
@@ -327,35 +327,31 @@ bool Device::IfLoadUseH() const {
     return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
 }
 bool Device::IfMispredicted() const { return E.icode == IJXX && !e.Cnd; }
-bool Device::IfRet() const {
-    return In(IRET,D.icode,E.icode,M.icode);
-}
-void Device::SetFControl()  {
+bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
+void Device::SetFControl() {
     if (IfLoadUseH() || IfRet()) {
         F.control = CSTALL;
     } else {
         F.control = CNORMAL;
     }
 }
-void Device::SetDControl()  {
+void Device::SetDControl() {
     if (IfLoadUseH()) {
         D.control = CSTALL;
     } else if (IfRet() || IfMispredicted()) {
-        D.control =  CBUBBLE;
+        D.control = CBUBBLE;
     } else {
-        D.control =  CNORMAL;
+        D.control = CNORMAL;
     }
 }
-void Device::SetEControl()  {
+void Device::SetEControl() {
     if (IfMispredicted() || IfLoadUseH()) {
         E.control = CBUBBLE;
     } else {
         E.control = CNORMAL;
     }
 }
-uint64_t Device::GetPC() const {
-    return F.predPC+1;
-}
+uint64_t Device::GetPC() const { return F.predPC + 1; }
 void Device::SetdsrcA() {
     if (In(D.icode, ICALL, IJXX)) {
         d.valA = D.valP;
