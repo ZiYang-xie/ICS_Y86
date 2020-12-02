@@ -6,7 +6,7 @@
 #include "infoList.h"
 
 void Output(const Controller& c) {
-    std::cout << "\n-------------------------------------------------\n" << std::endl;
+    std::cout << std::endl;
     std::cout << "PC:\t0x" << std::hex << c.d.GetPC() << std::endl;
     std::cout << "State:\t" << StatList[c.d.Stat] << std::endl;
 
