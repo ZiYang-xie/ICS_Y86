@@ -34,7 +34,7 @@ void Controller::Run(std::ostream &os) {
 
 void Controller::Output(std::ostream & os, int& idx) {
     os << std::endl;
-    os << "Cycle " << std::dec << idx++ << ": " << std::endl;
+    os << "Cycle " << std::dec << idx++ << ": " << "\n\n";
     for (unsigned long long i = 0; i < REG_SIZE; ++i) {
         os << RegList[i] << ":\t0x" << std::hex << d.Reg[i] << "  ";
         if(!(i & 1))
@@ -47,13 +47,13 @@ void Controller::Output(std::ostream & os, int& idx) {
     os << "D_Reg:\nControl: " << ControlList[d.D.control] << "\t\t" << "Stat: " << StatList[d.D.stat] << "\t";
     if(d.D.icode | d.D.ifun)
         os << "icode: " << std::hex << d.D.icode << "\t" << "ifun: " << d.D.ifun << "\t";
-    os << "rA: " << RegList[d.D.rA] << "\t\t" << "rB: " << RegList[d.D.rB] << "\n";
+    os << "rA: " << RegList[d.D.rA] << "\t\t" << "rB: " << RegList[d.D.rB];
     os << "valC: " << std::hex << d.D.valC << "\t\t" << "valP: " <<  d.D.valP << "\n\n";
 
     os << "E_Reg:\nControl: " << ControlList[d.E.control] << "\t\t" << "Stat: " << StatList[d.E.stat] << "\t";
     if(d.E.icode | d.E.ifun)
         os << "icode: " << std::hex << d.E.icode << "\t" << "ifun: " << d.E.ifun << "\t";
-    os << "valC: 0x" << std::hex << d.E.valC << "\t" << "valA: 0x" <<  d.E.valA << "\t" << "valB: 0x" <<  d.E.valB << "\n";
+    os << "valC: 0x" << std::hex << d.E.valC << "\t" << "valA: 0x" <<  d.E.valA << "\t" << "valB: 0x" <<  d.E.valB;
     os << "srcA: " << RegList[d.E.srcA] << "\t" << "srcB: " << RegList[d.E.srcB] << "\t" << "dstE: " << RegList[d.E.dstE] << "\t" << "detM: " << RegList[d.E.dstM] << "\n\n";
 
     os << "M_Reg:\n" << "Stat: " << StatList[d.M.stat] << "\t";
