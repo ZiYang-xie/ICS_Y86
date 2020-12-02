@@ -24,8 +24,6 @@ class Device {
     M_Reg M{};
     m_wire m{};
     W_Reg W{};
-    bool Mispredicted{false};
-    uint64_t MispredictedAddr{0};
     //更新predPC，该操作在Fetch阶段的最后执行
     void SetFPredPc();
     //判断地址是否合法
