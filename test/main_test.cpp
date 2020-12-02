@@ -331,7 +331,7 @@ TEST_F(InstrTest, test_OPq)
     c.d.Reg[RCX] = 0x10;
     c.d.Reg[RDX] = 0x03;
     c.Run();
-    ASSERT_EQ(c.d.Reg[RDX], (0x3 - 0x10));
+    ASSERT_EQ(c.d.Reg[RDX],  (0x3 - 0x10));
     ASSERT_EQ(c.d.CFLAG[ZF], 0);
     ASSERT_EQ(c.d.CFLAG[SF], 1);
     ASSERT_EQ(c.d.CFLAG[OF], 0);

@@ -5,6 +5,7 @@
 #ifndef ICS_Y86_PIPELINE_REGISTERS_H
 #define ICS_Y86_PIPELINE_REGISTERS_H
 #include <cstdint>
+#include "instr.h"
 const uint8_t RRAX = 0;
 const uint8_t RRCX = 1;
 const uint8_t RRDX = 2;
@@ -30,7 +31,7 @@ const uint8_t SADR = 3;
 const uint8_t SINS = 4;
 const uint8_t SBUB = 5;
 struct W_Reg {
-  uint8_t stat{};
+  uint8_t stat{SAOK};
   uint8_t icode{};
   uint64_t valE{};
   uint64_t valM{};
@@ -76,32 +77,32 @@ struct F_Reg {
   void reset();
 };
 struct f_wire {
-  uint8_t icode;
-  uint8_t ifun;
-  uint8_t Stat;
-  uint8_t ra;
-  uint8_t rb;
-  uint64_t valC;
-  uint64_t valP;
+  uint8_t icode{INOP};
+  uint8_t ifun{};
+  uint8_t Stat{SAOK}   ;
+  uint8_t ra{RNONE};
+  uint8_t rb{RNONE};
+  uint64_t valC{};
+  uint64_t valP{};
 };
 struct d_wire {
-  uint64_t SelFwdA;
-  uint64_t FwdB;
-  uint8_t dstE;
-  uint8_t dstM;
-  uint8_t srcA;
-  uint8_t srcB;
-  uint64_t valA;
-  uint64_t valB;
+  uint64_t SelFwdA{};
+  uint64_t FwdB{};
+  uint8_t dstE{RNONE};
+  uint8_t dstM{RNONE};
+  uint8_t srcA{RNONE};
+  uint8_t srcB{RNONE};
+  uint64_t valA{};
+  uint64_t valB{};
 };
 struct e_wire {
-  bool Cnd;
-  uint8_t dstE;
-  uint64_t valE;
+  bool Cnd{};
+  uint8_t dstE{RNONE};
+  uint64_t valE{};
 };
 struct m_wire {
-  uint8_t stat;
-  uint64_t valM;
+  uint8_t stat{SAOK};
+  uint64_t valM{};
 };
 
 #endif // ICS_Y86_PIPELINE_REGISTERS_H

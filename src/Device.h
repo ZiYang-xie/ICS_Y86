@@ -30,18 +30,11 @@ class Device {
     static bool IfAddrValid(uint64_t pos);
     //判断指令是否合法，后期增加指令时需要改
     static bool IfInstrValid(uint8_t icode);
-    //从F中取值，放入D，模拟连线（实际上并不存在的过程)
-    void F2D();
-    //从D中取值，放入E，模拟连线
-    void D2E();
+
     //选择ALU计算的函数
     std::function<uint64_t(uint64_t, uint64_t)> GetALUFunc(uint8_t ifun);
     //根据CFLAG返回cond
     [[nodiscard]] bool cond() const;
-    //从M中取值，放入W
-    void E2M();
-    //从M中取值，放入W
-    void M2W();
     // 判断是否是Load/Use Hazard
     [[nodiscard]] bool IfLoadUseH() const;
     // 判断是否是Mispredicted Branch
@@ -93,6 +86,14 @@ class Device {
     //在pos出的8个字节写入val
     //注意: 该函数不会检查pos的合法性
     void Write8Bytes(uint64_t pos, uint64_t val);
+    //从F中取值，放入D，模拟连线（实际上并不存在的过程)
+    void F2D();
+    //从D中取值，放入E，模拟连线
+    void D2E();
+    //从M中取值，放入W
+    void E2M();
+    //从M中取值，放入W
+    void M2W();
 };
 
 #endif  // ICS_Y86_DEVICE_H

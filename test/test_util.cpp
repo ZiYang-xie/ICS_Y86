@@ -3,7 +3,7 @@
 //
 
 #include "test_util.h"
-
+#include <sstream>
 // 翻转字符，输入偶长度字符串，每两位相对位置保持不变，翻转字符串
 // 用以翻转小端法
 std::string reverse_str(std::string s)
@@ -35,9 +35,11 @@ uint64_t str2int(const std::string& s)
 // 将int转为string，补齐16位并翻转
 std::string int2str(uint64_t n)
 {
-    std::string s = std::to_string(n);
-    while(s.length() < 16)
-        s += "0";//String应该用+=来避免不必要的内存重新分配
+    std::stringstream ss;
+    ss<<std::hex<<n;
+    std::string s=ss.str();
+    if (s.length() < 16)
+        s = std::string(16-s.length(),'0') + s;//String应该用+=来避免不必要的内存重新分配
     return reverse_str(s);
 }
 
