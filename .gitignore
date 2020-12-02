@@ -51,7 +51,6 @@ __pycache__/
 # Cmake
 CMakeLists.txt.user
 CMakeCache.txt
-CMakeFiles
 CMakeScripts
 Testing
 Makefile

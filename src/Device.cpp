@@ -52,6 +52,8 @@ void Device::Fetch() {
     f.Stat = SINS;
   } else if (f.icode == IHALT) {
     f.Stat = SHLT;
+  } else{
+      f.Stat = SAOK;
   }
   bool need_regids =
       In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ, IRMMOVQ, IMRMOVQ);
@@ -61,7 +63,7 @@ void Device::Fetch() {
     f.rb = ReadLow4Bits(f_pc + 1);
   }
   if (need_valC) {
-    f.valC = ReadHigh4Bits(f_pc + need_regids + 1);
+    f.valC = Read8Bytes(f_pc + need_regids + 1);
   }
   f.valP = f_pc + 1 + need_regids + 8 * need_valC;
   SetFPredPc();

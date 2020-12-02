@@ -1,9 +1,10 @@
 //
 // Created by 王少文 on 2020/11/27.
 //
-#include <cstdint>
+
 #ifndef ICS_Y86_PIPELINE_REGISTERS_H
 #define ICS_Y86_PIPELINE_REGISTERS_H
+#include <cstdint>
 const uint8_t RRAX = 0;
 const uint8_t RRCX = 1;
 const uint8_t RRDX = 2;
@@ -23,6 +24,11 @@ const uint8_t RNONE = 15;
 const uint8_t CNORMAL = 0;
 const uint8_t CBUBBLE = 1;
 const uint8_t CSTALL = 2;
+const uint8_t SAOK = 1;
+const uint8_t SHLT = 2;
+const uint8_t SADR = 3;
+const uint8_t SINS = 4;
+const uint8_t SBUB = 5;
 struct W_Reg {
   uint8_t stat{};
   uint8_t icode{};
@@ -33,7 +39,7 @@ struct W_Reg {
   void reset();
 };
 struct M_Reg {
-  uint8_t stat{};
+  uint8_t stat{SAOK};
   uint8_t icode{};
   bool Cnd{};
   uint64_t valE{};
@@ -43,7 +49,7 @@ struct M_Reg {
   void reset();
 };
 struct E_Reg {
-  uint8_t stat{};
+  uint8_t stat{SAOK};
   uint8_t icode{};
   uint8_t ifun{};
   uint64_t valC{};
@@ -56,7 +62,7 @@ struct E_Reg {
   void reset();
 };
 struct D_Reg {
-  uint8_t stat{};
+  uint8_t stat{SAOK};
   uint8_t icode{};
   uint8_t ifun{};
   uint8_t rA{RNONE};;
