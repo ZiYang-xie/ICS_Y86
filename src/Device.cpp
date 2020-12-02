@@ -70,7 +70,11 @@ void Device::Fetch() {
         f.valC = Read8Bytes(f_pc + need_regids + 1);
     }
     f.valP = f_pc + 1 + need_regids + 8 * need_valC;
-    SetFPredPc();
+    if (In(SHLT, D.stat, E.stat, M.stat, W.stat)) {
+        F.predPC = f_pc;
+    } else {
+        SetFPredPc();
+    }
 }
 void Device::SetFPredPc() {
     if (In(f.icode, IJXX, ICALL)) {
@@ -320,7 +324,7 @@ void Device::M2W() {
     W.icode = m.icode;
     W.valE = m.valE;
     W.valM = m.valM;
-    W.dstE =  m.dstE;
+    W.dstE = m.dstE;
     W.dstM = m.dstM;
 }
 void Device::Writeback() {
@@ -368,4 +372,6 @@ uint8_t Device::GetEControl() const {
         return CNORMAL;
     }
 }
-uint64_t Device::GetPC() const { return 0; }
+uint64_t Device::GetPC() const {
+    return F.predPC;
+}

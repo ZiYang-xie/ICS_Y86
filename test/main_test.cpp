@@ -68,7 +68,7 @@ TEST_F(InstrTest, test_halt)
     c.FlashCode("00");
     c.Run();
     ASSERT_EQ(c.d.Stat, SHLT);
-    //ASSERT_EQ(c.d.PC, 1);
+    ASSERT_EQ(c.d.GetPC(), 1);
 }
 
 TEST_F(InstrTest, test_nop)
@@ -76,7 +76,7 @@ TEST_F(InstrTest, test_nop)
     c.FlashCode("101000");
     c.Run();
     ASSERT_EQ(c.d.Stat, SHLT);
-    //ASSERT_EQ(c.d.PC, 3);
+    ASSERT_EQ(c.d.GetPC(), 3);
 }
 
 TEST_F(InstrTest, test_rrmov)
@@ -87,7 +87,7 @@ TEST_F(InstrTest, test_rrmov)
     c.Run();
 
     ASSERT_EQ(c.d.Stat, SHLT);
-    //ASSERT_EQ(c.d.PC, 3);
+    ASSERT_EQ(c.d.GetPC(), 3);
     ASSERT_EQ(c.d.Reg[RAX], 5);
 
     // c.FlashCode("20f000") 异常处理
@@ -389,59 +389,59 @@ TEST_F(InstrTest, test_JXX)
 {
     c.FlashCode("70" + int2str(0x100));
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     c.Reset();
     c.FlashCode("71" + int2str(0x100));
     c.d.CFLAG[ZF] = true;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     c.Reset();
     c.Run();
-    //ASSERT_EQ(c.d.PC, 10);
+    ASSERT_EQ(c.d.GetPC(), 10);
     c.Reset();
     c.d.CFLAG[SF] = true;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     c.Reset();
     c.d.CFLAG[OF] = true;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     c.Reset();
     c.d.CFLAG[OF] = true;
     c.d.CFLAG[SF] = true;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 10);
+    ASSERT_EQ(c.d.GetPC(), 10);
     c.FlashCode("72" + int2str(0x100));
     c.Run();
-    //ASSERT_EQ(c.d.PC, 10);
+    ASSERT_EQ(c.d.GetPC(), 10);
     c.Reset();
     c.d.CFLAG[ZF] = 0;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 10);
+    ASSERT_EQ(c.d.GetPC(), 10);
     c.Reset();
     c.d.CFLAG[SF] = true;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     c.Reset();
     c.d.CFLAG[OF] = true;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     c.Reset();
     c.d.CFLAG[OF] = true;
     c.d.CFLAG[SF] = true;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 10);
+    ASSERT_EQ(c.d.GetPC(), 10);
     c.FlashCode("73" + int2str(0x100));
     c.Reset();
     c.d.CFLAG[ZF] = true;
     c.d.Reg[RBX] = 5;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     c.Reset();
     c.d.CFLAG[ZF] = 0;
     c.d.Reg[RBX] = 5;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 10);
+    ASSERT_EQ(c.d.GetPC(), 10);
 }
 
 TEST_F(InstrTest, test_call)
@@ -449,7 +449,7 @@ TEST_F(InstrTest, test_call)
     c.FlashCode("80" + int2str(0x100));
     c.d.Reg[RSP] = 0x150;
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x101);
+    ASSERT_EQ(c.d.GetPC(), 0x101);
     ASSERT_EQ(c.d.Reg[RSP], 0x148);
     ASSERT_EQ(c.d.Read8Bytes(0x148), 0x9);
     c.Reset();
@@ -457,7 +457,7 @@ TEST_F(InstrTest, test_call)
     c.d.Reg[RSP] = 0x200;
     c.Run();
     ASSERT_EQ(c.d.Reg[RSP], 0x1f8);
-    //ASSERT_EQ(c.d.PC, 0x39);
+    ASSERT_EQ(c.d.GetPC(), 0x39);
 }
 
 TEST_F(InstrTest, test_ret)
@@ -466,13 +466,13 @@ TEST_F(InstrTest, test_ret)
     c.d.Reg[RSP] = 0x148;
     c.d.Write8Bytes(0x148, 0x3);
     c.Run();
-    //ASSERT_EQ(c.d.PC, 5);
+    ASSERT_EQ(c.d.GetPC(), 5);
     ASSERT_EQ(c.d.Reg[RSP], 0x150);
     c.Reset();
     c.d.Reg[RSP] = 0x148;
     c.d.Write8Bytes(0x148, 0x110);
     c.Run();
-    //ASSERT_EQ(c.d.PC, 0x111);
+    ASSERT_EQ(c.d.GetPC(), 0x111);
     ASSERT_EQ(c.d.Reg[RSP], 0x150);
 }
 
