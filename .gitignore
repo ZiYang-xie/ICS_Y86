@@ -47,3 +47,19 @@ y86-code
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Cmake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# Gtest
+test/lib
+lib/
