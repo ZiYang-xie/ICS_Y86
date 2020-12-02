@@ -331,9 +331,9 @@ bool Device::IfMispredicted() const{
 }
 bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
 void Device::SetFControl() {
-    Mispredicted = M.icode == IJXX && !M.Cnd;
-    MispredictedAddr = M.valA;
-    if (IfLoadUseH() || IfRet()) {
+    if(IfMispredicted()){
+        F.control = CNORMAL;
+    }else if (IfLoadUseH() || IfRet()) {
         F.control = CSTALL;
     } else {
         F.control = CNORMAL;
