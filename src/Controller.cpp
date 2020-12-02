@@ -3,8 +3,10 @@
 //
 
 #include "Controller.h"
+#include "infoList.h"
 
 #include <utility>
+
 bool Controller::FlashCode(std::string s) {
     scopy = s;
     d = Device(std::move(s));
@@ -26,10 +28,16 @@ void Controller::Run(std::ostream &os) {
         d.D2E();
         d.E2M();
         d.M2W();
-        os << "Cycle " << std::dec << idx++ << ": ";
-        for (unsigned long long i : d.Reg) {
-            os << "0x" << std::hex << i << "  ";
-        }
-        os << std::endl;
+        Output(os, idx);
     }
+}
+
+void Controller::Output(std::ostream & os, int& idx) {
+    os << "Cycle " << std::dec << idx++ << ": " << std::endl;
+    for (unsigned long long i = 0; i < REG_SIZE; ++i) {
+        os << RegList[i] << ":\t0x" << std::hex << i << "  ";
+        if(!(i & 1))
+            os << std::endl;
+    }
+    os << std::endl;
 }
