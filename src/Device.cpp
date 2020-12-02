@@ -342,14 +342,14 @@ void Device::SetFControl() {
 void Device::SetDControl() {
     if (IfLoadUseH()) {
         D.control = CSTALL;
-    } else if (IfRet() || IfMispredicted()) {
+    } else if (IfRet() || IfMispredicted()||M.icode == IRET) {
         D.control = CBUBBLE;
     } else {
         D.control = CNORMAL;
     }
 }
 void Device::SetEControl() {
-    if (IfMispredicted() || IfLoadUseH()) {
+    if (IfMispredicted() || IfLoadUseH() ||M.icode == IRET) {
         E.control = CBUBBLE;
     } else {
         E.control = CNORMAL;
