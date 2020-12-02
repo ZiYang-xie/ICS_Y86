@@ -326,9 +326,13 @@ void Device::Writeback() {
 bool Device::IfLoadUseH() const {
     return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
 }
-bool Device::IfMispredicted() const { return E.icode == IJXX && !e.Cnd; }
+bool Device::IfMispredicted() const{
+    return E.icode == IJXX && !e.Cnd;
+}
 bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
 void Device::SetFControl() {
+    Mispredicted = M.icode == IJXX && !M.Cnd;
+    MispredictedAddr = M.valA;
     if (IfLoadUseH() || IfRet()) {
         F.control = CSTALL;
     } else {

@@ -91,7 +91,6 @@ struct f_wire {
   uint64_t valP{};
 };
 struct d_wire {
-    bool ifForwading{false};
     uint8_t stat{SAOK};
     uint8_t icode{INOP};
     uint8_t ifun{};
