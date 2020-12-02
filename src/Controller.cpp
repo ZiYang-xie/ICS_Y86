@@ -35,7 +35,7 @@ void Controller::Run(std::ostream &os) {
 void Controller::Output(std::ostream & os, int& idx) {
     os << "Cycle " << std::dec << idx++ << ": " << std::endl;
     for (unsigned long long i = 0; i < REG_SIZE; ++i) {
-        os << RegList[i] << ":\t0x" << std::hex << i << "  ";
+        os << RegList[i] << ":\t0x" << std::hex << d.Reg[i] << "  ";
         if(!(i & 1))
             os << std::endl;
     }
