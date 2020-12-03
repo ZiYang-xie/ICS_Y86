@@ -20,6 +20,8 @@ public:
  void Reset();
  //运行内部的代码，直到异常情况停止
  void Run(std::ostream &os = std::cout);
+
+ void Output(std::ostream &, int&);
 };
 
 #endif // ICS_Y86_CONTROLLER_H

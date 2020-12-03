@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
-
+#include <cstring>
 #include "pipeline_registers.h"
 #ifndef ICS_Y86_DEVICE_H
 #define ICS_Y86_DEVICE_H
@@ -12,7 +12,7 @@ const int MEM_SIZE = 0x1000;
 const int RESERVED_SIZE = 0x100;  //用于后期扩展输出，作为保留内存不写入
 const int REG_SIZE = 0xf;
 class Device {
-   private:
+   public:
     // F,D,E,M,W为流水线寄存器
     // f,d,r,m,w为模拟导线而产生的变量，实际并不存在
     F_Reg F{};
@@ -25,6 +25,7 @@ class Device {
     m_wire m{};
     W_Reg W{};
     //更新predPC，该操作在Fetch阶段的最后执行
+   private:
     void SetFPredPc();
     //判断地址是否合法
     static bool IfAddrValid(uint64_t pos);
@@ -98,8 +99,6 @@ class Device {
     void SetEControl() ;
     void SetdsrcA();
     void SetdsrcB();
-
-
 };
 
 #endif  // ICS_Y86_DEVICE_H
