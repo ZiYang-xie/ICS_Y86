@@ -172,7 +172,7 @@ void Device::Execute() {
         alufun = ALUADD;
     }
     // 设置set_cc
-    bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
+    bool set_cc = In(E.icode, IOPQ) && !In(M.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
     // ALU计算
     auto func = GetALUFunc(alufun);
