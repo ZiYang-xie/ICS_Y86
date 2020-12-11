@@ -261,8 +261,11 @@ def gen_list(lines: list):
 def remove_single_line_annot(lines: list):
     res = []
     for l in lines:
-        if '#' in l:
-            idx = l.index('#')
+        if '#' in l or '//' in l:
+            if '#' in l:
+                idx = l.index('#')
+            if '//' in l:
+                idx = l.index('//') if l.index('//') < idx else idx
         else:
             idx = len(l)
         if idx != 0:
@@ -421,14 +424,23 @@ def assemble_file(filename):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Assemble .ys file to .yo file or raw byte file')
+        description='Assemble .ys file to .yo file or/and .yo file to  raw byte file')
     parser.add_argument("sourcefile", help="The source file to be assembled")
     parser.add_argument("-o", "--output", dest='outfile',
                         action='store', help="Assign the output file")
     parser.add_argument("-r", "--raw", dest='raw',
                         action="store_true", help="Generate raw byte file")
     args = parser.parse_args()
-    res = assemble_file(args.sourcefile)
+    if args.sourcefile[-3:] == '.ys':
+        res = assemble_file(args.sourcefile)
+    elif args.sourcefile[-3:] == '.yo':
+        args.raw = True
+        with open(args.sourcefile) as f:
+            res = f.read()
+    else:
+        print(
+            f"Invalid file format {args.sourcefile[-3:]}, only support .yo and .ys file")
+        exit(1)
     if args.raw is True:
         res = process_to_raw(res.split('\n'))
     if args.outfile is None:
