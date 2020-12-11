@@ -1,4 +1,14 @@
 import sys
+def process_to_raw(lines:list):
+    res = ""
+    for line in lines:
+        left = line.split(sep='|')[0].split(":")
+        if len(left) == 2:
+            res += "0"*(2*int(left[0].strip(), 16)-len(res))
+            res += left[1].strip()
+    return res
+
+
 if len(sys.argv) != 2:
     raise ValueError("You can only input 1 file at a time")
 
@@ -8,9 +18,5 @@ if file_name[-3:] != '.yo':
     exit()
 res = ""
 with open(file_name) as f:
-    for line in f.readlines():
-        left = line.split(sep='|')[0].split(":")
-        if len(left) == 2:
-            res += "0"*(2*int(left[0].strip(), 16)-len(res))
-            res += left[1].strip()
+    res = process_to_raw(f.readlines())
 print(res)
