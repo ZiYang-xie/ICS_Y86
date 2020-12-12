@@ -776,4 +776,3 @@ TEST_F(RealCodeTest, test_asumr)
 	EXPECT_EQ(c.d.Reg[RSP], 0x0000000000000200);
 	EXPECT_EQ(c.d.Reg[R10], 0x0000000000000008);
 }
-
