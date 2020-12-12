@@ -339,9 +339,7 @@ bool Device::IfLoadUseH() const {
 bool Device::IfMispredicted() const { return E.icode == IJXX && !e.Cnd; }
 bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
 void Device::SetFControl() {
-    if (IfMispredicted()) {
-        F.control = CNORMAL;
-    } else if (IfLoadUseH() || IfRet()) {
+    if (!IfMispredicted() && (IfLoadUseH() || IfRet())) {
         F.control = CSTALL;
     } else {
         F.control = CNORMAL;

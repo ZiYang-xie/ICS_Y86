@@ -11,7 +11,6 @@ class Controller {
 private:
   std::string scopy;
 public:
-  //TODO:后期再放进Private
   Device d;
   //将s写入Mem，同时还原所有的寄存器
   //若写入成功，则返回True，否则返回False
@@ -20,8 +19,6 @@ public:
  void Reset();
  //运行内部的代码，直到异常情况停止
  void Run(std::ostream &os = std::cout);
-
- void Output(std::ostream &, int&);
 };
 
 #endif // ICS_Y86_CONTROLLER_H

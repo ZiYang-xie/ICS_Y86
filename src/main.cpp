@@ -3,27 +3,7 @@
 //
 
 #include "Controller.h"
-#include "infoList.h"
-
-void Output(const Controller& c) {
-    std::cout << std::endl;
-    std::cout << "PC:\t0x" << std::hex << c.d.GetPC() << std::endl;
-    std::cout << "State:\t" << StatList[c.d.Stat] << std::endl;
-
-    std::cout << "CC:\t";
-    for(int i = 0; i < 3; ++i)
-        std::cout << CCList[i] << ": " << c.d.CFLAG[i] << "\t";
-
-    std::cout << "\n\n";
-    std::cout << "Register:" << std::endl;
-    for(int i = 0; i < REG_SIZE; ++i)
-    {
-        std::cout << "\t" << RegList[i] << ":\t0x" << std::hex << c.d.Reg[i] << '\t';
-        if(!(i & 1))
-            std::cout << std::endl;
-    }
-}
-
+#include "Output.h"
 
 int main() {
     Controller c;
@@ -31,6 +11,6 @@ int main() {
     std::cin >> raw_code;
     c.FlashCode(raw_code);
     c.Run();
-    Output(c);
+    OutputFinal(c.d);
     c.Reset();
 }
