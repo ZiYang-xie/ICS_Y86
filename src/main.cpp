@@ -10,7 +10,7 @@ int main() {
     std::string raw_code;
     std::cin >> raw_code;
     c.FlashCode(raw_code);
-    c.Run();
+    c.Run(0, false, 0);
     OutputFinal(c.d);
     c.Reset();
 }

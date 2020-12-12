@@ -2,9 +2,11 @@
 // Created by 王少文 on 2020/11/27.
 //
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <string>
-#include <cstring>
+
+#include "index_const.h"
 #include "pipeline_registers.h"
 #ifndef ICS_Y86_DEVICE_H
 #define ICS_Y86_DEVICE_H
@@ -27,14 +29,6 @@ class Device {
     //更新predPC，该操作在Fetch阶段的最后执行
     void SetDSrcA();
     void SetDSrcB();
-    const static uint8_t SAOK = 1;
-    const static uint8_t SHLT = 2;
-    const static uint8_t SADR = 3;
-    const static uint8_t SINS = 4;
-    const static uint8_t SBUB = 5;
-    const static uint8_t CZF = 0;
-    const static uint8_t CSF = 1;
-    const static uint8_t COF = 2;
     uint64_t Reg[REG_SIZE]{};
     uint8_t Mem[MEM_SIZE]{};
     //按ZF, SF, OF的顺序为0, 1, 2
@@ -89,7 +83,6 @@ class Device {
     static bool IfAddrValid(uint64_t pos);
     //判断指令是否合法，后期增加指令时需要改
     static bool IfInstrValid(uint8_t icode);
-
     //选择ALU计算的函数
     std::function<uint64_t(uint64_t, uint64_t)> GetALUFunc(uint8_t ifun);
     //根据CFLAG返回cond

@@ -14,9 +14,9 @@ bool Controller::FlashCode(std::string s) {
     return true;  //来不及写异常处理了就先这样吧
 }
 void Controller::Reset() { d = Device(scopy); }
-void Controller::Run(std::ostream &os) {
+void Controller::Run(int max_cycle, bool if_output, std::ostream& os) {
     int idx = 0;
-    while (d.Stat == Device::SAOK) {
+    while (d.Stat == SAOK) {
         d.Fetch();
         d.Decode();
         d.Execute();
@@ -32,7 +32,12 @@ void Controller::Run(std::ostream &os) {
         d.D2E();
         d.E2M();
         d.M2W();
-        OutputProcedure(os, idx, this->d);
-        idx++;
+        if (if_output) {
+            OutputProcedure(os, idx, this->d);
+        }
+        if (idx++ > max_cycle) {
+            std::cerr << "Exceed max cycle: " << max_cycle;
+            break;
+        }
     }
 }
