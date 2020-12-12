@@ -317,7 +317,7 @@ def get_memaddr(lines: list):
         elif line[0] == '.quad':
             res.append(res[idx-1]+8)
         elif line[0] == '.byte':
-            res.append(res[idx-1]+2)
+            res.append(res[idx-1]+1)
         elif ':' in line[0]:
             res.append(res[idx-1])
         else:
