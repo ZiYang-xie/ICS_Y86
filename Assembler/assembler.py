@@ -312,17 +312,23 @@ def get_memaddr(lines: list):
             res[-1] = int(line[1], 16)
             res.append(int(line[1], 16))
         elif line[0] == '.align':
-            res[-1] = res[-1]-res[-1] % 8+8
+            res[-1] = res[-1] - res[-1] % 8 + 8
             res.append(res[-1])
         elif line[0] == '.quad':
-            res.append(res[idx-1]+8)
+            res.append(res[idx - 1] + 8)
         elif line[0] == '.byte':
-            res.append(res[idx - 1] + 1)
-        elif ':' in line[0]:
-            res.append(res[idx-1])
-        else:
-            res.append(res[idx-1]+instr[line[0]].size)
-    return res[:-1]
+
+<< << << < HEAD
+res.append(res[idx - 1] + 1)
+== == == =
+res.append(res[idx - 1] + 1)
+>> >> >> > 28
+fa7f330e9d8afc075d4cbf6016e211f0226ad0
+elif ':' in line[0]:
+res.append(res[idx - 1])
+else:
+res.append(res[idx - 1] + instr[line[0]].size)
+return res[:-1]
 
 
 def replace_label(lines, mem):
