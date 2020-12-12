@@ -55,7 +55,7 @@ class Device {
     // TODO: 来不及了，先把这个写成public的
     uint64_t Reg[REG_SIZE]{};
     uint8_t Mem[MEM_SIZE]{};
-    bool CFLAG[3]{};  //按ZF, SF, OF的顺序为0, 1, 2
+    bool CFLAG[3]{true,false,false};  //按ZF, SF, OF的顺序为0, 1, 2
     uint8_t Stat{};
     //构造函数，str为写入内存的编码
     explicit Device(std::string s = "00");

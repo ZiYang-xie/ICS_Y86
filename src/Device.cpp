@@ -8,9 +8,8 @@
 
 #include "instr.h"
 #include "util.h"
-Device::Device(std::string str) {
+Device::Device(std::string str) :CFLAG{true, false, false}{
     memset(Reg, 0, REG_SIZE);
-    memset(CFLAG, 0, 3);
     memset(Mem, 0, MEM_SIZE);
     Stat = SAOK;
     if (str.length() >= MEM_SIZE - RESERVED_SIZE) {
@@ -172,7 +171,7 @@ void Device::Execute() {
         alufun = ALUADD;
     }
     // 设置set_cc
-    bool set_cc = In(E.icode, IOPQ) && !In(M.stat, SADR, SINS, SHLT) &&
+    bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
     // ALU计算
     auto func = GetALUFunc(alufun);
