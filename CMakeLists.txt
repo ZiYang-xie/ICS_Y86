@@ -9,4 +9,4 @@ add_subdirectory(test)
 add_executable(ICS_Y86
         src/main.cpp
         src/Device.cpp
-        src/pipeline_registers.h src/util.h src/util.cpp src/instr.h src/Controller.cpp src/Controller.h src/pipeline_registers.cpp src/Output.h src/Output.cpp)
+        src/pipeline_registers.h src/util.h src/util.cpp src/instr.h src/Controller.cpp src/Controller.h src/pipeline_registers.cpp src/Output.h src/Output.cpp src/index_const.h)
