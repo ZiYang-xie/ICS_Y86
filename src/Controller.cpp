@@ -22,6 +22,8 @@ void Controller::Run(std::ostream &os) {
         d.Memory();
         d.Writeback();
         d.SetCC();
+        d.SetDSrcA();
+        d.SetDSrcB();
         d.SetFControl();
         d.SetDControl();
         d.SetEControl();

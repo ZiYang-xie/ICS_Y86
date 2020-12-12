@@ -8,7 +8,7 @@
 
 #include "instr.h"
 #include "util.h"
-Device::Device(std::string str) :CFLAG{true, false, false}{
+Device::Device(std::string str) : CFLAG{true, false, false} {
     memset(Reg, 0, REG_SIZE);
     memset(Mem, 0, MEM_SIZE);
     Stat = SAOK;
@@ -40,23 +40,10 @@ void Device::Fetch() {
     if (F.control == CSTALL) {
         return;
     }
-    uint64_t f_pc;
-    if (M.icode == IJXX && !M.Cnd) {
-        f_pc = M.valA;  // JXX但是没有成功跳转的情况
-    } else if (W.icode == IRET) {
-        f_pc = W.valM;  // Ret的情况，后期使用硬件栈时可以删去这一句话
-    } else {
-        f_pc = F.predPC;
-    }
+    uint64_t f_pc = SelectPC();
     f.icode = ReadHigh4Bits(f_pc);
     f.ifun = ReadLow4Bits(f_pc);
-    if (!IfInstrValid(f.icode)) {
-        f.Stat = SINS;
-    } else if (f.icode == IHALT) {
-        f.Stat = SHLT;
-    } else {
-        f.Stat = SAOK;
-    }
+    f.Stat = SelectFStat();
     bool need_regids =
         In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ, IRMMOVQ, IMRMOVQ);
     bool need_valC = In(f.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL);
@@ -72,6 +59,24 @@ void Device::Fetch() {
         F.predPC = f_pc;
     } else {
         SetFPredPc();
+    }
+}
+uint8_t Device::SelectFStat() const {
+    if (!IfInstrValid(f.icode)) {
+        return SINS;
+    } else if (f.icode == IHALT) {
+        return SHLT;
+    } else {
+        return SAOK;
+    }
+}
+uint64_t Device::SelectPC() const {
+    if (M.icode == IJXX && !M.Cnd) {
+        return M.valA;  // JXX但是没有成功跳转的情况
+    } else if (W.icode == IRET) {
+        return W.valM;  // Ret的情况，后期使用硬件栈时可以删去这一句话
+    } else {
+        return F.predPC;
     }
 }
 void Device::SetFPredPc() {
@@ -97,35 +102,13 @@ void Device::Decode() {
         D.reset();
     }
     //写srcA
-    if (In(D.icode, IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ)) {
-        d.srcA = D.rA;
-    } else if (In(D.icode, IPOPQ, IRET)) {
-        d.srcA = RRSP;
-    } else {
-        d.srcA = RNONE;
-    }
+    d.srcA = SelectSrcA();
     //写srcB
-    if (In(D.icode, IOPQ, IRMMOVQ, IMRMOVQ)) {
-        d.srcB = D.rB;
-    } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
-        d.srcB = RRSP;
-    } else {
-        d.srcB = RNONE;
-    }
+    d.srcB = SelectSrcB();
     //写dstE
-    if (In(D.icode, IRRMOVQ, IIRMOVQ, IOPQ)) {
-        d.dstE = D.rB;
-    } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
-        d.dstE = RRSP;
-    } else {
-        d.dstE = RNONE;
-    }
+    d.dstE = SelectDstE();
     //写dstM
-    if (In(D.icode, IMRMOVQ, IPOPQ)) {
-        d.dstM = D.rA;
-    } else {
-        d.dstM = RNONE;
-    }
+    d.dstM = SelectDstM();
     uint64_t rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
     uint64_t rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
     //写valA，下面主要在处理forwarding的情况
@@ -137,39 +120,50 @@ void Device::Decode() {
     d.ifun = D.ifun;
     d.valC = D.valC;
 }
+uint8_t Device::SelectDstM() const {
+    if (In(D.icode, IMRMOVQ, IPOPQ)) {
+        return D.rA;
+    } else {
+        return RNONE;
+    }
+}
+uint8_t Device::SelectDstE() const {
+    if (In(D.icode, IRRMOVQ, IIRMOVQ, IOPQ)) {
+        return D.rB;
+    } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
+        return RRSP;
+    } else {
+        return RNONE;
+    }
+}
+uint8_t Device::SelectSrcB() const {
+    if (In(D.icode, IOPQ, IRMMOVQ, IMRMOVQ)) {
+        return D.rB;
+    } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
+        return RRSP;
+    } else {
+        return RNONE;
+    }
+}
+uint8_t Device::SelectSrcA() const {
+    if (In(D.icode, IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ)) {
+        return D.rA;
+    } else if (In(D.icode, IPOPQ, IRET)) {
+        return RRSP;
+    } else {
+        return RNONE;
+    }
+}
 void Device::Execute() {
     if (E.control == CBUBBLE) {
         E.reset();
     }
-    uint64_t aluA, aluB;
     // 设置aluA
-    if (In(E.icode, IRRMOVQ, IOPQ)) {
-        aluA = E.valA;
-    } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ)) {
-        aluA = E.valC;
-    } else if (In(E.icode, ICALL, IPUSHQ)) {
-        aluA = -8;
-    } else if (In(E.icode, IRET, IPOPQ)) {
-        aluA = 8;
-    } else {
-        aluA =
-            0xdeadbeef;  //这一条语句仅仅是为了方便后期debug和方式clang啰嗦我可能的未定义变量，下同
-    }
+    uint64_t aluA = SelectAluA();
     // 设置aluB
-    if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ)) {
-        aluB = E.valB;
-    } else if (In(E.icode, IRRMOVQ, IIRMOVQ)) {
-        aluB = 0;
-    } else {
-        aluB = 0xdeadbeef;
-    }
+    uint64_t aluB = SelectAluB();
     // 设置alufun
-    uint8_t alufun;
-    if (E.icode == IOPQ) {
-        alufun = E.ifun;
-    } else {
-        alufun = ALUADD;
-    }
+    uint8_t alufun = E.icode == IOPQ ? E.ifun : ALUADD;
     // 设置set_cc
     bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
@@ -178,13 +172,13 @@ void Device::Execute() {
     e.valE = func(aluA, aluB);
     // 计算cnd
     if (set_cc) {
-        e.CFLAG_tmp[CZF] = (e.valE == 0);
-        e.CFLAG_tmp[CSF] = (((int64_t)e.valE) < 0);
-        e.CFLAG_tmp[COF] = (((((int64_t)aluA < 0) ^ (E.ifun == ALUSUB)) ==
-                             (int64_t)aluB < 0) &&
-                            ((int64_t)e.valE < 0 != (int64_t)aluB < 0));
+        e.CFLAG[CZF] = (e.valE == 0);
+        e.CFLAG[CSF] = (((int64_t)e.valE) < 0);
+        e.CFLAG[COF] = (((((int64_t)aluA < 0) ^ (E.ifun == ALUSUB)) ==
+                         (int64_t)aluB < 0) &&
+                        ((int64_t)e.valE < 0 != (int64_t)aluB < 0));
     }
-    e.Cnd = cond();
+    e.Cnd = CalcCond(e.CFLAG);
     // 写dstE和dstM
     if (E.icode == IRRMOVQ && !e.Cnd) {
         e.dstE = RNONE;
@@ -195,8 +189,29 @@ void Device::Execute() {
     e.icode = E.icode;
     e.valA = E.valA;
     e.dstM = E.dstM;
-    SetdsrcA();
-    SetdsrcB();
+}
+uint64_t Device::SelectAluB() const {
+    if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ)) {
+        return E.valB;
+    } else if (In(E.icode, IRRMOVQ, IIRMOVQ)) {
+        return 0;
+    } else {
+        return 0xdeadbeef;
+    }
+}
+uint64_t Device::SelectAluA() const {
+    if (In(E.icode, IRRMOVQ, IOPQ)) {
+        return E.valA;
+    } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ)) {
+        return E.valC;
+    } else if (In(E.icode, ICALL, IPUSHQ)) {
+        return -8;
+    } else if (In(E.icode, IRET, IPOPQ)) {
+        return 8;
+    } else {
+        return 0xdeadbeef;
+        //这一条语句仅仅是为了方便后期debug和方式clang啰嗦我可能的未定义变量，下同
+    }
 }
 void Device::D2E() {
     E.stat = d.stat;
@@ -226,22 +241,22 @@ std::function<uint64_t(uint64_t, uint64_t)> Device::GetALUFunc(uint8_t ifun) {
             return [](uint64_t a, uint64_t b) { return 0; };
     }
 }
-bool Device::cond() const {
+bool Device::CalcCond(bool cflag[3]) const {
     switch (E.ifun) {
         case BALWAYS:
             return true;
         case BLE:
-            return e.CFLAG_tmp[CZF] || (e.CFLAG_tmp[CSF] ^ e.CFLAG_tmp[COF]);
+            return cflag[CZF] || (cflag[CSF] ^ cflag[COF]);
         case BL:
-            return e.CFLAG_tmp[CSF] ^ e.CFLAG_tmp[COF];
+            return cflag[CSF] ^ cflag[COF];
         case BE:
-            return e.CFLAG_tmp[CZF];
+            return cflag[CZF];
         case BNE:
-            return !e.CFLAG_tmp[CZF];
+            return !cflag[CZF];
         case BGE:
-            return (e.CFLAG_tmp[CSF] == e.CFLAG_tmp[COF]);
+            return (cflag[CSF] == cflag[COF]);
         case BG:
-            return !e.CFLAG_tmp[CZF] && (e.CFLAG_tmp[CSF] == e.CFLAG_tmp[COF]);
+            return !cflag[CZF] && (cflag[CSF] == cflag[COF]);
         default:
             return false;
     }
@@ -294,8 +309,6 @@ void Device::Memory() {
     m.valE = M.valE;
     m.dstE = M.dstE;
     m.dstM = M.dstM;
-    SetdsrcA();
-    SetdsrcB();
 }
 void Device::M2W() {
     W.stat = m.stat;
@@ -319,20 +332,16 @@ void Device::Writeback() {
     } else {
         Stat = W.stat;
     }
-    SetdsrcA();
-    SetdsrcB();
 }
 bool Device::IfLoadUseH() const {
     return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
 }
-bool Device::IfMispredicted() const{
-    return E.icode == IJXX && !e.Cnd;
-}
+bool Device::IfMispredicted() const { return E.icode == IJXX && !e.Cnd; }
 bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
 void Device::SetFControl() {
-    if(IfMispredicted()){
+    if (IfMispredicted()) {
         F.control = CNORMAL;
-    }else if (IfLoadUseH() || IfRet()) {
+    } else if (IfLoadUseH() || IfRet()) {
         F.control = CSTALL;
     } else {
         F.control = CNORMAL;
@@ -341,7 +350,7 @@ void Device::SetFControl() {
 void Device::SetDControl() {
     if (IfLoadUseH()) {
         D.control = CSTALL;
-    } else if (IfRet() || IfMispredicted()||M.icode == IRET) {
+    } else if (IfRet() || IfMispredicted() || M.icode == IRET) {
         D.control = CBUBBLE;
     } else {
         D.control = CNORMAL;
@@ -355,7 +364,7 @@ void Device::SetEControl() {
     }
 }
 uint64_t Device::GetPC() const { return F.predPC + 1; }
-void Device::SetdsrcA() {
+void Device::SetDSrcA() {
     if (In(D.icode, ICALL, IJXX)) {
         d.valA = D.valP;
     } else if (d.srcA == e.dstE) {
@@ -370,7 +379,7 @@ void Device::SetdsrcA() {
         d.valA = W.valE;
     }
 }
-void Device::SetdsrcB() {
+void Device::SetDSrcB() {
     if (d.srcB == e.dstE) {
         d.valB = e.valE;
     } else if (d.srcB == M.dstM) {
@@ -388,7 +397,7 @@ void Device::SetCC() {
                   !In(W.stat, SADR, SINS, SHLT);
     if (set_cc) {
         for (int i = 0; i < 3; i++) {
-            CFLAG[i] = e.CFLAG_tmp[i];
+            CFLAG[i] = e.CFLAG[i];
         }
     }
 }

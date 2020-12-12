@@ -106,7 +106,7 @@ struct d_wire {
 };
 struct e_wire {
     bool Cnd{};
-    bool CFLAG_tmp[3]{};
+    bool CFLAG[3]{};
     uint8_t stat{SAOK};
     uint8_t icode{INOP};
   uint8_t dstE{RNONE};
