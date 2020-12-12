@@ -1,0 +1,7 @@
+							| #Modification of Instruction Code Test
+0x0: 30f60100000000000000	| irmovq $1, %rsi
+0xa: 30f70000000000000000	| irmovq $0, %rdi
+0x14: 40670000000000000000	| rmmovq %rsi, (%rdi) #Trying to modify instruction code
+0x1e: 10					| nop	#Should return with status ADR
+0x1f: 10					| nop
+0x20: 10					| nop

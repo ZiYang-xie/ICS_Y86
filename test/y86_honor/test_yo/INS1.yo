@@ -1,0 +1,2 @@
+0x0: 30f2	| irmovq NONE, %rdx #IRMOVQ without immediate number
+			|					#Should return with status INS

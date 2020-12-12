@@ -1,0 +1,7 @@
+                            | #Overflow Test
+0x0: 30f7ffffffffffffff7f   | Label: irmovq $0x7fffffffffffffff, %rdi
+0xa: 30f6ffffffffffffffff   | irmovq $-1, %rsi	# %rdi > %rsi while %rdi - %rsi < 0
+0x14: 6167                  | subq %rsi, %rdi		# %rdi should be -9223372036854775808
+0x16: 710000000000000000    | jle Label	 # Should not jump
+0x1f: 00                    | halt
+                            | 

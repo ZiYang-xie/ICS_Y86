@@ -1,0 +1,2 @@
+0x0: 200f	| rrmovq %rax, RNONE 	#The second register of RRMOVQ should not be RNONE
+			|						#Should return with status INS

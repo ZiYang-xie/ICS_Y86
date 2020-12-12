@@ -1,0 +1,69 @@
+Y86-64 Processor: pipe-std.hcl
+2 bytes of code read
+
+Cycle 0. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x0
+D: instr = nop, rA = ----, rB = ----, valC = 0x0, valP = 0x0, Stat = BUB
+E: instr = nop, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = ----, dstM = ----, Stat = BUB
+M: instr = nop, Cnd = 0, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0x0, imem_instr = pushq, f_instr = pushq
+	Execute: ALU: + 0x0 0x0 --> 0x0
+
+Cycle 1. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x2
+D: instr = pushq, rA = %rax, rB = %rdx, valC = 0x0, valP = 0x2, Stat = AOK
+E: instr = nop, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = ----, dstM = ----, Stat = BUB
+M: instr = nop, Cnd = 1, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0x2, imem_instr = halt, f_instr = halt
+	Execute: ALU: + 0x0 0x0 --> 0x0
+
+Cycle 2. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x3
+D: instr = halt, rA = ----, rB = ----, valC = 0x0, valP = 0x3, Stat = HLT
+E: instr = pushq, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = %rax, srcB = %rsp, dstE = %rsp, dstM = ----, Stat = AOK
+M: instr = nop, Cnd = 1, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0x3, imem_instr = halt, f_instr = halt
+	Execute: ALU: + 0xfffffffffffffff8 0x0 --> 0xfffffffffffffff8
+
+Cycle 3. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x4
+D: instr = halt, rA = ----, rB = ----, valC = 0x0, valP = 0x4, Stat = HLT
+E: instr = halt, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = ----, dstM = ----, Stat = HLT
+M: instr = pushq, Cnd = 1, valE = 0xfffffffffffffff8, valA = 0x0
+   dstE = %rsp, dstM = ----, Stat = AOK
+W: instr = nop, valE = 0x0, valM = 0x0, dstE = ----, dstM = ----, Stat = BUB
+	Fetch: f_pc = 0x4, imem_instr = halt, f_instr = halt
+	Memory: Invalid address 0xfffffffffffffff8
+	Execute: ALU: + 0x0 0x0 --> 0x0
+	Couldn't write to address 0xfffffffffffffff8
+
+Cycle 4. CC=Z=1 S=0 O=0, Stat=AOK
+F: predPC = 0x5
+D: instr = halt, rA = ----, rB = ----, valC = 0x0, valP = 0x5, Stat = HLT
+E: instr = halt, valC = 0x0, valA = 0x0, valB = 0x0
+   srcA = ----, srcB = ----, dstE = ----, dstM = ----, Stat = HLT
+M: instr = nop, Cnd = 0, valE = 0x0, valA = 0x0
+   dstE = ----, dstM = ----, Stat = BUB
+W: instr = pushq, valE = 0xfffffffffffffff8, valM = 0x0, dstE = %rsp, dstM = ----, Stat = ADR
+	Fetch: f_pc = 0x5, imem_instr = halt, f_instr = halt
+	Execute: ALU: + 0x0 0x0 --> 0x0
+5 instructions executed
+Status = ADR
+Condition Codes: Z=1 S=0 O=0
+Changed Register State:
+Changed Memory State:
+PC = 0x0, Invalid stack address 0xfffffffffffffff8
+ISA Register != Pipeline Register File
+%rsp:	0xfffffffffffffff8	0x0000000000000000
+ISA Check Fails
+CPI: 1 cycles/1 instructions = 1.00

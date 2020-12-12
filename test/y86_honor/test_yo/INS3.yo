@@ -1,0 +1,2 @@
+0x0: a002	| pushq %rax 	#The second register of PUSH should be RNONE
+			|				#Should return with status INS

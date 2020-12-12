@@ -1,0 +1,7 @@
+							| # Test forward process
+0x0: 30f02301000000000000	| irmovq $0x123, %rax
+0xa: 30f22103000000000000	| irmovq $0x321, %rdx
+0x14: 6311					| xorq %rcx, %rcx		# CC = 100
+0x16: 2402					| cmovne %rax, %rdx	# Not transferred
+0x18: 6022					| addq %rdx, %rdx		# Should be 0x642
+0x1a: 00					| halt
