@@ -11,7 +11,10 @@
 #ifndef ICS_Y86_DEVICE_H
 #define ICS_Y86_DEVICE_H
 const int MEM_SIZE = 0x1000;
-const int RESERVED_SIZE = 0x100;  //用于后期扩展输出，作为保留内存不写入
+const int GRAPHICS_MEM_START = 0x800;
+const int GRAPHICS_MEM_SIZE = 0x100;
+const int CONSOLE_MEM_START = 0x900;
+const int CONSOLE_MEM_SIZE = 0x99;
 const int REG_SIZE = 0xf;
 class Device {
    public:

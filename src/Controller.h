@@ -20,8 +20,10 @@ class Controller {
     //还原所有的寄存器
     void Reset();
     //运行内部的代码，直到异常情况停止
-    void Run(int max_cycle = 10, bool if_output = false,
+    void Run(int max_cycle = 10000, bool if_output = false,
              std::ostream& os = std::cout);
+    //返回目前映射到控制台所代表的的字符串
+    std::string GetConsoleOutput();
 };
 
 #endif  // ICS_Y86_CONTROLLER_H

@@ -12,7 +12,7 @@ Device::Device(std::string str) : CFLAG{true, false, false} {
     memset(Reg, 0, REG_SIZE);
     memset(Mem, 0, MEM_SIZE);
     Stat = SAOK;
-    if (str.length() >= MEM_SIZE - RESERVED_SIZE) {
+    if (str.length() >= 2 * MEM_SIZE) {
         throw std::domain_error("String is too long to flash");
     }
     int i = 0;
@@ -22,9 +22,7 @@ Device::Device(std::string str) : CFLAG{true, false, false} {
         i++;
     }
 }
-bool Device::IfAddrValid(uint64_t pos) {
-    return pos >= 0 && pos <= MEM_SIZE - RESERVED_SIZE;
-}
+bool Device::IfAddrValid(uint64_t pos) { return pos >= 0 && pos < MEM_SIZE; }
 bool Device::IfInstrValid(uint8_t icode) { return icode >= 0 && icode <= 0xe; }
 uint8_t Device::ReadHigh4Bits(uint64_t pos) const {
     return (Mem[pos] & 0xf0u) >> 4u;

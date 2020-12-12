@@ -6,12 +6,18 @@
 
 #include <utility>
 
+#include "Device.h"
 #include "Output.h"
+#include "cstring"
 
 bool Controller::FlashCode(std::string s) {
-    scopy = s;
-    d = Device(std::move(s));
-    return true;  //来不及写异常处理了就先这样吧
+    if (s.length() < MEM_SIZE * 2) {
+        scopy = s;
+        d = Device(std::move(s));
+        return true;
+    } else {
+        return false;
+    }
 }
 void Controller::Reset() { d = Device(scopy); }
 void Controller::Run(int max_cycle, bool if_output, std::ostream& os) {
@@ -40,4 +46,9 @@ void Controller::Run(int max_cycle, bool if_output, std::ostream& os) {
             break;
         }
     }
+}
+std::string Controller::GetConsoleOutput() {
+    char dst[0x100] = {0};
+    memcpy(dst, d.Mem + CONSOLE_MEM_START, CONSOLE_MEM_SIZE);
+    return std::string(dst);
 }
