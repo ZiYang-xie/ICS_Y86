@@ -105,9 +105,10 @@ struct d_wire {
   uint64_t valB{};
 };
 struct e_wire {
-  bool Cnd{};
-  uint8_t stat{SAOK};
-  uint8_t icode{INOP};
+    bool Cnd{};
+    bool CFLAG_tmp[3]{};
+    uint8_t stat{SAOK};
+    uint8_t icode{INOP};
   uint8_t dstE{RNONE};
   uint64_t valE{};
   uint64_t valA{};

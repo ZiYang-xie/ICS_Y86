@@ -99,6 +99,7 @@ class Device {
     void SetEControl() ;
     void SetdsrcA();
     void SetdsrcB();
+    void SetCC();
 };
 
 #endif  // ICS_Y86_DEVICE_H

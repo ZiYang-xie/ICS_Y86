@@ -178,11 +178,11 @@ void Device::Execute() {
     e.valE = func(aluA, aluB);
     // 计算cnd
     if (set_cc) {
-        CFLAG[CZF] = (e.valE == 0);
-        CFLAG[CSF] = (((int64_t)e.valE) < 0);
-        CFLAG[COF] = (((((int64_t)aluA < 0) ^ (E.ifun == ALUSUB)) ==
-                       (int64_t)aluB < 0) &&
-                      ((int64_t)e.valE < 0 != (int64_t)aluB < 0));
+        e.CFLAG_tmp[CZF] = (e.valE == 0);
+        e.CFLAG_tmp[CSF] = (((int64_t)e.valE) < 0);
+        e.CFLAG_tmp[COF] = (((((int64_t)aluA < 0) ^ (E.ifun == ALUSUB)) ==
+                             (int64_t)aluB < 0) &&
+                            ((int64_t)e.valE < 0 != (int64_t)aluB < 0));
     }
     e.Cnd = cond();
     // 写dstE和dstM
@@ -231,17 +231,17 @@ bool Device::cond() const {
         case BALWAYS:
             return true;
         case BLE:
-            return CFLAG[CZF] || (CFLAG[CSF] ^ CFLAG[COF]);
+            return e.CFLAG_tmp[CZF] || (e.CFLAG_tmp[CSF] ^ e.CFLAG_tmp[COF]);
         case BL:
-            return CFLAG[CSF] ^ CFLAG[COF];
+            return e.CFLAG_tmp[CSF] ^ e.CFLAG_tmp[COF];
         case BE:
-            return CFLAG[CZF];
+            return e.CFLAG_tmp[CZF];
         case BNE:
-            return !CFLAG[CZF];
+            return !e.CFLAG_tmp[CZF];
         case BGE:
-            return (CFLAG[CSF] == CFLAG[COF]);
+            return (e.CFLAG_tmp[CSF] == e.CFLAG_tmp[COF]);
         case BG:
-            return !CFLAG[CZF] && (CFLAG[CSF] == CFLAG[COF]);
+            return !e.CFLAG_tmp[CZF] && (e.CFLAG_tmp[CSF] == e.CFLAG_tmp[COF]);
         default:
             return false;
     }
@@ -381,5 +381,14 @@ void Device::SetdsrcB() {
         d.valB = W.valM;
     } else if (d.srcB == W.dstE) {
         d.valB = W.valE;
+    }
+}
+void Device::SetCC() {
+    bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
+                  !In(W.stat, SADR, SINS, SHLT);
+    if (set_cc) {
+        for (int i = 0; i < 3; i++) {
+            CFLAG[i] = e.CFLAG_tmp[i];
+        }
     }
 }
