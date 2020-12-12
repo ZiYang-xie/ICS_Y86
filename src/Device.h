@@ -2,9 +2,11 @@
 // Created by 王少文 on 2020/11/27.
 //
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <string>
-#include <cstring>
+
+#include "index_const.h"
 #include "pipeline_registers.h"
 #ifndef ICS_Y86_DEVICE_H
 #define ICS_Y86_DEVICE_H
@@ -25,37 +27,12 @@ class Device {
     m_wire m{};
     W_Reg W{};
     //更新predPC，该操作在Fetch阶段的最后执行
-   private:
-    void SetFPredPc();
-    //判断地址是否合法
-    static bool IfAddrValid(uint64_t pos);
-    //判断指令是否合法，后期增加指令时需要改
-    static bool IfInstrValid(uint8_t icode);
-
-    //选择ALU计算的函数
-    std::function<uint64_t(uint64_t, uint64_t)> GetALUFunc(uint8_t ifun);
-    //根据CFLAG返回cond
-    [[nodiscard]] bool cond() const;
-    // 判断是否是Load/Use Hazard
-    [[nodiscard]] bool IfLoadUseH() const;
-    // 判断是否是Mispredicted Branch
-    [[nodiscard]] bool IfMispredicted() const;
-    // 判断是否在处理ret
-    [[nodiscard]] bool IfRet() const;
-
-   public:
-    const static uint8_t SAOK = 1;
-    const static uint8_t SHLT = 2;
-    const static uint8_t SADR = 3;
-    const static uint8_t SINS = 4;
-    const static uint8_t SBUB = 5;
-    const static uint8_t CZF = 0;
-    const static uint8_t CSF = 1;
-    const static uint8_t COF = 2;
-    // TODO: 来不及了，先把这个写成public的
+    void SetDSrcA();
+    void SetDSrcB();
     uint64_t Reg[REG_SIZE]{};
     uint8_t Mem[MEM_SIZE]{};
-    bool CFLAG[3]{};  //按ZF, SF, OF的顺序为0, 1, 2
+    //按ZF, SF, OF的顺序为0, 1, 2
+    bool CFLAG[3]{true, false, false};
     uint8_t Stat{};
     //构造函数，str为写入内存的编码
     explicit Device(std::string s = "00");
@@ -96,9 +73,34 @@ class Device {
     //取D的状态码
     void SetDControl();
     //取E的状态码
-    void SetEControl() ;
-    void SetdsrcA();
-    void SetdsrcB();
+    void SetEControl();
+    //计算set_cc,若为True,将e.CFLAG的内容写入CFLAG
+    void SetCC();
+
+   private:
+    void SetFPredPc();
+    //判断地址是否合法
+    static bool IfAddrValid(uint64_t pos);
+    //判断指令是否合法，后期增加指令时需要改
+    static bool IfInstrValid(uint8_t icode);
+    //选择ALU计算的函数
+    std::function<uint64_t(uint64_t, uint64_t)> GetALUFunc(uint8_t ifun);
+    //根据CFLAG返回cond
+    [[nodiscard]] bool CalcCond(bool cflag[3]) const;
+    // 判断是否是Load/Use Hazard
+    [[nodiscard]] bool IfLoadUseH() const;
+    // 判断是否是Mispredicted Branch
+    [[nodiscard]] bool IfMispredicted() const;
+    // 判断是否在处理ret
+    [[nodiscard]] bool IfRet() const;
+    [[nodiscard]] uint8_t SelectSrcA() const;
+    [[nodiscard]] uint8_t SelectSrcB() const;
+    [[nodiscard]] uint8_t SelectDstE() const;
+    [[nodiscard]] uint8_t SelectDstM() const;
+    [[nodiscard]] uint64_t SelectPC() const;
+    [[nodiscard]] uint8_t SelectFStat() const;
+    [[nodiscard]] uint64_t SelectAluA() const;
+    [[nodiscard]] uint64_t SelectAluB() const;
 };
 
 #endif  // ICS_Y86_DEVICE_H
