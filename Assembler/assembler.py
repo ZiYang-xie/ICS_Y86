@@ -261,15 +261,20 @@ def gen_list(lines: list):
 def remove_single_line_annot(lines: list):
     res = []
     for l in lines:
-        if '#' in l or '//' in l:
-            if '#' in l:
-                idx = l.index('#')
-            if '//' in l:
-                idx = l.index('//') if l.index('//') < idx else idx
-        else:
-            idx = len(l)
-        if idx != 0:
-            res.append(l[0:idx])
+        try: 
+            if '#' in l or '//' in l:
+                if '#' in l:
+                    idx = l.index('#')
+                if '//' in l:
+                    idx = l.index('//') if l.index('//') < idx else idx
+            else:
+                idx = len(l)
+            if idx != 0:
+                res.append(l[0:idx])
+        except Exception as e:
+            print(f"Syntax Error At: {l}")
+            print("Assemble Terminated")
+            exit(1)
     return res
 
 
@@ -277,29 +282,39 @@ def remove_multi_line_annot(lines: list):
     res = []
     if_annot = False
     for line in lines:
-        temp = []
-        for c in line:
-            if not if_annot:
-                if c != '/*':
-                    temp.append(c)
+        try: 
+            temp = []
+            for c in line:
+                if not if_annot:
+                    if c != '/*':
+                        temp.append(c)
+                    else:
+                        if_annot = True
                 else:
-                    if_annot = True
-            else:
-                if c == '*/':
-                    if_annot = False
-        if len(temp) != 0:
-            res.append(temp)
+                    if c == '*/':
+                        if_annot = False
+            if len(temp) != 0:
+                res.append(temp)
+        except Exception as e:
+            print(f"Syntax Error At: {line}")
+            print("Assemble Terminated")
+            exit(1)
     return res
 
 
 def detach_label(lines: list):
     res = []
     for line in lines:
-        if ':' in line[0] and len(line) > 1:
-            res.append([line[0]])
-            res.append(line[1:])
-        else:
-            res.append(line)
+        try:
+            if ':' in line[0] and len(line) > 1:
+                res.append([line[0]])
+                res.append(line[1:])
+            else:
+                res.append(line)
+        except Exception as e:
+            print(f"Syntax Error At: {line}")
+            print("Assemble Terminated")
+            exit(1)
     return res
 
 
@@ -307,21 +322,26 @@ def get_memaddr(lines: list):
     res = [0]
     idx = 0
     for line in lines:
-        idx += 1
-        if line[0] == '.pos':
-            res[-1] = int(line[1], 16)
-            res.append(int(line[1], 16))
-        elif line[0] == '.align':
-            res[-1] = res[-1]-res[-1] % 8+8
-            res.append(res[-1])
-        elif line[0] == '.quad':
-            res.append(res[idx-1]+8)
-        elif line[0] == '.byte':
-            res.append(res[idx - 1] + 1)
-        elif ':' in line[0]:
-            res.append(res[idx-1])
-        else:
-            res.append(res[idx-1]+instr[line[0]].size)
+        try:
+            idx += 1
+            if line[0] == '.pos':
+                res[-1] = int(line[1], 16)
+                res.append(int(line[1], 16))
+            elif line[0] == '.align':
+                res[-1] = res[-1]-res[-1] % 8+8
+                res.append(res[-1])
+            elif line[0] == '.quad':
+                res.append(res[idx-1]+8)
+            elif line[0] == '.byte':
+                res.append(res[idx - 1] + 1)
+            elif ':' in line[0]:
+                res.append(res[idx-1])
+            else:
+                res.append(res[idx-1]+instr[line[0]].size)
+        except Exception as e:
+            print(f"Syntax Error At: {line}")
+            print("Assemble Terminated")
+            exit(1)
     return res[:-1]
 
 
@@ -345,47 +365,52 @@ def replace_label(lines, mem):
 def gen_byte_code(lines):
     res = []
     for line in lines:
-        if line[0] == '.pos' or line[0] == '.align' or ':' in line[0]:
-            res.append('')
-        elif line[0] == '.quad':
-            res.append(get_hex_repr(int(line[1].replace("$", ""), 16)))
-        elif line[0] == '.byte':
-            res.append(hex(int(line[1], 16))[2:])
-        else:
-            ins = instr[line[0]]
-            if ins == halt:
-                temp = halt()
-            elif ins == nop:
-                temp = nop()
-            elif ins == rrmovq:
-                temp = rrmovq(line[0], line[1], line[2])
-            elif ins == irmovq:
-                temp = irmovq(line[2], line[1])
-            elif ins == rmmovq:
-                opr = line[2].replace(')', '').split('(')
-                if len(opr[0]) == 0:
-                    opr[0] = '0'
-                temp = rmmovq(line[1], opr[1], opr[0])
-            elif ins == mrmovq:
-                opr = line[1].replace(')', '').split('(')
-                if len(opr[0]) == 0:
-                    opr[0] = '0'
-                temp = mrmovq(opr[1], line[2], opr[0])
-            elif ins == OPq:
-                temp = OPq(line[0], line[1], line[2])
-            elif ins == iOPq:
-                temp = iOPq(line[0], line[2], line[1])
-            elif ins == jXX:
-                temp = jXX(line[0], line[1])
-            elif ins == call:
-                temp = call(line[1])
-            elif ins == ret:
-                temp = ret()
-            elif ins == pushq:
-                temp = pushq(line[1])
-            elif ins == popq:
-                temp = popq(line[1])
-            res.append(str(temp))
+        try:
+            if line[0] == '.pos' or line[0] == '.align' or ':' in line[0]:
+                res.append('')
+            elif line[0] == '.quad':
+                res.append(get_hex_repr(int(line[1].replace("$", ""), 16)))
+            elif line[0] == '.byte':
+                res.append(hex(int(line[1], 16))[2:])
+            else:
+                ins = instr[line[0]]
+                if ins == halt:
+                    temp = halt()
+                elif ins == nop:
+                    temp = nop()
+                elif ins == rrmovq:
+                    temp = rrmovq(line[0], line[1], line[2])
+                elif ins == irmovq:
+                    temp = irmovq(line[2], line[1])
+                elif ins == rmmovq:
+                    opr = line[2].replace(')', '').split('(')
+                    if len(opr[0]) == 0:
+                        opr[0] = '0'
+                    temp = rmmovq(line[1], opr[1], opr[0])
+                elif ins == mrmovq:
+                    opr = line[1].replace(')', '').split('(')
+                    if len(opr[0]) == 0:
+                        opr[0] = '0'
+                    temp = mrmovq(opr[1], line[2], opr[0])
+                elif ins == OPq:
+                    temp = OPq(line[0], line[1], line[2])
+                elif ins == iOPq:
+                    temp = iOPq(line[0], line[2], line[1])
+                elif ins == jXX:
+                    temp = jXX(line[0], line[1])
+                elif ins == call:
+                    temp = call(line[1])
+                elif ins == ret:
+                    temp = ret()
+                elif ins == pushq:
+                    temp = pushq(line[1])
+                elif ins == popq:
+                    temp = popq(line[1])
+                res.append(str(temp))
+        except Exception as e:
+            print(f"Syntax Error At: {line}")
+            print("Assemble Terminated")
+            exit(1)
     return res
 
 
