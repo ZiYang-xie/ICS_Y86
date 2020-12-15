@@ -273,6 +273,7 @@ def gen_list(lines: list):
                 split_list = line.split('"')
                 res.append(split_list[0].strip().replace('\t', ' ').replace(',', ' ').split(
                     ' ')+[split_list[1]]+split_list[2].strip().replace('\t', ' ').replace(',', ' ').split(' '))
+            res[-1]=[x for x in res[-1] if x!='']
         except Exception as e:
             print(f"Syntax Error At: {line}")
             print("Assemble Terminated")
@@ -349,7 +350,7 @@ def get_memaddr(lines: list):
                 res[-1] = int(line[1], 16)
                 res.append(int(line[1], 16))
             elif line[0] == '.align':
-                res[-1] = res[-1]-res[-1] % 8+8
+                res[-1] = res[-1]-res[-1] % int(line[1])+int(line[1])
                 res.append(res[-1])
             elif line[0] == '.quad':
                 res.append(res[idx-1]+8)
