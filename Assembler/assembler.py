@@ -4,13 +4,21 @@ import copy
 import argparse
 
 
-def get_hex_repr(h):
+def get_hex_repr(h, size):
+    size *= 2
     s = hex(h)[2:]
     res = ''
-    if len(s) < 16:
-        s = (16-len(s))*'0'+s
-    for i in range(14, -2, -2):
+    if len(s) < size:
+        s = (size-len(s))*'0'+s
+    for i in range(size-2, -2, -2):
         res += s[i:i+2]
+    return res
+
+
+def get_raw_str_repr(s):
+    res = ''
+    for c in s:
+        res += f"{ord(c):x}"
     return res
 
 
@@ -60,7 +68,7 @@ class Instr:
         if not self.rA is None and not self.rB is None:
             res += hex(self.rA)[2:] + hex(self.rB)[2:]
         if not self.imm is None:
-            res += get_hex_repr(self.imm)
+            res += get_hex_repr(self.imm, 8)
         return res
 
 
@@ -254,14 +262,27 @@ instr = {
 
 
 def gen_list(lines: list):
-    return [list(filter(lambda x: x != '',
-                        line.strip().replace('\t', ' ').replace(',', ' ').split(' '))) for line in lines]
-
+    res = []
+    for line in lines:
+        try:
+            # 先处理无.string的情况
+            if not ".string" in line:
+                res.append(line.strip().replace(
+                    '\t', ' ').replace(',', ' ').split(' '))
+            else:
+                split_list = line.split('"')
+                res.append(split_list[0].strip().replace('\t', ' ').replace(',', ' ').split(
+                    ' ')+[split_list[1]]+split_list[2].strip().replace('\t', ' ').replace(',', ' ').split(' '))
+        except Exception as e:
+            print(f"Syntax Error At: {line}")
+            print("Assemble Terminated")
+            exit(1)
+    return res
 
 def remove_single_line_annot(lines: list):
     res = []
     for l in lines:
-        try: 
+        try:
             if '#' in l or '//' in l:
                 if '#' in l:
                     idx = l.index('#')
@@ -282,7 +303,7 @@ def remove_multi_line_annot(lines: list):
     res = []
     if_annot = False
     for line in lines:
-        try: 
+        try:
             temp = []
             for c in line:
                 if not if_annot:
@@ -332,8 +353,14 @@ def get_memaddr(lines: list):
                 res.append(res[-1])
             elif line[0] == '.quad':
                 res.append(res[idx-1]+8)
+            elif line[0] == '.word':
+                res.append(res[idx-1]+4)
+            elif line[0] == '.hword':
+                res.append(res[idx-1]+2)
             elif line[0] == '.byte':
-                res.append(res[idx - 1] + 1)
+                res.append(res[idx-1]+1)
+            elif line[0] == '.string':
+                res.append(res[idx-1]+2*len(line[1]))
             elif ':' in line[0]:
                 res.append(res[idx-1])
             else:
@@ -369,9 +396,15 @@ def gen_byte_code(lines):
             if line[0] == '.pos' or line[0] == '.align' or ':' in line[0]:
                 res.append('')
             elif line[0] == '.quad':
-                res.append(get_hex_repr(int(line[1].replace("$", ""), 16)))
+                res.append(get_hex_repr(int(line[1].replace("$", ""), 16), 8))
+            elif line[0] == '.word':
+                res.append(get_hex_repr(int(line[1].replace("$", ""), 16), 4))
+            elif line[0] == '.hword':
+                res.append(get_hex_repr(int(line[1].replace("$", ""), 16), 2))
             elif line[0] == '.byte':
-                res.append(hex(int(line[1], 16))[2:])
+                res.append(get_hex_repr(int(line[1].replace("$", ""), 16), 1))
+            elif line[0] == '.string':
+                res.append(get_raw_str_repr(line[1]))
             else:
                 ins = instr[line[0]]
                 if ins == halt:
