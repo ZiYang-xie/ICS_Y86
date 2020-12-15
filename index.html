@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Y86_Cpu</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" type="text/css" href="http://unpkg.com/view-design/dist/styles/iview.css">
+    <link rel="stylesheet" type="text/css" href="./css/cpu.css">
+    <link rel="stylesheet" type="text/css" href="./css/card.css">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="http://vuejs.org/js/vue.min.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-iY48mspuUJ7KyIglN9JjM9stxRtuoz9/UMA9Ffe2uluL8ej5FjNsCxj4XNYv866H" src="https://lib.baomitu.com/vue-resource/1.5.1/vue-resource.js"></script>
+    <script type="text/javascript" src="http://unpkg.com/view-design/dist/iview.min.js"></script>
+</head>
+<body>
+<div id="app" class="main">
+    <div class="layout">
+
+        <Layout>
+            <Header>
+                <i-menu mode="horizontal" theme="dark" active-name="1">
+                    <div class="layout-logo">
+                        <h1 class="title">Y86 Cpu</h1>
+                    </div>
+                    <div class="layout-nav">
+                        <menu-item name="1">
+                            <Icon type="md-list" size="20"></Icon>
+                            主要信息
+                        </menu-item>
+                        <menu-item name="2">
+                            <Icon type="md-apps" size="20"></Icon>
+                            特殊功能
+                        </menu-item>
+                        <menu-item name="3">
+                            <Icon type="md-settings" size="20"></Icon>
+                            设置
+                        </menu-item>
+                    </div>
+                </i-menu>
+            </Header>
+            <Content :style="{padding: '0 50px'}">
+                <Breadcrumb :style="{margin: '20px 0'}">
+                    <breadcrumb-item>寄存器信息</breadcrumb-item>
+                    <breadcrumb-item>内存信息</breadcrumb-item>
+                    <breadcrumb-item>CC</breadcrumb-item></breadcrumb-item>
+                    <breadcrumb-item>CPI</breadcrumb-item></breadcrumb-item>
+                    <breadcrumb-item>PC</breadcrumb-item></breadcrumb-item>
+                </Breadcrumb>
+                
+                <Card shadow dis-hover="true">
+                    <div class="head_cards_warper">
+                        <Card class="main_info">
+                            <p class="info_title" slot="title"> <Icon size="20" type="ios-home"></Icon> 基本信息</p>
+                            <i-table :row-class-name="info_table_class" border :columns="info_list" :data="info_data" ></i-table>
+                            <br><br>
+                            <i-table :row-class-name="info_table_class" border :columns="cc_list" :data="cc_data" ></i-table>
+                        </Card>
+                        <Card class="controller">
+                            <p class="info_title" slot="title"> 
+                                <Icon size="20" type="ios-game-controller-a"></Icon> 
+                                控制台
+                                <p class="progress" slot="extra">进度: {{progress}}%</p> 
+                            </p>
+                            <Row type="flex" justify="start">
+                                <i-col span="4">
+                                    <i-button @click="start" type="primary"><Icon suze="30" type="md-arrow-round-forward" color="#ecf0f1"></Icon> 开始运行 </i-button>
+                                </i-col>
+                                <i-col span="4">
+                                    <i-button @click="stop" type="primary"><Icon suze="20" type="md-pause" color="#ecf0f1"></Icon> 停止运行</i-button>
+                                </i-col>
+                                <i-col span="6">
+                                    <button-group :size="30">
+                                        <i-button @click="dec_pg"  :size="20" type="primary">
+                                            <Icon type="ios-arrow-back" ></Icon>
+                                            后退
+                                        </i-button>
+                                        <i-button @click="inc_pg" :size="20" type="primary">
+                                            前进
+                                            <Icon type="ios-arrow-forward" ></Icon>
+                                        </i-button>
+                                    </button-group>
+                                </i-col>
+                                <i-col span="5" >
+                                    <i-circle size="110" :percent="10" :stroke-color="cpi_color" dashboard>
+                                    <span class="demo-Circle-inner" style="font-size:20px">1 CPI</span>
+                                    </i-circle>
+                                </i-col>
+                                <i-col span="5" >
+                                    <i-circle size="110" :percent="progress" :stroke-color="pg_color">
+                                        <Icon v-if="progress == 100" type="ios-checkmark" size="60" style="color:#5cb85c"></Icon>
+                                        <span v-else class="demo-Circle-inner" style="font-size:24px">{{progress}} %</span>
+                                    </i-circle>
+                                </i-col>
+                            </Row>
+                            
+                            
+                            <Slider v-model="progress" :tip-format="progress_format" :step="ratio"></Slider>
+                            <Upload
+                                multiple
+                                type="drag"
+                                action="//jsonplaceholder.typicode.com/posts/">
+                                <div style="padding: 20px 0">
+                                    <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+                                    <p>点击或拖拽上传文件</p>
+                                </div>
+                            </Upload>
+                        </Card>
+                    </div>
+                    <Divider></Divider>
+                    <Card class="reg_card">
+                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 寄存器</p>
+                        <div style="min-height: 200px;">
+                            <i-table :row-class-name="reg_table_class" border stripe :columns="reg_list1" :data="reg_data1" ></i-table>
+                            <i-table :row-class-name="reg_table_class" border stripe :columns="reg_list2" :data="reg_data2" ></i-table>
+                            <i-table :row-class-name="reg_table_class" border stripe :columns="reg_list3" :data="reg_data3" ></i-table>
+                        </div>
+                    </Card>
+                </Card>
+            </Content>
+            <Footer class="layout-footer-center">2020 - 2077 &copy; Wsw & Xzy</Footer>
+        </Layout>
+    </div>  
+</div>
+<script type="text/javascript" src="./vue.js"></script> 
+</body>
+</html>

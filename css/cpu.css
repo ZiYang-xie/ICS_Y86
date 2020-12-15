@@ -1,0 +1,32 @@
+.layout{
+    border: 1px solid #d7dde4;
+    background: #f5f7f9;
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.layout-logo{
+    width: 130px;
+    height: 35px;
+    border-radius: 3px;
+    float: left;
+    position: relative;
+    top: 15px;
+    left: 20px;
+}
+.title
+{
+    display: flex;
+    justify-content: center;
+    line-height: 30px;
+    color: white;
+}
+.layout-nav{
+    width: 350px;
+    margin: 0 auto;
+    margin-right: 20px;
+    font-weight: bold;
+}
+.layout-footer-center{
+    text-align: center;
+}

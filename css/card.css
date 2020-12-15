@@ -1,0 +1,55 @@
+.reg_card
+{
+    width: 40%!important;
+}
+
+.main_info
+{
+    width: 40%!important;
+}
+
+.controller
+{
+    width: 55%!important;
+}
+
+.ivu-table .info_table td
+{
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.ivu-table .reg_table td
+{
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.progress
+{
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.info_wraper
+{
+    display: inline-block;
+    font-size: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.info_ele
+{
+    display: inline-block;
+}
+
+.info_res
+{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.head_cards_warper
+{
+    display: flex;
+    justify-content: space-between;
+}
