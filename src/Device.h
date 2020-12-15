@@ -92,7 +92,7 @@ class Device {
     // 如果成功跳转了一次，则加1；如果没有成功跳转，则减1
     uint8_t if_jump_state{2};
     // 设置F阶段的PredPC
-    [[nodiscard]] uint64_t GetFPredPc(uint64_t f_pc) const;
+    [[nodiscard]] uint64_t GetFPredPc();
     //判断地址是否合法
     static bool IfAddrValid(uint64_t pos);
     //判断指令是否合法，后期增加指令时需要改

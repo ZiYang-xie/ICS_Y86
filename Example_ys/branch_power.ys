@@ -1,0 +1,19 @@
+.pos 0
+    irmovq $0 %rax
+    irmovq $100 %rcx
+    irmovq $1 %rdx
+loop:
+    addq %rcx %rax
+    subq %rdx %rcx
+    je next
+    jmp loop
+next:
+    irmovq $0 %rax
+    irmovq $100 %rcx
+    irmovq $1 %rdx
+newone:
+    addq %rcx %rax
+    subq %rdx %rcx
+    jne newone
+end:
+    halt

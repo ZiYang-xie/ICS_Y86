@@ -28,6 +28,7 @@ void D_Reg::reset() {
     stat = SBUB;
     icode = INOP;
     rA = RNONE;
-  rB = RNONE;
+    rB = RNONE;
+    ifJump = true;
 }
 void F_Reg::reset() {}

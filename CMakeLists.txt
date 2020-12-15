@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./build)
 set(CMAKE_CXX_STANDARD 17)
 include_directories(src)
 add_subdirectory(test)
-
+add_definitions("-DADVANCED_JUMP")
 add_executable(ICS_Y86
         src/main.cpp
         src/Device.cpp

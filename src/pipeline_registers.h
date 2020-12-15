@@ -20,11 +20,13 @@ struct W_Reg {
 struct M_Reg {
     uint8_t stat{SAOK};
     uint8_t icode{0};
+    uint8_t ifun{0};
     bool Cnd{false};
     uint64_t valE{0};
     uint64_t valA{0};
     uint8_t dstE{RNONE};
     uint8_t dstM{RNONE};
+    bool ifJump{true};
     void reset();
 };
 struct E_Reg {
@@ -40,6 +42,7 @@ struct E_Reg {
     uint8_t srcA{RNONE};
     uint8_t srcB{RNONE};
     void reset();
+    bool ifJump{true};
 };
 struct D_Reg {
     uint8_t control{CNORMAL};
@@ -52,6 +55,7 @@ struct D_Reg {
     ;
     uint64_t valC{0};
     uint64_t valP{0};
+    bool ifJump{true};
     void reset();
 };
 struct F_Reg {
@@ -67,6 +71,7 @@ struct f_wire {
     uint8_t rb{RNONE};
     uint64_t valC{0};
     uint64_t valP{0};
+    bool ifJump{true};
 };
 struct d_wire {
     uint8_t stat{SAOK};
@@ -80,16 +85,20 @@ struct d_wire {
     uint8_t srcB{RNONE};
     uint64_t valA{0};
     uint64_t valB{0};
+    bool ifJump{true};
 };
 struct e_wire {
     bool Cnd{false};
     bool CFLAG[3]{true, false, false};
     uint8_t stat{SAOK};
     uint8_t icode{INOP};
+    uint8_t ifun{0};
     uint8_t dstE{RNONE};
     uint64_t valE{0};
     uint64_t valA{0};
     uint64_t dstM{0};
+    uint64_t valC{0};
+    bool ifJump{true};
 };
 struct m_wire {
     uint8_t icode{INOP};

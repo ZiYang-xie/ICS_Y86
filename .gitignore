@@ -158,7 +158,7 @@ test/CMakeFiles/Google_Tests_run.dir/flags.make
 test/CMakeFiles/Google_Tests_run.dir/link.txt
 test/CMakeFiles/Google_Tests_run.dir/progress.make
 ICS_Y86.cbp
-Assembler/helloworld.ys
+Example_ys/helloworld.ys
 build/.cmake/api/v1/query/client-vscode/query.json
 build/.cmake/api/v1/reply/cache-v2-c3509c7104b1f2d05056.json
 build/.cmake/api/v1/reply/codemodel-v2-2557b2555874767e0d00.json

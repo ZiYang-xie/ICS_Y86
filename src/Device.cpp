@@ -1,7 +1,6 @@
 //
 // Created by 王少文 on 2020/11/27.
 //
-#define ADVANCED_JUMP
 #include "Device.h"
 
 #include <stdexcept>
@@ -60,7 +59,7 @@ void Device::Fetch() {
     if (In(SHLT, f.Stat)) {
         F.predPC = f_pc;
     } else {
-        F.predPC = GetFPredPc(f_pc);
+        F.predPC = GetFPredPc();
     }
     addr_queue.push(F.predPC);
     addr_queue.pop();
@@ -75,28 +74,35 @@ uint8_t Device::SelectFStat() const {
     }
 }
 uint64_t Device::SelectPC() const {
-    if (M.icode == IJXX && !M.Cnd) {
-        return M.valA;  // JXX但是没有成功跳转的情况
+    if (M.icode == IJXX && (M.Cnd ^ M.ifJump)) {
+        if (!M.ifJump)
+            return e.valC;  // JXX但是没有成功跳转的情况
+        else
+            return M.valE;
     } else if (W.icode == IRET) {
         return W.valM;  // Ret的情况，后期使用硬件栈时可以删去这一句话
     } else {
         return F.predPC;
     }
 }
-uint64_t Device::GetFPredPc(uint64_t f_pc) const {
-    if (f.icode == IJXX) {
+uint64_t Device::GetFPredPc() {
+    if (f.icode == IJXX && f.ifun != BALWAYS) {
 #ifdef ADVANCED_JUMP
         if (if_jump_state <= 1) {
-            return f_pc;
+            f.ifJump = false;
+            return f.valP;
         } else {
 #endif
+            f.ifJump = true;
             return f.valC;
 #ifdef ADVANCED_JUMP
         };
 #endif
-    } else if (f.icode == ICALL) {
+    } else if (In(f.icode, IJXX, ICALL)) {
+        f.ifJump = true;
         return f.valC;
     } else {
+        f.ifJump = false;
         return f.valP;
     }
 }
@@ -108,6 +114,7 @@ void Device::F2D() {
     D.rB = f.rb;
     D.valC = f.valC;
     D.valP = f.valP;
+    D.ifJump = f.ifJump;
 }
 void Device::Decode() {
     if (D.control == CSTALL) {
@@ -125,14 +132,15 @@ void Device::Decode() {
     d.dstM = SelectDstM();
     uint64_t rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
     uint64_t rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
-    //写valA，下面主要在处理forwarding的情况
+    //写valA
     d.valA = rvalA;
-    //写valB，下面主要在处理forwarding的情况
+    //写valB
     d.valB = rvalB;
     d.stat = D.stat;
     d.icode = D.icode;
     d.ifun = D.ifun;
     d.valC = D.valC;
+    d.ifJump = D.ifJump;
 }
 uint8_t Device::SelectDstM() const {
     if (In(D.icode, IMRMOVQ, IPOPQ)) {
@@ -201,20 +209,23 @@ void Device::Execute() {
     }
     e.stat = E.stat;
     e.icode = E.icode;
+    e.ifun = E.ifun;
+    e.ifJump = E.ifJump;
     e.valA = E.valA;
     e.dstM = E.dstM;
+    e.valC = E.valC;
 }
 uint64_t Device::SelectAluB() const {
     if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ)) {
         return E.valB;
-    } else if (In(E.icode, IRRMOVQ, IIRMOVQ)) {
+    } else if (In(E.icode, IRRMOVQ, IIRMOVQ, IJXX)) {
         return 0;
     } else {
         return 0xdeadbeef;
     }
 }
 uint64_t Device::SelectAluA() const {
-    if (In(E.icode, IRRMOVQ, IOPQ)) {
+    if (In(E.icode, IRRMOVQ, IOPQ, IJXX)) {
         return E.valA;
     } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ)) {
         return E.valC;
@@ -238,6 +249,7 @@ void Device::D2E() {
     E.dstM = d.dstM;
     E.srcA = d.srcA;
     E.srcB = d.srcB;
+    E.ifJump = d.ifJump;
 }
 std::function<uint64_t(uint64_t, uint64_t)> Device::GetALUFunc(uint8_t ifun) {
     switch (ifun) {
@@ -278,11 +290,13 @@ bool Device::CalcCond(bool cflag[3]) const {
 void Device::E2M() {
     M.stat = e.stat;
     M.icode = e.icode;
+    M.ifun = e.ifun;
     M.Cnd = e.Cnd;
     M.valE = e.valE;
     M.valA = e.valA;
     M.dstE = e.dstE;
     M.dstM = e.dstM;
+    M.ifJump = e.ifJump;
 }
 void Device::Memory() {
     // 写stat
@@ -350,7 +364,9 @@ void Device::Writeback() {
 bool Device::IfLoadUseH() const {
     return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
 }
-bool Device::IfMispredicted() const { return E.icode == IJXX && !e.Cnd; }
+bool Device::IfMispredicted() const {
+    return E.icode == IJXX && (e.Cnd ^ E.ifJump);
+}
 bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
 void Device::SetFControl() {
     if (!IfMispredicted() && (IfLoadUseH() || IfRet())) {
@@ -414,11 +430,13 @@ void Device::SetCC() {
     }
 }
 void Device::UpdateIfJumpState() {
-    if (M.icode == IJXX && !M.Cnd) {
-        //未成功跳转的情况
-        if_jump_state = if_jump_state == 0 ? 0 : if_jump_state - 1;
-    } else if (M.icode == IJXX && M.Cnd) {
-        //成功跳转的情况
-        if_jump_state = if_jump_state == 3 ? 3 : if_jump_state + 1;
+    if (E.icode == IJXX && E.ifun != BALWAYS) {
+        if (!e.Cnd) {
+            //未成功跳转的情况
+            if_jump_state = if_jump_state == 0 ? 0 : if_jump_state - 1;
+        } else {
+            //成功跳转的情况
+            if_jump_state = if_jump_state == 3 ? 3 : if_jump_state + 1;
+        }
     }
 }
