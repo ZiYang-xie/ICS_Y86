@@ -9,9 +9,9 @@ def get_hex_repr(h, size):
     s = hex(h)[2:]
     res = ''
     if len(s) < size:
-        s = (size-len(s))*'0'+s
-    for i in range(size-2, -2, -2):
-        res += s[i:i+2]
+        s = (size - len(s)) * '0' + s
+    for i in range(size - 2, -2, -2):
+        res += s[i:i + 2]
     return res
 
 
@@ -30,7 +30,7 @@ def get_num(s: str):
     else:
         res = int(s)
     if res < 0:
-        res += 2**64
+        res += 2 ** 64
     return res
 
 
@@ -185,7 +185,7 @@ class ret(Instr):
     def __init__(self):
         super().__init__()
         self.icode = 9
-        1+1
+        1 + 1
 
 
 class pushq(Instr):
@@ -272,13 +272,14 @@ def gen_list(lines: list):
             else:
                 split_list = line.split('"')
                 res.append(split_list[0].strip().replace('\t', ' ').replace(',', ' ').split(
-                    ' ')+[split_list[1]]+split_list[2].strip().replace('\t', ' ').replace(',', ' ').split(' '))
-            res[-1]=[x for x in res[-1] if x!='']
+                    ' ') + [split_list[1]] + split_list[2].strip().replace('\t', ' ').replace(',', ' ').split(' '))
+            res[-1] = [x for x in res[-1] if x != '']
         except Exception as e:
             print(f"Syntax Error At: {line}")
             print("Assemble Terminated")
             exit(1)
     return res
+
 
 def remove_single_line_annot(lines: list):
     res = []
@@ -350,22 +351,22 @@ def get_memaddr(lines: list):
                 res[-1] = int(line[1], 16)
                 res.append(int(line[1], 16))
             elif line[0] == '.align':
-                res[-1] = res[-1]-res[-1] % int(line[1])+int(line[1])
+                res[-1] = res[-1] - res[-1] % int(line[1]) + int(line[1])
                 res.append(res[-1])
             elif line[0] == '.quad':
-                res.append(res[idx-1]+8)
+                res.append(res[idx - 1] + 8)
             elif line[0] == '.word':
-                res.append(res[idx-1]+4)
+                res.append(res[idx - 1] + 4)
             elif line[0] == '.hword':
-                res.append(res[idx-1]+2)
+                res.append(res[idx - 1] + 2)
             elif line[0] == '.byte':
-                res.append(res[idx-1]+1)
+                res.append(res[idx - 1] + 1)
             elif line[0] == '.string':
-                res.append(res[idx-1]+2*len(line[1]))
+                res.append(res[idx - 1] + 2 * len(line[1]))
             elif ':' in line[0]:
-                res.append(res[idx-1])
+                res.append(res[idx - 1])
             else:
-                res.append(res[idx-1]+instr[line[0]].size)
+                res.append(res[idx - 1] + instr[line[0]].size)
         except Exception as e:
             print(f"Syntax Error At: {line}")
             print("Assemble Terminated")
@@ -378,12 +379,12 @@ def replace_label(lines, mem):
     res = []
     for i in range(len(lines)):
         if ':' in lines[i][0]:
-            labels[lines[i][0].replace(':', '')] = '$'+hex(mem[i])
+            labels[lines[i][0].replace(':', '')] = '$' + hex(mem[i])
     for l in lines:
         temp = []
         for s in l:
             for la in labels.keys():
-                if la in s and not ':' in s and not '.' in s:
+                if la == s and ':' not in s and '.' not in s:
                     s = s.replace(la, labels[la])
             temp.append(s)
         res.append(temp)
@@ -450,7 +451,8 @@ def gen_byte_code(lines):
 
 def get_output(mem_addr, lines, byte_code):
     res = '\n'.join(
-        [f"0x{mem_addr[i]:03x}: {byte_code[i]:24s}| {''if ':' in lines[i][0] else '    ' }{' '.join(lines[i])}" for i in range(len(lines))])
+        [f"0x{mem_addr[i]:03x}: {byte_code[i]:24s}| {'' if ':' in lines[i][0] else '    '}{' '.join(lines[i])}" for i in
+         range(len(lines))])
     return res
 
 
@@ -471,7 +473,7 @@ def process_to_raw(lines: list):
     for line in lines:
         left = line.split(sep='|')[0].split(":")
         if len(left) == 2:
-            res += "0"*(2*int(left[0].strip(), 16)-len(res))
+            res += "0" * (2 * int(left[0].strip(), 16) - len(res))
             res += left[1].strip()
     return res
 
