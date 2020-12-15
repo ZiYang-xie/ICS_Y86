@@ -20,14 +20,15 @@ bool Controller::FlashCode(std::string s) {
     }
 }
 void Controller::Reset() { d = Device(scopy); }
-void Controller::Run(int max_cycle, bool if_output, std::ostream& os) {
-    int idx = 0;
+void Controller::Run(bool if_output, int max_cycle, std::ostream& os) {
+    int idx = 1;
     while (d.Stat == SAOK) {
         d.Fetch();
         d.Decode();
         d.Execute();
         d.Memory();
         d.Writeback();
+        d.UpdateIfJumpState();
         d.SetCC();
         d.SetDSrcA();
         d.SetDSrcB();

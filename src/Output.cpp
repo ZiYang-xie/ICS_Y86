@@ -36,6 +36,7 @@ void OutputProcedure(std::ostream& os, int idx, const Device& d) {
     os << std::endl;
     os << "Cycle " << std::dec << idx++ << ": "
        << "\n\n";
+    os << "PC " << std::hex << ": 0x" << d.GetPC() << "\n\n";
     for (int i = 0; i < REG_SIZE; ++i) {
         os << GetRegName(i) << ":\t0x" << std::hex << d.Reg[i] << "  ";
         if (!(i & 1)) os << std::endl;
@@ -50,9 +51,8 @@ void OutputProcedure(std::ostream& os, int idx, const Device& d) {
 
     os << "D_Reg:\nControl: " << GetControlName(d.D.control) << "\t\t"
        << "Stat: " << GetStatName(d.D.stat) << "\t";
-    if (d.D.icode | d.D.ifun)
-        os << "icode: " << std::hex << d.D.icode << "\t"
-           << "ifun: " << d.D.ifun << "\t";
+    os << "icode: " << std::hex << (int)d.D.icode << "\t"
+       << "ifun: " << (int)d.D.ifun << "\t";
     os << "rA: " << GetRegName(d.D.rA) << "\t\t"
        << "rB: " << GetRegName(d.D.rB) << "\t\t";
     os << "valC: 0x" << std::hex << d.D.valC << "\t\t"
@@ -60,9 +60,8 @@ void OutputProcedure(std::ostream& os, int idx, const Device& d) {
 
     os << "E_Reg:\nControl: " << GetControlName(d.E.control) << "\t\t"
        << "Stat: " << GetStatName(d.E.stat) << "\t";
-    if (d.E.icode | d.E.ifun)
-        os << "icode: " << std::hex << d.E.icode << "\t"
-           << "ifun: " << d.E.ifun << "\t";
+    os << "icode: " << std::hex << (int)d.E.icode << "\t"
+       << "ifun: " << (int)d.E.ifun << "\t";
     os << "valC: 0x" << std::hex << d.E.valC << "\t"
        << "valA: 0x" << d.E.valA << "\t"
        << "valB: 0x" << d.E.valB << "\t";
@@ -73,7 +72,7 @@ void OutputProcedure(std::ostream& os, int idx, const Device& d) {
 
     os << "M_Reg:\n"
        << "Stat: " << GetStatName(d.M.stat) << "\t";
-    os << "icode: " << d.M.icode << "\t";
+    os << "icode: " << (int)d.M.icode << "\t";
     os << "valE: 0x" << std::hex << d.M.valE << "\t"
        << "valA: 0x" << d.M.valA << "\t";
     os << "dstE: " << GetRegName(d.M.dstE) << "\t"
@@ -81,7 +80,7 @@ void OutputProcedure(std::ostream& os, int idx, const Device& d) {
 
     os << "W_Reg:\n"
        << "Stat: " << GetStatName(d.W.stat) << "\t";
-    os << "icode: " << d.W.icode << "\t";
+    os << "icode: " << (int)d.W.icode << "\t";
     os << "valE: 0x" << std::hex << d.W.valE << "\t"
        << "valM: 0x" << d.W.valM << "\t";
     os << "dstE: " << GetRegName(d.W.dstE) << "\t"

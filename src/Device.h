@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <queue>
 #include <string>
 
 #include "index_const.h"
@@ -79,9 +80,19 @@ class Device {
     void SetEControl();
     //计算set_cc,若为True,将e.CFLAG的内容写入CFLAG
     void SetCC();
+    //更新if_jump_state状态机
+    void UpdateIfJumpState();
 
    private:
-    void SetFPredPc();
+    // 这是一个硬件中并不存在的queue，用于方便我们在前端显示PC
+    // 这个Addr的大小始终为5，因为我们总是显示在Writeback阶段的PC值
+    std::queue<int> addr_queue;
+    // 这是一个跳转的状态机(2-bit saturating counter)，工作原理如下
+    // 如果是0和1，则不跳转；如果是2和3，则跳转
+    // 如果成功跳转了一次，则加1；如果没有成功跳转，则减1
+    uint8_t if_jump_state{2};
+    // 设置F阶段的PredPC
+    [[nodiscard]] uint64_t GetFPredPc(uint64_t f_pc) const;
     //判断地址是否合法
     static bool IfAddrValid(uint64_t pos);
     //判断指令是否合法，后期增加指令时需要改

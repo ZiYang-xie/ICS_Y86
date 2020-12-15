@@ -1,6 +1,7 @@
 //
 // Created by 王少文 on 2020/11/27.
 //
+#define ADVANCED_JUMP
 #include "Device.h"
 
 #include <stdexcept>
@@ -20,6 +21,9 @@ Device::Device(std::string str) : CFLAG{true, false, false} {
     while (p != str.end()) {
         Mem[i] = 16 * CharToUint8(*p++) + CharToUint8(*p++);
         i++;
+    }
+    for (int k = 0; k < 5; k++) {
+        addr_queue.push(0);
     }
 }
 bool Device::IfAddrValid(uint64_t pos) { return pos >= 0 && pos < MEM_SIZE; }
@@ -56,8 +60,10 @@ void Device::Fetch() {
     if (In(SHLT, f.Stat)) {
         F.predPC = f_pc;
     } else {
-        SetFPredPc();
+        F.predPC = GetFPredPc(f_pc);
     }
+    addr_queue.push(F.predPC);
+    addr_queue.pop();
 }
 uint8_t Device::SelectFStat() const {
     if (!IfInstrValid(f.icode)) {
@@ -77,11 +83,21 @@ uint64_t Device::SelectPC() const {
         return F.predPC;
     }
 }
-void Device::SetFPredPc() {
-    if (In(f.icode, IJXX, ICALL)) {
-        F.predPC = f.valC;
+uint64_t Device::GetFPredPc(uint64_t f_pc) const {
+    if (f.icode == IJXX) {
+#ifdef ADVANCED_JUMP
+        if (if_jump_state <= 1) {
+            return f_pc;
+        } else {
+#endif
+            return f.valC;
+#ifdef ADVANCED_JUMP
+        };
+#endif
+    } else if (f.icode == ICALL) {
+        return f.valC;
     } else {
-        F.predPC = f.valP;
+        return f.valP;
     }
 }
 void Device::F2D() {
@@ -359,7 +375,7 @@ void Device::SetEControl() {
         E.control = CNORMAL;
     }
 }
-uint64_t Device::GetPC() const { return F.predPC + 1; }
+uint64_t Device::GetPC() const { return addr_queue.front(); }
 void Device::SetDSrcA() {
     if (In(D.icode, ICALL, IJXX)) {
         d.valA = D.valP;
@@ -395,5 +411,14 @@ void Device::SetCC() {
         for (int i = 0; i < 3; i++) {
             CFLAG[i] = e.CFLAG[i];
         }
+    }
+}
+void Device::UpdateIfJumpState() {
+    if (M.icode == IJXX && !M.Cnd) {
+        //未成功跳转的情况
+        if_jump_state = if_jump_state == 0 ? 0 : if_jump_state - 1;
+    } else if (M.icode == IJXX && M.Cnd) {
+        //成功跳转的情况
+        if_jump_state = if_jump_state == 3 ? 3 : if_jump_state + 1;
     }
 }
