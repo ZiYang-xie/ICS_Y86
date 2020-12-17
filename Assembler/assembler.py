@@ -1,7 +1,6 @@
 #! /usr/bin/python3
-import sys
-import copy
 import argparse
+import copy
 
 
 def get_hex_repr(h, size):
@@ -468,7 +467,7 @@ def process_to_yo(lines: list):
     return get_output(mem, lines_ref, byte_code)
 
 
-def process_to_raw(lines: list):
+def process_to_raw(lines: list, gen_prefix=True):
     last_instr_addr = 0
     res = ""
     for line in lines:
@@ -480,7 +479,10 @@ def process_to_raw(lines: list):
                 res += left_side[1].strip()
                 if '.' not in right_side and ':' not in right_side:
                     last_instr_addr = int(left_side[0], 16) + len(left_side[1].strip()) // 2
-    return get_hex_repr(last_instr_addr, 8) + res
+    if gen_prefix:
+        return get_hex_repr(last_instr_addr, 8) + res
+    else:
+        return res
 
 
 def assemble_file(filename):
@@ -496,6 +498,8 @@ if __name__ == "__main__":
                         action='store', help="Assign the output file")
     parser.add_argument("-r", "--raw", dest='raw',
                         action="store_true", help="Generate raw byte file")
+    parser.add_argument("-np", "--noprefix", dest="noprefix",
+                        action="store_true", help="Do not generate prefix in raw output")
     args = parser.parse_args()
     if args.sourcefile[-3:] == '.ys':
         res = assemble_file(args.sourcefile)
@@ -508,7 +512,7 @@ if __name__ == "__main__":
             f"Invalid file format {args.sourcefile[-3:]}, only support .yo and .ys file")
         exit(1)
     if args.raw is True:
-        res = process_to_raw(res.split('\n'))
+        res = process_to_raw(res.split('\n'), args.noprefix is False)
     if args.outfile is None:
         print(res)
     else:

@@ -20,12 +20,15 @@ Device::Device(std::string str) {
     }
     int i = 0;
     auto p = str.begin();
+#ifdef TEXT_CHECK
     for (int j = 15; j > 0; j -= 2) {
         text_section_end = 16 * text_section_end +
                            16 * CharToUint8(*(p + j - 1)) +
                            CharToUint8(*(p + j));
     }
     p += 16;
+#endif
+
     while (p != str.end()) {
         Mem[i] = 16 * CharToUint8(*p++) + CharToUint8(*p++);
         i++;
@@ -36,10 +39,18 @@ Device::Device(std::string str) {
 }
 bool Device::IfAddrReadable(uint64_t pos) { return pos >= 0 && pos < MEM_SIZE; }
 bool Device::IfAddrWriteable(uint64_t pos) {
+#ifdef TEXT_CHECK
     return pos >= text_section_end && pos < MEM_SIZE;
+#else
+    return pos >= 0 && pos < MEM_SIZE;
+#endif
 }
 bool Device::IfAddrExecutable(uint64_t pos) {
+#ifdef TEXT_CHECK
     return pos >= 0 && pos < text_section_end;
+#else
+    return pos >= 0 && pos < MEM_SIZE;
+#endif
 }
 bool Device::IfInstrValid(uint8_t icode) { return icode >= 0 && icode <= 0xe; }
 uint8_t Device::ReadHigh4Bits(uint64_t pos) const {
@@ -322,7 +333,9 @@ bool Device::CalcCond(bool cflag[3]) {
         case BG:
             return !cflag[CZF] && (cflag[CSF] == cflag[COF]);
         default:
-            E.stat = SINS;
+            if (In(E.icode, IRRMOVQ, IJXX)) {
+                E.stat = SINS;
+            }
             return false;
     }
 }

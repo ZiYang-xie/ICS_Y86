@@ -596,7 +596,7 @@ TEST_F(RealCodeTest, test_prog10) {
 
 TEST_F(RealCodeTest, test_prog9) {
     c.FlashCode("630074160000000000000030f0010000000000000000ff");
-    c.Run();
+    c.Run(true);
     EXPECT_EQ(c.d.Stat, SHLT);
     EXPECT_EQ(c.d.CFLAG[0], 1);
     EXPECT_EQ(c.d.CFLAG[1], 0);
