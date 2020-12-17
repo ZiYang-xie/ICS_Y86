@@ -64,6 +64,9 @@ _deps
 test/lib
 lib/
 
+# hpp
+library/
+
 #
 test/build/CMakeFiles/cmake.check_cache
 test/build/CMakeFiles/CMakeOutput.log

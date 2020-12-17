@@ -15,11 +15,15 @@ Device::Device(std::string str) {
     if (str.length() >= 2 * MEM_SIZE) {
         throw std::domain_error("String is too long to flash");
     }
+    if(str.length()==0){
+        return;
+    }
     int i = 0;
     auto p = str.begin();
     for (int j = 15; j > 0; j -= 2) {
-        text_section_end = 16 * text_section_end + 16 * CharToUint8(p[j - 1]) +
-                           CharToUint8(p[j]);
+        text_section_end = 16 * text_section_end +
+                           16 * CharToUint8(*(p + j - 1)) +
+                           CharToUint8(*(p + j));
     }
     p += 16;
     while (p != str.end()) {

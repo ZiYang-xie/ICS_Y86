@@ -40,7 +40,7 @@ class Device {
     bool CFLAG[3]{true, false, false};
     uint8_t Stat{};
     //构造函数，str为写入内存的编码
-    explicit Device(std::string s = "00");
+    explicit Device(std::string s = "");
     //执行Fetch阶段
     void Fetch();
     //执行Decode阶段
@@ -115,7 +115,7 @@ class Device {
     [[nodiscard]] uint8_t SelectSrcB() const;
     [[nodiscard]] uint8_t SelectDstE();
     [[nodiscard]] uint8_t SelectDstM();
-    [[nodiscard]] uint64_t SelectPC() const;
+    [[nodiscard]] uint64_t SelectPC() ;
     [[nodiscard]] uint8_t SelectFStat() const;
     [[nodiscard]] uint64_t SelectAluA() const;
     [[nodiscard]] uint64_t SelectAluB() const;

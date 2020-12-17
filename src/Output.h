@@ -8,10 +8,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#ifdef OUTPUT_JSON
 #include "../library/json.hpp"
-#include "Device.h"
 using json = nlohmann::json;
+#endif
+#include "Device.h"
+
 // 返回Stat的编号所对应的名字，例如1对应NORMAL
 std::string GetStatName(int idx);
 // 返回CC的编号所对应的名字
@@ -24,7 +26,9 @@ std::string GetControlName(int idx);
 void OutputProcedure(std::ostream& os, int idx, const Device& d);
 // 输出运行结束后的信息，包含PC、状态、寄存器和Cflag
 void OutputFinal(const Device& d);
+#ifdef OUTPUT_JSON
 json OutputToJsonCycle(const Device& d);
 void OutputToJsonFinal(int cycle_num, int ins_num,
                        const std::vector<json>& cycle, std::ostream& os);
+#endif
 #endif

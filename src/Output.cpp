@@ -110,6 +110,7 @@ void OutputFinal(const Device& d) {
         if (!(i & 1)) std::cout << std::endl;
     }
 }
+#ifdef OUTPUT_JSON
 json OutputToJsonCycle(const Device& d) {
     json res;
     res["State"] = GetStatName(d.Stat);
@@ -170,3 +171,4 @@ void OutputToJsonFinal(int cycle_num, int ins_num,
     os << res;
     os << ");";
 }
+#endif
