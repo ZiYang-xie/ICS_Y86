@@ -22,6 +22,16 @@ const uint8_t ALUADD = 0;
 const uint8_t ALUSUB = 1;
 const uint8_t ALUAND = 2;
 const uint8_t ALUXOR = 3;
+const uint8_t ALUOR = 4;
+const uint8_t ALUSHL = 5;
+const uint8_t ALUSHR = 6;
+const uint8_t ALUSAR = 7;
+const uint8_t ALUMULQ = 8;
+const uint8_t ALUDIVQ = 9;
+const uint8_t ALUREMQ = 10;
+const uint8_t ALUMINQ = 11;
+const uint8_t ALUMAXQ = 12;
+
 // Branch
 const uint8_t BALWAYS = 0;
 const uint8_t BLE = 1;
@@ -30,7 +40,5 @@ const uint8_t BE = 3;
 const uint8_t BNE = 4;
 const uint8_t BGE = 5;
 const uint8_t BG = 6;
-
-
 
 #endif // ICS_Y86_INSTR_H

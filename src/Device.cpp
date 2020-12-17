@@ -15,7 +15,7 @@ Device::Device(std::string str) {
     if (str.length() >= 2 * MEM_SIZE) {
         throw std::domain_error("String is too long to flash");
     }
-    if(str.length()==0){
+    if (str.length() == 0) {
         return;
     }
     int i = 0;
@@ -303,13 +303,31 @@ void Device::D2E() {
 std::function<uint64_t(uint64_t, uint64_t)> Device::GetALUFunc(uint8_t ifun) {
     switch (ifun) {
         case ALUADD:
-            return [](uint64_t a, uint64_t b) { return a + b; };
+            return [](uint64_t a, uint64_t b) { return b + a; };
         case ALUSUB:
             return [](uint64_t a, uint64_t b) { return b - a; };
         case ALUAND:
-            return [](uint64_t a, uint64_t b) { return a & b; };
+            return [](uint64_t a, uint64_t b) { return b & a; };
         case ALUXOR:
-            return [](uint64_t a, uint64_t b) { return a ^ b; };
+            return [](uint64_t a, uint64_t b) { return b ^ a; };
+        case ALUOR:
+            return [](uint64_t a, uint64_t b) { return b | a; };
+        case ALUSHL:
+            return [](uint64_t a, uint64_t b) { return b << a; };
+        case ALUSHR:
+            return [](uint64_t a, uint64_t b) { return b >> a; };
+        case ALUSAR:
+            return [](uint64_t a, uint64_t b) { return (int64_t)b >> a; };
+        case ALUMULQ:
+            return [](uint64_t a, uint64_t b) { return b * a; };
+        case ALUDIVQ:
+            return [](uint64_t a, uint64_t b) { return b / a; };
+        case ALUREMQ:
+            return [](uint64_t a, uint64_t b) { return b - b * (b / a); };
+        case ALUMINQ:
+            return [](uint64_t a, uint64_t b) { return a < b ? a : b; };
+        case ALUMAXQ:
+            return [](uint64_t a, uint64_t b) { return a > b ? a : b; };
         default:
             // 若ALU指令不已知，设置错误码并返回返回0的函数
             E.stat = SINS;

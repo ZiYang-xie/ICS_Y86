@@ -3,9 +3,9 @@
 //
 #include "Output.h"
 
-#include <util.h>
-
 #include <map>
+
+#include "util.h"
 template <typename T, unsigned long N>
 static std::string GetName(std::array<T, N> arr, int idx) {
     if (idx >= 0 && idx < N) {

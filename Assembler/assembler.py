@@ -49,7 +49,8 @@ def get_r(s):
         "%r11": 11,
         "%r12": 12,
         "%r13": 13,
-        "%r14": 14
+        "%r14": 14,
+        "RNONE": 15
     }
     return rchoice[s]
 
@@ -150,7 +151,17 @@ class OPq(Instr):
             'addq': 0,
             'subq': 1,
             'andq': 2,
-            'xorq': 3
+            'xorq': 3,
+            'orq': 4,
+            'shl': 5,
+            'sal': 5,
+            'shr': 6,
+            'sar': 7,
+            'mulq': 8,
+            'divq': 9,
+            'remq': 10,
+            'minq': 11,
+            'maxq': 12
         }
         self.ifun = choice[op_str]
         self.rA = get_r(ra)
@@ -242,6 +253,16 @@ instr = {
     'subq': OPq,
     'andq': OPq,
     'xorq': OPq,
+    'orq': OPq,
+    'shl': OPq,
+    'sal': OPq,
+    'shr': OPq,
+    'sar': OPq,
+    'mulq': OPq,
+    'divq': OPq,
+    'remq': OPq,
+    'minq': OPq,
+    'maxq': OPq,
     'iaddq': iOPq,
     'isubq': iOPq,
     'iandq': iOPq,
@@ -417,15 +438,21 @@ def gen_byte_code(lines):
                 elif ins == irmovq:
                     temp = irmovq(line[2], line[1])
                 elif ins == rmmovq:
-                    opr = line[2].replace(')', '').split('(')
-                    if len(opr[0]) == 0:
-                        opr[0] = '0'
-                    temp = rmmovq(line[1], opr[1], opr[0])
+                    if '(' not in line[2] and ')' not in line[2]:
+                        temp = rmmovq(line[1], "RNONE", line[2])
+                    else:
+                        opr = line[2].replace(')', '').split('(')
+                        if len(opr[0]) == 0:
+                            opr[0] = '0'
+                        temp = rmmovq(line[1], opr[1], opr[0])
                 elif ins == mrmovq:
-                    opr = line[1].replace(')', '').split('(')
-                    if len(opr[0]) == 0:
-                        opr[0] = '0'
-                    temp = mrmovq(opr[1], line[2], opr[0])
+                    if '(' not in line[1] and ')' not in line[1]:
+                        temp = mrmovq("RNONE", line[1], line[2])
+                    else:
+                        opr = line[1].replace(')', '').split('(')
+                        if len(opr[0]) == 0:
+                            opr[0] = '0'
+                        temp = mrmovq(opr[1], line[2], opr[0])
                 elif ins == OPq:
                     temp = OPq(line[0], line[1], line[2])
                 elif ins == iOPq:
