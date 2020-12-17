@@ -1,15 +1,16 @@
 json_data(
   {
-    "name": "yoName",
+    "fileName": "cjr",
     "CycleNum": "4",
+    "InsNum": "14",
     "Cycle": [
       {
         "State": "AOK",
-        "PC": "5",
+        "PC": "0x000",
         "CC": { "zf": "1", "sf": "0", "of": "0" },
         "Register": {
-          "rax": "0x1",
-          "rcx": "0x34",
+          "rax": "0x0",
+          "rcx": "0x0",
           "rdx": "0x0",
           "rbx": "0x0",
           "rsp": "0x0",
@@ -23,11 +24,53 @@ json_data(
           "r12": "0x0",
           "r13": "0x0",
           "r14": "0x0"
+        },
+        "PipelineReg" : {
+          "F_Reg": {
+            "predPC": "0xa"
+          },
+          "D_Reg": {
+            "Stat": "AOK",
+            "icode": "3",
+            "ifun": "0",
+            "rA": "None",
+            "rB": "RCX",
+            "valC": "0x64",
+            "valC": "0x14",
+          },
+          "E_Reg": {
+            "Stat": "AOK",
+            "icode": "3",
+            "ifun": "0",
+            "valC": "0x0",
+            "valA": "0x1bd5b7dde",
+            "valB": "0x1bd5b7dde",
+            "srcA": "None",
+            "srcB": "None",
+            "dstE": "RAX",
+            "detM": "None"
+          },
+          "M_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "0x1bd5b7dde",
+            "valA": "0x1bd5b7dde",
+            "dstE": "None",
+            "detM": "None"
+          },
+          "W_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "0x1bd5b7dde",
+            "valM": "0x0",
+            "dstE": "None",
+            "detM": "None"
+          }
         }
       },
       {
         "State": "AOK",
-        "PC": "3",
+        "PC": "0xabc",
         "CC": { "zf": "0", "sf": "1", "of": "0" },
         "Register": {
           "rax": "0x1",
@@ -45,18 +88,60 @@ json_data(
           "r12": "0x0",
           "r13": "0x0",
           "r14": "0x0"
+        },
+        "PipelineReg" : {
+          "F_Reg": {
+            "predPC": "0xb"
+          },
+          "D_Reg": {
+            "Stat": "Bubble",
+            "icode": "4",
+            "ifun": "1",
+            "rA": "None",
+            "rB": "RCX",
+            "valC": "0x64",
+            "valC": "0x14",
+          },
+          "E_Reg": {
+            "Stat": "AOK",
+            "icode": "3",
+            "ifun": "0",
+            "valC": "0x0",
+            "valA": "0xfffff",
+            "valB": "0x1bd5b7dde",
+            "srcA": "None",
+            "srcB": "None",
+            "dstE": "RAX",
+            "detM": "None"
+          },
+          "M_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "0x1bd5b7dde",
+            "valA": "0x1bd5b7dde",
+            "dstE": "1",
+            "detM": "None"
+          },
+          "W_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "0x1bd5b7dde",
+            "valM": "0x0",
+            "dstE": "2",
+            "detM": "None"
+          }
         }
       },
       {
-        "State": "AOK",
-        "PC": "1",
+        "State": "HLT",
+        "PC": "0x02d",
         "CC": { "zf": "0", "sf": "1", "of": "0" },
         "Register": {
           "rax": "0x2",
           "rcx": "0x3",
           "rdx": "0x0",
           "rbx": "0x0",
-          "rsp": "0x0",
+          "rsp": "0x4",
           "rbp": "0x3",
           "rsi": "0x0",
           "rdi": "0x0",
@@ -67,11 +152,53 @@ json_data(
           "r12": "0x0",
           "r13": "0x0",
           "r14": "0x0"
+        },
+        "PipelineReg" : {
+          "F_Reg": {
+            "predPC": "0xa"
+          },
+          "D_Reg": {
+            "Stat": "变一变",
+            "icode": "3",
+            "ifun": "0",
+            "rA": "None",
+            "rB": "RCX",
+            "valC": "0x64",
+            "valC": "0x14",
+          },
+          "E_Reg": {
+            "Stat": "AOK",
+            "icode": "3",
+            "ifun": "0",
+            "valC": "0x0",
+            "valA": "看一看",
+            "valB": "0x1bd5b7dde",
+            "srcA": "None",
+            "srcB": "None",
+            "dstE": "RAX",
+            "detM": "None"
+          },
+          "M_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "效果对不对",
+            "valA": "0x1bd5b7dde",
+            "dstE": "None",
+            "detM": "None"
+          },
+          "W_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "0x123456",
+            "valM": "0x0",
+            "dstE": "None",
+            "detM": "None"
+          }
         }
       },
       {
-        "State": "HLT",
-        "PC": "4",
+        "State": "AOK",
+        "PC": "0x312",
         "CC": { "zf": "0", "sf": "1", "of": "0" },
         "Register": {
           "rax": "0x1",
@@ -89,9 +216,115 @@ json_data(
           "r12": "0x0",
           "r13": "0x0",
           "r14": "0x0"
+        },
+        "PipelineReg" : {
+          "F_Reg": {
+            "predPC": "0xa"
+          },
+          "D_Reg": {
+            "Stat": "Bubble",
+            "icode": "3",
+            "ifun": "0",
+            "rA": "None",
+            "rB": "RCX",
+            "valC": "0x64",
+            "valC": "0x14",
+          },
+          "E_Reg": {
+            "Stat": "Stall",
+            "icode": "3",
+            "ifun": "0",
+            "valC": "0x0",
+            "valA": "0x1bd5b7dde",
+            "valB": "0x1bd5b7dde",
+            "srcA": "None",
+            "srcB": "None",
+            "dstE": "RAX",
+            "detM": "None"
+          },
+          "M_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "0x1bd5b7dde",
+            "valA": "0x1bd5b7dde",
+            "dstE": "None",
+            "detM": "None"
+          },
+          "W_Reg": {
+            "Stat": "AOK",
+            "icode": "hhhh",
+            "valE": "123123123",
+            "valM": "0x0",
+            "dstE": "None",
+            "detM": "None"
+          }
+        }
+      },
+      {
+        "State": "HLT",
+        "PC": "0x312",
+        "CC": { "zf": "0", "sf": "1", "of": "0" },
+        "Register": {
+          "rax": "0x1",
+          "rcx": "0xffffffffffffffff",
+          "rdx": "0x5",
+          "rbx": "0x0",
+          "rsp": "0x0",
+          "rbp": "0x3",
+          "rsi": "0x0",
+          "rdi": "0x0",
+          "r8": "0x4",
+          "r9": "0x0",
+          "r10": "0x5",
+          "r11": "0x6",
+          "r12": "0x0",
+          "r13": "0x0",
+          "r14": "0x0"
+        },
+        "PipelineReg" : {
+          "F_Reg": {
+            "predPC": "0xa"
+          },
+          "D_Reg": {
+            "Stat": "Bubble",
+            "icode": "3",
+            "ifun": "0",
+            "rA": "None",
+            "rB": "RCX",
+            "valC": "0x64",
+            "valP": "0x14",
+          },
+          "E_Reg": {
+            "Stat": "Stall",
+            "icode": "3",
+            "ifun": "0",
+            "valC": "0x0",
+            "valA": "0x1bd5b7dde",
+            "valB": "0x1bd5b7dde",
+            "srcA": "None",
+            "srcB": "None",
+            "dstE": "RAX",
+            "detM": "None"
+          },
+          "M_Reg": {
+            "Stat": "AOK",
+            "icode": "0",
+            "valE": "0x1bd5b7dde",
+            "valA": "0x1bd5b7dde",
+            "dstE": "None",
+            "detM": "None"
+          },
+          "W_Reg": {
+            "Stat": "AOK",
+            "icode": "hhhh",
+            "valE": "123123123",
+            "valM": "0x0",
+            "dstE": "None",
+            "detM": "None"
+          }
         }
         
-      }
+      },
     ]
   }
 );

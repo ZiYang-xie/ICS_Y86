@@ -30,3 +30,11 @@
 .layout-footer-center{
     text-align: center;
 }
+
+.topInfo_style
+{
+    display: flex;
+    padding: 15px;
+    font-weight: bold!important;
+    color: rgb(170, 170, 170);
+}

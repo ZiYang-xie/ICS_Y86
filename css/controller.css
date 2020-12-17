@@ -1,0 +1,26 @@
+.controller_wraper
+{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.button_class
+{
+    width: 70%;
+}
+
+.circle
+{
+    padding: 10px;
+}
+
+.controller_circle
+{
+    display: block;
+}
+
+.fb_button
+{
+    padding: 10px;
+}

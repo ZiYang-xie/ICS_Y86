@@ -3,14 +3,24 @@
     width: 40%!important;
 }
 
-.main_info
+.now_card
+{
+    width: 55%!important;
+}
+
+.main_card
 {
     width: 40%!important;
 }
 
-.controller
+.controller_card
 {
     width: 55%!important;
+}
+
+.pipeline_card
+{
+    width: 100%!important;
 }
 
 .ivu-table .info_table td
@@ -51,5 +61,17 @@
 .head_cards_warper
 {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
+}
+
+.body_card_wraper
+{
+    display: flex;
+    justify-content: space-around;
+}
+
+.footer_card_wraper
+{
+    display: flex;
+    justify-content: space-around;
 }
