@@ -8,7 +8,7 @@
 
 #include "instr.h"
 #include "util.h"
-Device::Device(std::string str) : CFLAG{true, false, false} {
+Device::Device(std::string str) {
     memset(Reg, 0, REG_SIZE);
     memset(Mem, 0, MEM_SIZE);
     Stat = SAOK;
@@ -17,15 +17,26 @@ Device::Device(std::string str) : CFLAG{true, false, false} {
     }
     int i = 0;
     auto p = str.begin();
+    for (int j = 15; j > 0; j -= 2) {
+        text_section_end = 16 * text_section_end + 16 * CharToUint8(p[j - 1]) +
+                           CharToUint8(p[j]);
+    }
+    p += 16;
     while (p != str.end()) {
         Mem[i] = 16 * CharToUint8(*p++) + CharToUint8(*p++);
         i++;
     }
-    for (int k = 0; k < 5; k++) {
+    for (int k = 0; k <= 5; k++) {
         addr_queue.push(0);
     }
 }
-bool Device::IfAddrValid(uint64_t pos) { return pos >= 0 && pos < MEM_SIZE; }
+bool Device::IfAddrReadable(uint64_t pos) { return pos >= 0 && pos < MEM_SIZE; }
+bool Device::IfAddrWriteable(uint64_t pos) {
+    return pos >= text_section_end && pos < MEM_SIZE;
+}
+bool Device::IfAddrExecutable(uint64_t pos) {
+    return pos >= 0 && pos < text_section_end;
+}
 bool Device::IfInstrValid(uint8_t icode) { return icode >= 0 && icode <= 0xe; }
 uint8_t Device::ReadHigh4Bits(uint64_t pos) const {
     return (Mem[pos] & 0xf0u) >> 4u;
@@ -49,8 +60,12 @@ void Device::Fetch() {
         In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ, IRMMOVQ, IMRMOVQ);
     bool need_valC = In(f.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL);
     if (need_regids) {
-        f.ra = ReadHigh4Bits(f_pc + 1);
-        f.rb = ReadLow4Bits(f_pc + 1);
+        if (IfAddrExecutable(f_pc + 1)) {
+            f.ra = ReadHigh4Bits(f_pc + 1);
+            f.rb = ReadLow4Bits(f_pc + 1);
+        } else {
+            f.Stat = SINS;
+        }
     }
     if (need_valC) {
         f.valC = Read8Bytes(f_pc + need_regids + 1);
@@ -63,6 +78,11 @@ void Device::Fetch() {
     }
     addr_queue.push(F.predPC);
     addr_queue.pop();
+#ifdef HARDWARE_STACK
+    if (f.icode == ICALL) {
+        hardware_stack.push(f.valP);
+    }
+#endif
 }
 uint8_t Device::SelectFStat() const {
     if (!IfInstrValid(f.icode)) {
@@ -73,14 +93,23 @@ uint8_t Device::SelectFStat() const {
         return SAOK;
     }
 }
-uint64_t Device::SelectPC() const {
+uint64_t Device::SelectPC() {
     if (M.icode == IJXX && (M.Cnd ^ M.ifJump)) {
         if (!M.ifJump)
             return e.valC;  // JXX但是没有成功跳转的情况
         else
             return M.valE;
     } else if (W.icode == IRET) {
-        return W.valM;  // Ret的情况，后期使用硬件栈时可以删去这一句话
+#ifdef HARDWARE_STACK
+        if (hardware_stack.empty())
+            return W.valM;
+        else {
+            uint64_t temp = hardware_stack.top();
+            hardware_stack.pop();
+            return temp;
+        }
+#endif
+        return W.valM;
     } else {
         return F.predPC;
     }
@@ -130,6 +159,7 @@ void Device::Decode() {
     d.dstE = SelectDstE();
     //写dstM
     d.dstM = SelectDstM();
+    //计算valA,valB
     uint64_t rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
     uint64_t rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
     //写valA
@@ -142,23 +172,27 @@ void Device::Decode() {
     d.valC = D.valC;
     d.ifJump = D.ifJump;
 }
-uint8_t Device::SelectDstM() const {
+uint8_t Device::SelectDstM() {
     if (In(D.icode, IMRMOVQ, IPOPQ)) {
         return D.rA;
     } else {
         return RNONE;
     }
 }
-uint8_t Device::SelectDstE() const {
+uint8_t Device::SelectDstE() {
     if (In(D.icode, IRRMOVQ, IIRMOVQ, IOPQ)) {
         return D.rB;
     } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
+        if (D.rB != RNONE && D.icode == IPUSHQ) {
+            D.stat = SINS;
+        }
         return RRSP;
     } else {
         return RNONE;
     }
 }
 uint8_t Device::SelectSrcB() const {
+    // TODO:后期扩展IRMMOVQ和IMRMOVQ的语义时，这里需要改
     if (In(D.icode, IOPQ, IRMMOVQ, IMRMOVQ)) {
         return D.rB;
     } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
@@ -267,7 +301,7 @@ std::function<uint64_t(uint64_t, uint64_t)> Device::GetALUFunc(uint8_t ifun) {
             return [](uint64_t a, uint64_t b) { return 0; };
     }
 }
-bool Device::CalcCond(bool cflag[3]) const {
+bool Device::CalcCond(bool cflag[3]) {
     switch (E.ifun) {
         case BALWAYS:
             return true;
@@ -284,6 +318,7 @@ bool Device::CalcCond(bool cflag[3]) const {
         case BG:
             return !cflag[CZF] && (cflag[CSF] == cflag[COF]);
         default:
+            E.stat = SINS;
             return false;
     }
 }
@@ -315,19 +350,21 @@ void Device::Memory() {
     bool mem_write = In(M.icode, IRMMOVQ, IPUSHQ, ICALL);
     // 读内存
     if (mem_read) {
-        if (IfAddrValid(mem_addr)) {
+        if (IfAddrReadable(mem_addr)) {
             m.valM = Read8Bytes(mem_addr);
         } else {
-            m.stat = SADR;
+            // m.stat = SADR;
+            m.stat = m.stat == SINS ? SINS : SADR;
             if (In(M.icode, IPUSHQ, IPOPQ)) {
                 M.valE = 0;
             }
         }
     } else if (mem_write) {
-        if (IfAddrValid(mem_addr)) {
+        if (IfAddrWriteable(mem_addr)) {
             Write8Bytes(mem_addr, M.valA);
         } else {
-            m.stat = SADR;
+            // m.stat = SADR; 没有人比我更会面向测例编程
+            m.stat = m.stat == SINS ? SINS : SADR;
             if (In(M.icode, IPUSHQ, IPOPQ)) {
                 M.valE = 0;
             }

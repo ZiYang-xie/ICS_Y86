@@ -3,6 +3,9 @@
 //
 #include "Output.h"
 
+#include <util.h>
+
+#include <map>
 template <typename T, unsigned long N>
 static std::string GetName(std::array<T, N> arr, int idx) {
     if (idx >= 0 && idx < N) {
@@ -23,8 +26,8 @@ std::string GetCCName(int idx) {
 }
 std::string GetRegName(int idx) {
     const std::array<std::string, 16> RegList = {
-        "RAX", "RCX", "RDX", "RBX", "RSP", "RBP", "RSI", "RDI",
-        "R8",  "R9",  "R10", "R11", "R12", "R13", "R14", "None"};
+        "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
+        "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "None"};
     return GetName(RegList, idx);
 }
 std::string GetControlName(int idx) {
@@ -106,4 +109,64 @@ void OutputFinal(const Device& d) {
                   << '\t';
         if (!(i & 1)) std::cout << std::endl;
     }
+}
+json OutputToJsonCycle(const Device& d) {
+    json res;
+    res["State"] = GetStatName(d.Stat);
+    res["PC"] = Format("0x%03x", d.GetPC());
+    res["CC"] = json{{"zf", (int)d.CFLAG[0]},
+                     {"sf", (int)d.CFLAG[1]},
+                     {"of", (int)d.CFLAG[2]}};
+    json reg;
+    for (int i = 0; i < 15; i++) {
+        reg[GetRegName(i)] = Format("0x%x", d.Reg[i]);
+    }
+    res["Register"] = reg;
+    res["PipelineReg"] = {{"F_Reg", {{"predPC", Format("0x%x", d.F.predPC)}}},
+                          {"D_Reg",
+                           {
+                               {"Stat", GetStatName(d.D.stat)},
+                               {"icode", Format("%d", d.D.icode)},
+                               {"ifun", Format("%d", d.D.ifun)},
+                               {"rA", GetRegName(d.D.rA)},
+                               {"rB", GetRegName(d.D.rA)},
+                               {"valC", Format("0x%x", d.D.valC)},
+                               {"valP", Format("0x%x", d.D.valP)},
+                           }},
+                          {"E_Reg",
+                           {{"Stat", GetStatName(d.E.stat)},
+                            {"icode", Format("%d", d.E.icode)},
+                            {"ifun", Format("%d", d.E.ifun)},
+                            {"valC", Format("0x%x", d.E.valC)},
+                            {"valA", Format("0x%x", d.E.valA)},
+                            {"valB", Format("0x%x", d.E.valB)},
+                            {"srcA", GetRegName(d.E.srcA)},
+                            {"srcB", GetRegName(d.E.srcB)},
+                            {"dstE", GetRegName(d.E.srcB)},
+                            {"detM", GetRegName(d.E.srcB)}}},
+                          {"M_Reg",
+                           {{"Stat", GetStatName(d.M.stat)},
+                            {"icode", Format("%d", d.M.icode)},
+                            {"valE", Format("0x%x", d.M.valE)},
+                            {"valA", Format("0x%x", d.M.valA)},
+                            {"dstE", GetRegName(d.M.dstE)},
+                            {"detM", GetRegName(d.M.dstM)}}},
+                          {"W_Reg",
+                           {{"Stat", GetStatName(d.W.stat)},
+                            {"icode", Format("%d", d.W.icode)},
+                            {"valE", Format("0x%x", d.W.valE)},
+                            {"valM", Format("0x%x", d.W.valM)},
+                            {"dstE", GetRegName(d.W.dstE)},
+                            {"detM", GetRegName(d.W.dstM)}}}};
+    return res;
+}
+void OutputToJsonFinal(int cycle_num, int ins_num,
+                       const std::vector<json>& cycle, std::ostream& os) {
+    json res;
+    res["CycleNum"] = cycle_num;
+    res["InsNum"] = ins_num;
+    res["Cycle"] = json(cycle);
+    os << "json_data(";
+    os << res;
+    os << ");";
 }

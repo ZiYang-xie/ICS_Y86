@@ -1,0 +1,5 @@
+.pos 0
+irmovq $0 %rax
+# fib(int n)->int
+fib: # TODO: 等先把指令加完再回来改
+    pushq %
