@@ -469,13 +469,18 @@ def process_to_yo(lines: list):
 
 
 def process_to_raw(lines: list):
+    last_instr_addr = 0
     res = ""
     for line in lines:
-        left = line.split(sep='|')[0].split(":")
-        if len(left) == 2:
-            res += "0" * (2 * int(left[0].strip(), 16) - len(res))
-            res += left[1].strip()
-    return res
+        if len(line) != 0:
+            left_side = line.split(sep='|')[0].split(":")
+            right_side = line.split(sep='|')[1]
+            if len(left_side) == 2:
+                res += "0" * (2 * int(left_side[0].strip(), 16) - len(res))
+                res += left_side[1].strip()
+                if '.' not in right_side and ':' not in right_side:
+                    last_instr_addr = int(left_side[0], 16) + len(left_side[1].strip()) // 2
+    return get_hex_repr(last_instr_addr, 8) + res
 
 
 def assemble_file(filename):
