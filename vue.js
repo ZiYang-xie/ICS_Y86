@@ -3,6 +3,9 @@ import Extended from './pages/extended.js'
 
 let app = new Vue({
     el: '#app',
+    data: {
+        text: ""
+    },
     router: new VueRouter({
         mode: "history",
         routes:[
@@ -21,3 +24,5 @@ let app = new Vue({
         ]
     })
 })
+
+export default app;

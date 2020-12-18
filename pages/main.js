@@ -5,7 +5,6 @@ export default {
             file_path: "",
             file_format: ["yo","ys"],
             upload_list: [],
-            
             reg_list1: [
                 {
                     title: "RAX",
@@ -378,6 +377,8 @@ export default {
             current_pc: "",
             current_id: -1,
             progress: 0,
+            cpi: 0,
+            progress_slide: 0,
             speed: 20,
             ratio: 0,
             cycle_num: 0,
@@ -389,12 +390,12 @@ export default {
     },
     methods: {
         getData: function() {
-            this.$http.jsonp('static/json/data.json', {jsonpCallback: "json_data"}).then(function (res){
+            this.$http.jsonp('/flask/data.json', {jsonpCallback: "json_data"}).then(function (res){
                 this.json_data = JSON.parse(res.bodyText);
-                this.task_name = this.json_data.fileName;
-                this.file_path = "./static/source/" + this.json_data.fileName + ".yo";
+                //this.task_name = this.json_data.fileName;
+                this.file_path = "./static/source/tmp.yo";
                 this.cycle_num = this.json_data.CycleNum;
-                this.ratio = Math.floor(100/this.cycle_num);
+                this.ratio = Math.floor(10000/this.cycle_num);
             })
         },
         readFile: function() {
@@ -450,10 +451,12 @@ export default {
             this.$Message.error('上传文件 ' + file.name + ' 格式不支持');
         },
         handleUploadSuccess(res, file) {
-            console.log(res);
+            this.getData();
         },
         handleBeforeUpload () {
-            const check = this.uploadList.length < 2;
+            this.$refs.upload.clearFiles();
+            let fileList = this.$refs.upload.fileList;
+            const check = fileList.length < 1;
             if (!check) {
                 this.$Notice.warning({
                     title: '最多只能同时上传一个文件'
@@ -462,13 +465,14 @@ export default {
             return check;
         },
         inc_pg() {
-            this.progress += this.ratio;
+            this.progress_slide += this.ratio;
         },
         dec_pg() {
-            this.progress -= this.ratio;
+            this.progress_slide -= this.ratio;
         },
         reset() {
-            this.progress = 0;
+            this.cpi = 0;
+            this.progress_slide = 0;
         },
         progress_format() {
             return this.progress + "%";
@@ -498,33 +502,38 @@ export default {
         },
         handleInfoUpdate () {
             // 懒得整了，就这几个寄存器，就这样写点shitcode吧
-            let data = this.json_data.Cycle[Math.floor(this.progress/this.ratio)];
-            this.info_data[0].PC = data.PC;
-            this.info_data[0].State = data.State;
-            for(let key in this.cc_data[0])
-                this.cc_data[0][key] = data.CC[key];
-            for(let key in this.reg_data1[0])
-                this.reg_data1[0][key] = data.Register[key];
-            for(let key in this.reg_data2[0])
-                this.reg_data2[0][key] = data.Register[key];
-            for(let key in this.reg_data3[0])
-                this.reg_data3[0][key] = data.Register[key];
-            
-            for(let key in this.pipline_reg_data.f_reg_data[0])
-                this.pipline_reg_data.f_reg_data[0][key] = data.PipelineReg.F_Reg[key];
-            this.pipline_reg_data.f_reg_data[0]["name"] = "F_REG";
-            for(let key in this.pipline_reg_data.d_reg_data[0])
-                this.pipline_reg_data.d_reg_data[0][key] = data.PipelineReg.D_Reg[key];
-            this.pipline_reg_data.d_reg_data[0]["name"] = "D_REG";
-            for(let key in this.pipline_reg_data.e_reg_data[0])
-                this.pipline_reg_data.e_reg_data[0][key] = data.PipelineReg.E_Reg[key];
-            this.pipline_reg_data.e_reg_data[0]["name"] = "E_REG";
-            for(let key in this.pipline_reg_data.m_reg_data[0])
-                this.pipline_reg_data.m_reg_data[0][key] = data.PipelineReg.M_Reg[key];
-            this.pipline_reg_data.m_reg_data[0]["name"] = "M_REG";
-            for(let key in this.pipline_reg_data.w_reg_data[0])
-                this.pipline_reg_data.w_reg_data[0][key] = data.PipelineReg.W_Reg[key];
-            this.pipline_reg_data.w_reg_data[0]["name"] = "W_REG";
+            let cycle_key = Math.floor(this.progress_slide/this.ratio);
+            let data = this.json_data.Cycle[cycle_key];
+            if(data)
+            {
+                this.info_data[0].PC = data.PC;
+                this.info_data[0].State = data.State;
+                
+                for(let key in this.cc_data[0])
+                    this.cc_data[0][key] = data.CC[key];
+                for(let key in this.reg_data1[0])
+                    this.reg_data1[0][key] = data.Register[key];
+                for(let key in this.reg_data2[0])
+                    this.reg_data2[0][key] = data.Register[key];
+                for(let key in this.reg_data3[0])
+                    this.reg_data3[0][key] = data.Register[key];
+                
+                for(let key in this.pipline_reg_data.f_reg_data[0])
+                    this.pipline_reg_data.f_reg_data[0][key] = data.PipelineReg.F_Reg[key];
+                this.pipline_reg_data.f_reg_data[0]["name"] = "F_REG";
+                for(let key in this.pipline_reg_data.d_reg_data[0])
+                    this.pipline_reg_data.d_reg_data[0][key] = data.PipelineReg.D_Reg[key];
+                this.pipline_reg_data.d_reg_data[0]["name"] = "D_REG";
+                for(let key in this.pipline_reg_data.e_reg_data[0])
+                    this.pipline_reg_data.e_reg_data[0][key] = data.PipelineReg.E_Reg[key];
+                this.pipline_reg_data.e_reg_data[0]["name"] = "E_REG";
+                for(let key in this.pipline_reg_data.m_reg_data[0])
+                    this.pipline_reg_data.m_reg_data[0][key] = data.PipelineReg.M_Reg[key];
+                this.pipline_reg_data.m_reg_data[0]["name"] = "M_REG";
+                for(let key in this.pipline_reg_data.w_reg_data[0])
+                    this.pipline_reg_data.w_reg_data[0][key] = data.PipelineReg.W_Reg[key];
+                this.pipline_reg_data.w_reg_data[0]["name"] = "W_REG";
+            }
         }
     },
     computed: {
@@ -537,10 +546,10 @@ export default {
         },
         cpi_color () {
             let color = '#2db7f5';
-            if (this.progress >= 50 && this.progress < 70) {
+            if (this.cpi >= 1.27 && this.cpi < 1.5) {
                 color = '#fa8231';
             }
-            else if (this.progress >= 70) {
+            else if (this.cpi >= 1.5) {
                 color = '#ff5500';
             }
             return color;
@@ -550,11 +559,13 @@ export default {
         }
     },
     watch: {
-        progress(val) {
-            if(val > 100 || val < 0)
+        progress_slide(val) {
+            if(val > 10000 || val < 0)
                 return;
-            if(val == 100)
+            if(val == 10000)
                 this.stop();
+            this.progress = this.progress_slide / 100;
+            this.cpi = (this.text.length/this.cycle_num).toFixed(2);
             this.handleInfoUpdate();
         },
         file_path() {
@@ -633,8 +644,8 @@ export default {
                                 </Row>
                             </div>
                             <div class="controller_circle">
-                                <i-circle class="circle" size="130" :percent="10" :stroke-color="cpi_color" dashboard>
-                                    <span class="demo-Circle-inner" style="font-size:20px">1 CPI</span>
+                                <i-circle class="circle" size="130" :percent="progress" :stroke-color="cpi_color" dashboard>
+                                    <span class="demo-Circle-inner" style="font-size:20px">{{cpi}} CPI</span>
                                 </i-circle>
                                 <i-circle class="circle" size="130" :percent="progress" :stroke-color="pg_color">
                                     <Icon v-if="progress == 100" type="ios-checkmark" size="60" style="color:#5cb85c"></Icon>
@@ -643,13 +654,15 @@ export default {
                             </div>
                         </div>
 
-                        <Slider v-model="progress" :tip-format="progress_format" :step="ratio"></Slider>
+                        <Slider v-model="progress_slide" max="10000" :tip-format="progress_format" :step="ratio"></Slider>
                         <Upload
+                            ref="upload"
                             type="drag"
-                            action="//jsonplaceholder.typicode.com/posts/"
+                            action="//192.168.3.5:7777/post"
                             :format="file_format"
                             :on-format-error="handleFormatError"
-                            :on-success="handleUploadSuccess">
+                            :on-success="handleUploadSuccess"
+                            :before-upload="handleBeforeUpload">
                             <div style="padding: 20px 0">
                                 <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
                                 <p>点击或拖拽上传文件</p>
@@ -671,7 +684,7 @@ export default {
                         <p slot="title"><Icon size="20" type="ios-cog"></Icon> 当前指令</p>
                         <div style="min-height: 200px;">
                             <List border item-layout="vertical">
-                                <ListItem v-for="(item, i) in current_text" :key="item.pc">
+                                <ListItem v-for="(item, i) in current_text">
                                     <p v-if="item.pc == CurrentPc" style="display:flex">
                                         <Tag type="border" style="margin-right:10px">{{item.pc}}</Tag> 
                                         <Tag color="primary" size="large"><b>{{item.instr}}</b></Tag>

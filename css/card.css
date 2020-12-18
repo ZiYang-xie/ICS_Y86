@@ -13,6 +13,16 @@
     width: 40%!important;
 }
 
+.text_card
+{
+    width: 100%!important;
+}
+
+.left_card_wrapper
+{
+    width: 45%!important;
+}
+
 .controller_card
 {
     width: 55%!important;
