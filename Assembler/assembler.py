@@ -4,6 +4,8 @@ import copy
 
 
 def get_hex_repr(h, size):
+    if h < 0:
+        h = 1 << 64 + h
     size *= 2
     s = hex(h)[2:]
     res = ''
@@ -505,7 +507,8 @@ def process_to_raw(lines: list, gen_prefix=True):
                 res += "0" * (2 * int(left_side[0].strip(), 16) - len(res))
                 res += left_side[1].strip()
                 if '.' not in right_side and ':' not in right_side:
-                    last_instr_addr = int(left_side[0], 16) + len(left_side[1].strip()) // 2
+                    last_instr_addr = int(
+                        left_side[0], 16) + len(left_side[1].strip()) // 2
     if gen_prefix:
         return get_hex_repr(last_instr_addr, 8) + res
     else:
