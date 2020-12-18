@@ -255,7 +255,7 @@ void Device::Decode() {
     d.valC = D.valC;
     d.ifJump = D.ifJump;
 }
-uint8_t Device::SelectDstM() {
+uint8_t Device::SelectDstM() const {
     if (In(D.icode, IMRMOVQ, IPOPQ)) {
         return D.rA;
     } else {
@@ -584,6 +584,8 @@ uint64_t Device::GetPC() const { return addr_queue.front(); }
 void Device::SetDSrcA() {
     if (In(D.icode, ICALL, IJXX)) {
         d.valA = D.valP;
+    } else if (d.srcA == RNONE) {
+        return;
     } else if (d.srcA == e.dstE) {
         d.valA = e.valE;
     } else if (d.srcA == M.dstM) {
@@ -597,6 +599,9 @@ void Device::SetDSrcA() {
     }
 }
 void Device::SetDSrcB() {
+    if (d.srcB == RNONE) {
+        return;
+    }
     if (d.srcB == e.dstE) {
         d.valB = e.valE;
     } else if (d.srcB == M.dstM) {

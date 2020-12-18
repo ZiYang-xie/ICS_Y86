@@ -114,7 +114,7 @@ class Device {
     [[nodiscard]] uint8_t SelectSrcA() const;
     [[nodiscard]] uint8_t SelectSrcB() const;
     [[nodiscard]] uint8_t SelectDstE();
-    [[nodiscard]] uint8_t SelectDstM();
+    [[nodiscard]] uint8_t SelectDstM() const;
     [[nodiscard]] uint64_t SelectPC();
     [[nodiscard]] uint8_t SelectFStat() const;
     [[nodiscard]] uint64_t SelectAluA() const;
