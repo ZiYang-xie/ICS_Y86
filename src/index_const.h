@@ -31,4 +31,11 @@ const uint8_t SBUB = 5;
 const uint8_t CZF = 0;
 const uint8_t CSF = 1;
 const uint8_t COF = 2;
+const uint8_t RQU = 0;
+const uint8_t RLU = 1;
+const uint8_t RWU = 2;
+const uint8_t RBU = 3;
+const uint8_t RLS = 4;
+const uint8_t RWS = 5;
+const uint8_t RBS = 6;
 #endif  // ICS_Y86_INDEX_CONST_H

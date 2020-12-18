@@ -115,12 +115,20 @@ class Device {
     [[nodiscard]] uint8_t SelectSrcB() const;
     [[nodiscard]] uint8_t SelectDstE();
     [[nodiscard]] uint8_t SelectDstM();
-    [[nodiscard]] uint64_t SelectPC() ;
+    [[nodiscard]] uint64_t SelectPC();
     [[nodiscard]] uint8_t SelectFStat() const;
     [[nodiscard]] uint64_t SelectAluA() const;
     [[nodiscard]] uint64_t SelectAluB() const;
-    bool IfAddrWriteable(uint64_t pos);
-    bool IfAddrExecutable(uint64_t pos);
+    static bool IfAddrWriteable(uint64_t pos);
+    static bool IfAddrExecutable(uint64_t pos);
+    void Write4Bytes(uint64_t pos, uint64_t val);
+    void Write2Bytes(uint64_t pos, uint64_t val);
+    void Write1Bytes(uint64_t pos, uint64_t val);
+    uint64_t Read4Bytes(uint64_t pos) const;
+    uint64_t Read2Bytes(uint64_t pos) const;
+    uint64_t Read1Bytes(uint64_t pos) const;
+    uint64_t ReadReg(uint8_t reg_idx, uint8_t ifun);
+    void WriteReg(uint8_t reg_idx, uint8_t ifun, uint64_t val);
 };
 
 #endif  // ICS_Y86_DEVICE_H

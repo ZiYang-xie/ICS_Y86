@@ -60,8 +60,69 @@ uint8_t Device::ReadLow4Bits(uint64_t pos) const { return (Mem[pos] & 0x0fu); }
 uint64_t Device::Read8Bytes(uint64_t pos) const {
     return *(uint64_t *)(Mem + pos);
 }
+uint64_t Device::Read4Bytes(uint64_t pos) const {
+    return *(uint32_t *)(Mem + pos);
+}
+uint64_t Device::Read2Bytes(uint64_t pos) const {
+    return *(uint16_t *)(Mem + pos);
+}
+uint64_t Device::Read1Bytes(uint64_t pos) const {
+    return *(uint8_t *)(Mem + pos);
+}
+
 void Device::Write8Bytes(uint64_t pos, uint64_t val) {
     *(uint64_t *)(Mem + pos) = val;
+}
+void Device::Write4Bytes(uint64_t pos, uint64_t val) {
+    *(uint32_t *)(Mem + pos) = val;
+}
+void Device::Write2Bytes(uint64_t pos, uint64_t val) {
+    *(uint16_t *)(Mem + pos) = val;
+}
+void Device::Write1Bytes(uint64_t pos, uint64_t val) {
+    *(uint8_t *)(Mem + pos) = val;
+}
+uint64_t Device::ReadReg(uint8_t reg_idx, uint8_t ifun) {
+    switch (ifun) {
+        case (RQU):
+            return Reg[reg_idx];
+        case (RLU):
+            return (uint32_t)Reg[reg_idx];
+        case (RWU):
+            return (uint16_t)Reg[reg_idx];
+        case (RBU):
+            return (uint8_t)Reg[reg_idx];
+        default:
+            D.stat = SINS;
+            return 0;
+    }
+}
+void Device::WriteReg(uint8_t reg_idx, uint8_t ifun, uint64_t val) {
+    switch (ifun) {
+        case (RQU):
+            Reg[reg_idx] = val;
+            break;
+        case (RLU):
+            Reg[reg_idx] = (uint32_t)val;
+            break;
+        case (RWU):
+            Reg[reg_idx] = (uint16_t)val;
+            break;
+        case (RBU):
+            Reg[reg_idx] = (uint8_t)val;
+            break;
+        case (RLS):
+            Reg[reg_idx] = (int64_t)(uint32_t)val;
+            break;
+        case (RWS):
+            Reg[reg_idx] = (int64_t)(uint16_t)val;
+            break;
+        case (RBS):
+            Reg[reg_idx] = (int64_t)(uint8_t)val;
+            break;
+        default:
+            D.stat = SINS;
+    }
 }
 void Device::Fetch() {
     if (F.control == CSTALL) {
@@ -175,8 +236,15 @@ void Device::Decode() {
     //写dstM
     d.dstM = SelectDstM();
     //计算valA,valB
-    uint64_t rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
-    uint64_t rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
+    uint64_t rvalA;
+    uint64_t rvalB;
+    if (E.icode == IRMMOVQ) {
+        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, E.ifun) : 0;
+        rvalB = d.srcB != RNONE ? ReadReg(d.srcB, E.ifun) : 0;
+    } else {
+        rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
+        rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
+    }
     //写valA
     d.valA = rvalA;
     //写valB
@@ -207,7 +275,6 @@ uint8_t Device::SelectDstE() {
     }
 }
 uint8_t Device::SelectSrcB() const {
-    // TODO:后期扩展IRMMOVQ和IMRMOVQ的语义时，这里需要改
     if (In(D.icode, IOPQ, IRMMOVQ, IMRMOVQ)) {
         return D.rB;
     } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
@@ -386,7 +453,27 @@ void Device::Memory() {
     // 读内存
     if (mem_read) {
         if (IfAddrReadable(mem_addr)) {
-            m.valM = Read8Bytes(mem_addr);
+            if (M.icode != IMRMOVQ) {
+                m.valM = Read8Bytes(mem_addr);
+            } else {
+                switch (M.ifun) {
+                    case (RQU):
+                        m.valM = Read8Bytes(mem_addr);
+                        break;
+                    case (RLS):
+                    case (RLU):
+                        m.valM = Read4Bytes(mem_addr);
+                        break;
+                    case (RWS):
+                    case (RWU):
+                        m.valM = Read2Bytes(mem_addr);
+                        break;
+                    case (RBS):
+                    case (RBU):
+                        m.valM = Read1Bytes(mem_addr);
+                        break;
+                }
+            }
         } else {
             // m.stat = SADR;
             m.stat = m.stat == SINS ? SINS : SADR;
@@ -396,7 +483,27 @@ void Device::Memory() {
         }
     } else if (mem_write) {
         if (IfAddrWriteable(mem_addr)) {
-            Write8Bytes(mem_addr, M.valA);
+            if (M.icode != IRMMOVQ) {
+                Write8Bytes(mem_addr, M.valA);
+            } else {
+                switch (M.ifun) {
+                    case (RQU):
+                        Write8Bytes(mem_addr, M.valA);
+                        break;
+                    case (RLS):
+                    case (RLU):
+                        Write4Bytes(mem_addr, M.valA);
+                        break;
+                    case (RWS):
+                    case (RWU):
+                        Write2Bytes(mem_addr, M.valA);
+                        break;
+                    case (RBS):
+                    case (RBU):
+                        Write1Bytes(mem_addr, M.valA);
+                        break;
+                }
+            }
         } else {
             // m.stat = SADR; 没有人比我更会面向测例编程
             m.stat = m.stat == SINS ? SINS : SADR;
@@ -409,10 +516,12 @@ void Device::Memory() {
     m.valE = M.valE;
     m.dstE = M.dstE;
     m.dstM = M.dstM;
+    m.ifun = M.ifun;
 }
 void Device::M2W() {
     W.stat = m.stat;
     W.icode = m.icode;
+    W.ifun = m.ifun;
     W.valE = m.valE;
     W.valM = m.valM;
     W.dstE = m.dstE;
@@ -421,10 +530,18 @@ void Device::M2W() {
 void Device::Writeback() {
     //写回寄存器
     if (W.dstE != RNONE) {
-        Reg[W.dstE] = W.valE;
+        if (W.icode != IMRMOVQ) {
+            Reg[W.dstE] = W.valE;
+        } else {
+            WriteReg(W.dstE, W.ifun, W.valE);
+        }
     }
     if (W.dstM != RNONE) {
-        Reg[W.dstM] = W.valM;
+        if (W.icode != IMRMOVQ) {
+            Reg[W.dstM] = W.valM;
+        } else {
+            WriteReg(W.dstM, W.ifun, W.valM);
+        }
     }
     //设置状态码
     if (W.stat == SBUB) {

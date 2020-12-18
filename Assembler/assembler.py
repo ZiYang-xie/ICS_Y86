@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 import argparse
 import copy
-
+import traceback
 
 def get_hex_repr(h, size):
     if h < 0:
@@ -121,23 +121,40 @@ class irmovq(Instr):
         self.imm = get_num(V)
 
 
-class rmmovq(Instr):
+class rmmov(Instr):
     size = 10
 
-    def __init__(self, ra, rb, V):
+    def __init__(self, ra, rb, V, rm_str: str):
         super().__init__()
         self.icode = 4
+        choice = {
+            "rmmovq": 0,
+            "rmmovl": 1,
+            "rmmovw": 2,
+            "rmmovb": 3
+        }
+        self.ifun = choice[rm_str]
         self.rA = get_r(ra)
         self.rB = get_r(rb)
         self.imm = get_num(V)
 
 
-class mrmovq(Instr):
+class mrmov(Instr):
     size = 10
 
-    def __init__(self, ra, rb, D):
+    def __init__(self, ra, rb, D, mrmov_str):
         super().__init__()
         self.icode = 5
+        choice = {
+            'mrmovq': 0,
+            'mrmovlu': 1,
+            'mrmovwu': 2,
+            'mrmovbu': 3,
+            'mrmovls': 4,
+            'mrmovws': 5,
+            'mrmovbs': 6
+        }
+        self.ifun = choice[mrmov_str]
         self.rA = get_r(rb)
         self.rB = get_r(ra)
         self.imm = get_num(D)
@@ -249,8 +266,17 @@ instr = {
     'cmovge': rrmovq,
     'cmovg': rrmovq,
     'irmovq': irmovq,
-    'rmmovq': rmmovq,
-    'mrmovq': mrmovq,
+    'rmmovq': rmmov,
+    "rmmovl": rmmov,
+    "rmmovw": rmmov,
+    "rmmovb": rmmov,
+    'mrmovq': mrmov,
+    'mrmovlu': mrmov,
+    'mrmovwu': mrmov,
+    'mrmovbu': mrmov,
+    'mrmovls': mrmov,
+    'mrmovws': mrmov,
+    'mrmovbs': mrmov,
     'addq': OPq,
     'subq': OPq,
     'andq': OPq,
@@ -439,22 +465,22 @@ def gen_byte_code(lines):
                     temp = rrmovq(line[0], line[1], line[2])
                 elif ins == irmovq:
                     temp = irmovq(line[2], line[1])
-                elif ins == rmmovq:
+                elif ins == rmmov:
                     if '(' not in line[2] and ')' not in line[2]:
-                        temp = rmmovq(line[1], "RNONE", line[2])
+                        temp = rmmov(line[1], "RNONE", line[2], line[0])
                     else:
                         opr = line[2].replace(')', '').split('(')
                         if len(opr[0]) == 0:
                             opr[0] = '0'
-                        temp = rmmovq(line[1], opr[1], opr[0])
-                elif ins == mrmovq:
+                        temp = rmmov(line[1], opr[1], opr[0], line[0])
+                elif ins == mrmov:
                     if '(' not in line[1] and ')' not in line[1]:
-                        temp = mrmovq("RNONE", line[1], line[2])
+                        temp = mrmov("RNONE", line[2], line[1], line[0])
                     else:
                         opr = line[1].replace(')', '').split('(')
                         if len(opr[0]) == 0:
                             opr[0] = '0'
-                        temp = mrmovq(opr[1], line[2], opr[0])
+                        temp = mrmov(opr[1], line[2], opr[0], line[0])
                 elif ins == OPq:
                     temp = OPq(line[0], line[1], line[2])
                 elif ins == iOPq:
@@ -472,6 +498,7 @@ def gen_byte_code(lines):
                 res.append(str(temp))
         except Exception as e:
             print(f"Syntax Error At: {line}")
+            traceback.print_exc()
             print("Assemble Terminated")
             exit(1)
     return res

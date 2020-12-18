@@ -11,6 +11,7 @@
 struct W_Reg {
     uint8_t stat{SAOK};
     uint8_t icode{0};
+    uint8_t ifun{0};
     uint64_t valE{0};
     uint64_t valM{0};
     uint8_t dstE{RNONE};
@@ -102,6 +103,7 @@ struct e_wire {
 };
 struct m_wire {
     uint8_t icode{INOP};
+    uint8_t ifun{0};
     uint64_t valE{0};
     uint64_t dstE{0};
     uint64_t dstM{0};
