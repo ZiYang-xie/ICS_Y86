@@ -144,7 +144,11 @@ void Device::Fetch() {
         }
     }
     if (need_valC) {
-        f.valC = Read8Bytes(f_pc + need_regids + 1);
+        if (IfAddrExecutable(f_pc + need_regids + 1)) {
+            f.valC = Read8Bytes(f_pc + need_regids + 1);
+        } else {
+            f.Stat = SINS;
+        }
     }
     f.valP = f_pc + 1 + need_regids + 8 * need_valC;
     if (In(SHLT, f.Stat)) {
@@ -506,10 +510,8 @@ void Device::Memory() {
             }
         } else {
             // m.stat = SADR; 没有人比我更会面向测例编程
+            // 认真说：SINS和SADR都是可以的，但这里遵循助教的规范，当二者同时存在时，选择SINS
             m.stat = m.stat == SINS ? SINS : SADR;
-            if (In(M.icode, IPUSHQ, IPOPQ)) {
-                M.valE = 0;
-            }
         }
     }
     m.icode = M.icode;
@@ -528,15 +530,15 @@ void Device::M2W() {
     W.dstM = m.dstM;
 }
 void Device::Writeback() {
-    //写回寄存器
-    if (W.dstE != RNONE) {
+    //写回寄存器，如果遇到错误则不允许写入
+    if (W.dstE != RNONE && W.stat == SAOK) {
         if (W.icode != IMRMOVQ) {
             Reg[W.dstE] = W.valE;
         } else {
             WriteReg(W.dstE, W.ifun, W.valE);
         }
     }
-    if (W.dstM != RNONE) {
+    if (W.dstM != RNONE && W.stat == SAOK) {
         if (W.icode != IMRMOVQ) {
             Reg[W.dstM] = W.valM;
         } else {

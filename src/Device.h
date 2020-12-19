@@ -119,8 +119,8 @@ class Device {
     [[nodiscard]] uint8_t SelectFStat() const;
     [[nodiscard]] uint64_t SelectAluA() const;
     [[nodiscard]] uint64_t SelectAluB() const;
-    static bool IfAddrWriteable(uint64_t pos);
-    static bool IfAddrExecutable(uint64_t pos);
+    bool IfAddrWriteable(uint64_t pos);
+    bool IfAddrExecutable(uint64_t pos);
     void Write4Bytes(uint64_t pos, uint64_t val);
     void Write2Bytes(uint64_t pos, uint64_t val);
     void Write1Bytes(uint64_t pos, uint64_t val);
