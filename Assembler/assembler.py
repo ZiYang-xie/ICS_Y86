@@ -3,6 +3,7 @@ import argparse
 import copy
 import traceback
 
+
 def get_hex_repr(h, size):
     if h < 0:
         h = 1 << 64 + h
@@ -558,15 +559,15 @@ if __name__ == "__main__":
     parser.add_argument("-np", "--noprefix", dest="noprefix",
                         action="store_true", help="Do not generate prefix in raw output")
     args = parser.parse_args()
-    if args.sourcefile[-3:] == '.ys':
+    if args.sourcefile.split('.')[-1] == 'ys':
         res = assemble_file(args.sourcefile)
-    elif args.sourcefile[-3:] == '.yo':
+    elif args.sourcefile.split('.')[-1] == 'yo':
         args.raw = True
         with open(args.sourcefile) as f:
             res = f.read()
     else:
         print(
-            f"Invalid file format {args.sourcefile[-3:]}, only support .yo and .ys file")
+            f"Invalid file format \"{ ''if '/' in args.sourcefile.split('.')[-1] else '.'+args.sourcefile.split('.')[-1]}\", only support .yo and .ys file")
         exit(1)
     if args.raw is True:
         res = process_to_raw(res.split('\n'), args.noprefix is False)
