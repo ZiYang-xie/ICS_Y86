@@ -5,6 +5,7 @@
 
 #include <map>
 
+#include "Device.h"
 #include "util.h"
 template <typename T, unsigned long N>
 static std::string GetName(std::array<T, N> arr, int idx) {
@@ -159,6 +160,7 @@ json OutputToJsonCycle(const Device& d) {
                             {"valM", Format("0x%x", d.W.valM)},
                             {"dstE", GetRegName(d.W.dstE)},
                             {"detM", GetRegName(d.W.dstM)}}}};
+    res["Console"] = d.GetConsoleOutput();
     return res;
 }
 void OutputToJsonFinal(int cycle_num, int ins_num,

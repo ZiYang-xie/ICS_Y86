@@ -63,8 +63,3 @@ void Controller::Run(bool if_output, int max_cycle, std::ostream& os) {
     OutputToJsonFinal(idx - 1, idx * 0.8, cycle_vec, os);
 #endif
 }
-std::string Controller::GetConsoleOutput() {
-    char dst[0x100] = {0};
-    memcpy(dst, d.Mem + CONSOLE_MEM_START, CONSOLE_MEM_SIZE);
-    return std::string(dst);
-}

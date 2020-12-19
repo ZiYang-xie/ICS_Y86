@@ -5,7 +5,13 @@
 
 #include <stdexcept>
 #include <string>
+#include <utility>
+#include <vector>
 
+#include "../library/json.hpp"
+#include "Controller.h"
+#include "Output.h"
+#include "cstring"
 #include "instr.h"
 #include "util.h"
 Device::Device(std::string str) {
@@ -682,4 +688,9 @@ void Device::UpdateIfJumpState() {
             if_jump_state = if_jump_state == 3 ? 3 : if_jump_state + 1;
         }
     }
+}
+std::string Device::GetConsoleOutput() const {
+    char dst[0x100] = {0};
+    memcpy(dst, Mem + CONSOLE_MEM_START, CONSOLE_MEM_SIZE);
+    return std::string(dst);
 }

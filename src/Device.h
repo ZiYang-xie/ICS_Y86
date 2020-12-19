@@ -83,6 +83,8 @@ class Device {
     void SetCC();
     //更新if_jump_state状态机
     void UpdateIfJumpState();
+    //读取Console的结果
+    std::string GetConsoleOutput() const;
 
    private:
     uint64_t text_section_end{0};
@@ -119,14 +121,14 @@ class Device {
     [[nodiscard]] uint8_t SelectFStat() const;
     [[nodiscard]] uint64_t SelectAluA() const;
     [[nodiscard]] uint64_t SelectAluB() const;
-    bool IfAddrWriteable(uint64_t pos) const;
-    bool IfAddrExecutable(uint64_t pos) const;
+    [[nodiscard]] bool IfAddrWriteable(uint64_t pos) const;
+    [[nodiscard]] bool IfAddrExecutable(uint64_t pos) const;
     void Write4Bytes(uint64_t pos, uint64_t val);
     void Write2Bytes(uint64_t pos, uint64_t val);
     void Write1Bytes(uint64_t pos, uint64_t val);
-    uint64_t Read4Bytes(uint64_t pos) const;
-    uint64_t Read2Bytes(uint64_t pos) const;
-    uint64_t Read1Bytes(uint64_t pos) const;
+    [[nodiscard]] uint64_t Read4Bytes(uint64_t pos) const;
+    [[nodiscard]] uint64_t Read2Bytes(uint64_t pos) const;
+    [[nodiscard]] uint64_t Read1Bytes(uint64_t pos) const;
     uint64_t ReadReg(uint8_t reg_idx, uint8_t ifun);
     void WriteReg(uint8_t reg_idx, uint8_t ifun, uint64_t val);
     void ReadMemToValM(uint64_t mem_addr);
