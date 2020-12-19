@@ -248,7 +248,47 @@ class iOPq(Instr):
             'iaddq': 0,
             'isubq': 1,
             'iandq': 2,
-            'ixorq': 3
+            'ixorq': 3,
+            'iorq': 4,
+            'ishl': 5,
+            'isal': 6,
+            'ishr': 7,
+            'isar': 8,
+            'imulq': 9,
+            'idivq': 0xa,
+            'iremq': 0xb,
+            'iminq': 0xc,
+            'imaxq': 0xd,
+        }
+        self.ifun = choice[op_str]
+        self.rA = 0xf
+        self.rB = get_r(rb)
+        self.imm = get_num(imm)
+
+
+class OPqN(Instr):
+    size = 2
+
+    def __init__(self, op_str, ra, rb):
+        super().__init__()
+        self.icode = 0xd
+        choice = {
+            'testq': 2,
+            'cmpq': 1
+        }
+        self.ifun = choice[op_str]
+        self.rA = get_r(ra)
+        self.rB = get_r(rb)
+
+
+class iOPqN(Instr):
+    size = 10
+
+    def __init__(self, op_str, rb, imm):
+        super().__init__()
+        self.icode = 0xe
+        choice = {
+            'icmpq': 1
         }
         self.ifun = choice[op_str]
         self.rA = 0xf
@@ -296,6 +336,16 @@ instr = {
     'isubq': iOPq,
     'iandq': iOPq,
     'ixorq': iOPq,
+    'iorq': iOPq,
+    'ishl': iOPq,
+    'isal': iOPq,
+    'ishr': iOPq,
+    'isar': iOPq,
+    'imulq': iOPq,
+    'idivq': iOPq,
+    'iremq': iOPq,
+    'iminq': iOPq,
+    'imaxq': iOPq,
     'jmp': jXX,
     'jle': jXX,
     'jl': jXX,
@@ -306,7 +356,10 @@ instr = {
     'call': call,
     'ret': ret,
     'pushq': pushq,
-    'popq': popq
+    'popq': popq,
+    'testq': OPqN,
+    'cmpq': OPqN,
+    'icmpq': iOPqN
 }
 
 
@@ -484,8 +537,12 @@ def gen_byte_code(lines):
                         temp = mrmov(opr[1], line[2], opr[0], line[0])
                 elif ins == OPq:
                     temp = OPq(line[0], line[1], line[2])
+                elif ins == OPqN:
+                    temp = OPqN(line[0], line[1], line[2])
                 elif ins == iOPq:
                     temp = iOPq(line[0], line[2], line[1])
+                elif ins == iOPqN:
+                    temp = iOPqN(line[0], line[2], line[1])
                 elif ins == jXX:
                     temp = jXX(line[0], line[1])
                 elif ins == call:

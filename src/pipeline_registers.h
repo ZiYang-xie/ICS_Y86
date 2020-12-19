@@ -73,6 +73,7 @@ struct f_wire {
     uint64_t valC{0};
     uint64_t valP{0};
     bool ifJump{true};
+    uint64_t pc{0};
 };
 struct d_wire {
     uint8_t stat{SAOK};
@@ -87,6 +88,7 @@ struct d_wire {
     uint64_t valA{0};
     uint64_t valB{0};
     bool ifJump{true};
+    uint64_t pc{0};
 };
 struct e_wire {
     bool Cnd{false};
@@ -100,6 +102,7 @@ struct e_wire {
     uint64_t dstM{0};
     uint64_t valC{0};
     bool ifJump{true};
+    uint64_t pc{0};
 };
 struct m_wire {
     uint8_t icode{INOP};

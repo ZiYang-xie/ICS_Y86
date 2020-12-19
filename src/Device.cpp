@@ -38,14 +38,14 @@ Device::Device(std::string str) {
     }
 }
 bool Device::IfAddrReadable(uint64_t pos) { return pos >= 0 && pos < MEM_SIZE; }
-bool Device::IfAddrWriteable(uint64_t pos) {
+bool Device::IfAddrWriteable(uint64_t pos) const {
 #ifdef TEXT_CHECK
     return pos >= text_section_end && pos < MEM_SIZE;
 #else
     return pos >= 0 && pos < MEM_SIZE;
 #endif
 }
-bool Device::IfAddrExecutable(uint64_t pos) {
+bool Device::IfAddrExecutable(uint64_t pos) const {
 #ifdef TEXT_CHECK
     return pos >= 0 && pos < text_section_end;
 #else
@@ -128,31 +128,32 @@ void Device::Fetch() {
     if (F.control == CSTALL) {
         return;
     }
-    uint64_t f_pc = SelectPC();
-    f.icode = ReadHigh4Bits(f_pc);
-    f.ifun = ReadLow4Bits(f_pc);
+    f.pc = SelectPC();
+    f.icode = ReadHigh4Bits(f.pc);
+    f.ifun = ReadLow4Bits(f.pc);
     f.Stat = SelectFStat();
-    bool need_regids =
-        In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ, IRMMOVQ, IMRMOVQ);
-    bool need_valC = In(f.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL);
+    bool need_regids = In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ,
+                          IRMMOVQ, IMRMOVQ, IIOPQ, IOPQ, IIOPQN);
+    bool need_valC =
+        In(f.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIOPQ, IIOPQN);
     if (need_regids) {
-        if (IfAddrExecutable(f_pc + 1)) {
-            f.ra = ReadHigh4Bits(f_pc + 1);
-            f.rb = ReadLow4Bits(f_pc + 1);
+        if (IfAddrExecutable(f.pc + 1)) {
+            f.ra = ReadHigh4Bits(f.pc + 1);
+            f.rb = ReadLow4Bits(f.pc + 1);
         } else {
             f.Stat = SINS;
         }
     }
     if (need_valC) {
-        if (IfAddrExecutable(f_pc + need_regids + 1)) {
-            f.valC = Read8Bytes(f_pc + need_regids + 1);
+        if (IfAddrExecutable(f.pc + need_regids + 1)) {
+            f.valC = Read8Bytes(f.pc + need_regids + 1);
         } else {
             f.Stat = SINS;
         }
     }
-    f.valP = f_pc + 1 + need_regids + 8 * need_valC;
+    f.valP = f.pc + 1 + need_regids + 8 * need_valC;
     if (In(SHLT, f.Stat)) {
-        F.predPC = f_pc;
+        F.predPC = f.pc;
     } else {
         F.predPC = GetFPredPc();
     }
@@ -179,18 +180,25 @@ uint64_t Device::SelectPC() {
             return e.valC;  // JXX但是没有成功跳转的情况
         else
             return M.valE;
-    } else if (W.icode == IRET) {
+    }
 #ifdef HARDWARE_STACK
+    else if (W.icode == IRET && W.valM != hardware_stack.top()) {
+        return W.valM;
+    } else if (D.icode == IRET) {
         if (hardware_stack.empty())
-            return W.valM;
+            return F.predPC;
         else {
             uint64_t temp = hardware_stack.top();
             hardware_stack.pop();
             return temp;
         }
-#endif
+    }
+#else
+    else if (W.icode == IRET) {
         return W.valM;
-    } else {
+    }
+#endif
+    else {
         return F.predPC;
     }
 }
@@ -267,7 +275,7 @@ uint8_t Device::SelectDstM() const {
     }
 }
 uint8_t Device::SelectDstE() {
-    if (In(D.icode, IRRMOVQ, IIRMOVQ, IOPQ)) {
+    if (In(D.icode, IRRMOVQ, IIRMOVQ, IOPQ, IIOPQ)) {
         return D.rB;
     } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
         if (D.rB != RNONE && D.icode == IPUSHQ) {
@@ -279,7 +287,7 @@ uint8_t Device::SelectDstE() {
     }
 }
 uint8_t Device::SelectSrcB() const {
-    if (In(D.icode, IOPQ, IRMMOVQ, IMRMOVQ)) {
+    if (In(D.icode, IOPQ, IRMMOVQ, IMRMOVQ, IIOPQ, IOPQN, IIOPQN)) {
         return D.rB;
     } else if (In(D.icode, IPUSHQ, IPOPQ, ICALL, IRET)) {
         return RRSP;
@@ -288,7 +296,7 @@ uint8_t Device::SelectSrcB() const {
     }
 }
 uint8_t Device::SelectSrcA() const {
-    if (In(D.icode, IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ)) {
+    if (In(D.icode, IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ, IOPQN)) {
         return D.rA;
     } else if (In(D.icode, IPOPQ, IRET)) {
         return RRSP;
@@ -305,9 +313,9 @@ void Device::Execute() {
     // 设置aluB
     uint64_t aluB = SelectAluB();
     // 设置alufun
-    uint8_t alufun = E.icode == IOPQ ? E.ifun : ALUADD;
+    uint8_t alufun = In(E.icode, IOPQ, IIOPQ) ? E.ifun : ALUADD;
     // 设置set_cc
-    bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
+    bool set_cc = In(E.icode, IOPQ, IIOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
     // ALU计算
     auto func = GetALUFunc(alufun);
@@ -336,7 +344,8 @@ void Device::Execute() {
     e.valC = E.valC;
 }
 uint64_t Device::SelectAluB() const {
-    if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ)) {
+    if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ,
+           IIOPQ)) {
         return E.valB;
     } else if (In(E.icode, IRRMOVQ, IIRMOVQ, IJXX)) {
         return 0;
@@ -347,7 +356,7 @@ uint64_t Device::SelectAluB() const {
 uint64_t Device::SelectAluA() const {
     if (In(E.icode, IRRMOVQ, IOPQ, IJXX)) {
         return E.valA;
-    } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ)) {
+    } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IIOPQ)) {
         return E.valC;
     } else if (In(E.icode, ICALL, IPUSHQ)) {
         return -8;
@@ -457,27 +466,7 @@ void Device::Memory() {
     // 读内存
     if (mem_read) {
         if (IfAddrReadable(mem_addr)) {
-            if (M.icode != IMRMOVQ) {
-                m.valM = Read8Bytes(mem_addr);
-            } else {
-                switch (M.ifun) {
-                    case (RQU):
-                        m.valM = Read8Bytes(mem_addr);
-                        break;
-                    case (RLS):
-                    case (RLU):
-                        m.valM = Read4Bytes(mem_addr);
-                        break;
-                    case (RWS):
-                    case (RWU):
-                        m.valM = Read2Bytes(mem_addr);
-                        break;
-                    case (RBS):
-                    case (RBU):
-                        m.valM = Read1Bytes(mem_addr);
-                        break;
-                }
-            }
+            ReadMemToValM(mem_addr);
         } else {
             // m.stat = SADR;
             m.stat = m.stat == SINS ? SINS : SADR;
@@ -487,27 +476,7 @@ void Device::Memory() {
         }
     } else if (mem_write) {
         if (IfAddrWriteable(mem_addr)) {
-            if (M.icode != IRMMOVQ) {
-                Write8Bytes(mem_addr, M.valA);
-            } else {
-                switch (M.ifun) {
-                    case (RQU):
-                        Write8Bytes(mem_addr, M.valA);
-                        break;
-                    case (RLS):
-                    case (RLU):
-                        Write4Bytes(mem_addr, M.valA);
-                        break;
-                    case (RWS):
-                    case (RWU):
-                        Write2Bytes(mem_addr, M.valA);
-                        break;
-                    case (RBS):
-                    case (RBU):
-                        Write1Bytes(mem_addr, M.valA);
-                        break;
-                }
-            }
+            WriteMemFromValA(mem_addr);
         } else {
             // m.stat = SADR; 没有人比我更会面向测例编程
             // 认真说：SINS和SADR都是可以的，但这里遵循助教的规范，当二者同时存在时，选择SINS
@@ -519,6 +488,52 @@ void Device::Memory() {
     m.dstE = M.dstE;
     m.dstM = M.dstM;
     m.ifun = M.ifun;
+}
+void Device::WriteMemFromValA(uint64_t mem_addr) {
+    if (M.icode != IRMMOVQ) {
+        Write8Bytes(mem_addr, M.valA);
+    } else {
+        switch (M.ifun) {
+            case (RQU):
+                Write8Bytes(mem_addr, M.valA);
+                break;
+            case (RLS):
+            case (RLU):
+                Write4Bytes(mem_addr, M.valA);
+                break;
+            case (RWS):
+            case (RWU):
+                Write2Bytes(mem_addr, M.valA);
+                break;
+            case (RBS):
+            case (RBU):
+                Write1Bytes(mem_addr, M.valA);
+                break;
+        }
+    }
+}
+void Device::ReadMemToValM(uint64_t mem_addr) {
+    if (M.icode != IMRMOVQ) {
+        m.valM = Read8Bytes(mem_addr);
+    } else {
+        switch (M.ifun) {
+            case (RQU):
+                m.valM = Read8Bytes(mem_addr);
+                break;
+            case (RLS):
+            case (RLU):
+                m.valM = Read4Bytes(mem_addr);
+                break;
+            case (RWS):
+            case (RWU):
+                m.valM = Read2Bytes(mem_addr);
+                break;
+            case (RBS):
+            case (RBU):
+                m.valM = Read1Bytes(mem_addr);
+                break;
+        }
+    }
 }
 void Device::M2W() {
     W.stat = m.stat;
@@ -558,15 +573,38 @@ bool Device::IfLoadUseH() const {
 bool Device::IfMispredicted() const {
     return E.icode == IJXX && (e.Cnd ^ E.ifJump);
 }
+#ifdef HARDWARE_STACK
+bool Device::IfMispredictRet() const {
+    return M.icode == IRET && (m.valM != hardware_stack.top());
+}
+#else
 bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
+#endif
 void Device::SetFControl() {
+#ifdef HARDWARE_STACK
+    if (!IfMispredicted() && (IfLoadUseH())) {
+        F.control = CSTALL;
+    } else {
+        F.control = CNORMAL;
+    }
+#else
     if (!IfMispredicted() && (IfLoadUseH() || IfRet())) {
         F.control = CSTALL;
     } else {
         F.control = CNORMAL;
     }
+#endif
 }
 void Device::SetDControl() {
+#ifdef HARDWARE_STACK
+    if (IfLoadUseH()) {
+        D.control = CSTALL;
+    } else if (IfMispredictRet() || IfMispredicted()) {
+        D.control = CBUBBLE;
+    } else {
+        D.control = CNORMAL;
+    }
+#else
     if (IfLoadUseH()) {
         D.control = CSTALL;
     } else if (IfRet() || IfMispredicted() || M.icode == IRET) {
@@ -574,13 +612,22 @@ void Device::SetDControl() {
     } else {
         D.control = CNORMAL;
     }
+#endif
 }
 void Device::SetEControl() {
+#ifdef HARDWARE_STACK
+    if (IfMispredicted() || IfMispredictRet() || IfLoadUseH()) {
+        E.control = CBUBBLE;
+    } else {
+        E.control = CNORMAL;
+    }
+#else
     if (IfMispredicted() || IfLoadUseH() || E.icode == IRET) {
         E.control = CBUBBLE;
     } else {
         E.control = CNORMAL;
     }
+#endif
 }
 uint64_t Device::GetPC() const { return addr_queue.front(); }
 void Device::SetDSrcA() {
@@ -617,7 +664,7 @@ void Device::SetDSrcB() {
     }
 }
 void Device::SetCC() {
-    bool set_cc = In(E.icode, IOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
+    bool set_cc = In(E.icode, IOPQ, IIOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
     if (set_cc) {
         for (int i = 0; i < 3; i++) {

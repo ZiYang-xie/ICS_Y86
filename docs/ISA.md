@@ -177,5 +177,33 @@
 12. maxq (Maximum, from RISC-V)
 ```
 
+### iOPq
 
+- Icode： 0xc
+
+- 参数：rb imm
+
+- 动作：rb = rb op imm
+
+### OPqN
+
+- icode: 0xd
+- 动作：与opq一样，但最后结果不写入
+
+#### testq
+
+- Ifun: 2
+
+#### cmpq
+
+- Ifun: 1
+
+### iOPqN
+
+- icode: 0xe
+- 动作：与iopq一样，但最后结果不写入
+
+#### icmpq
+
+- Ifun: 1
 
