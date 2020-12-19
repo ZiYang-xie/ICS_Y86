@@ -230,3 +230,8 @@ build/.cmake/api/v1/reply/index-2020-12-17T16-30-04-0453.json
 build/.cmake/api/v1/reply/target-gmock_main-Debug-f95c9ade178aa18c29de.json
 build/.cmake/api/v1/reply/target-Google_Tests_run-Debug-6a99711649ddd4ec83ee.json
 build/.cmake/api/v1/reply/target-ICS_Y86-Debug-d297d687ac667a595c59.json
+build/test.json
+build/.cmake/api/v1/reply/codemodel-v2-da55c551bb4adf7a6b51.json
+build/.cmake/api/v1/reply/index-2020-12-19T15-36-02-0130.json
+build/.cmake/api/v1/reply/target-Google_Tests_run-Debug-c51a97bc2099f5677f6a.json
+build/.cmake/api/v1/reply/target-ICS_Y86-Debug-05c031864230102c5415.json

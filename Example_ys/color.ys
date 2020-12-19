@@ -1,0 +1,19 @@
+.define red $0xff0000ff
+.define green $0xff00ff00
+.define blue $0xffff0000
+.define start $0x800
+.define flag $0x7f8
+.pos 0
+irmovq start %rsp
+irmovq red %rax
+rmmovl %rax (%rsp)
+iaddq $4 %rsp
+irmovq green %rax
+rmmovl %rax (%rsp)
+iaddq $4 %rsp
+irmovq blue %rax
+rmmovl %rax (%rsp)
+iaddq $4 %rsp
+irmovq $0 %rax
+rmmovq %rax flag
+halt

@@ -14,6 +14,7 @@
 #include "cstring"
 #include "instr.h"
 #include "util.h"
+using json = nlohmann::json;
 Device::Device(std::string str) {
     memset(Reg, 0, REG_SIZE);
     memset(Mem, 0, MEM_SIZE);
@@ -693,4 +694,24 @@ std::string Device::GetConsoleOutput() const {
     char dst[0x100] = {0};
     memcpy(dst, Mem + CONSOLE_MEM_START, CONSOLE_MEM_SIZE);
     return std::string(dst);
+}
+json Device::GetGraphicsOutput() const {
+    static json res;
+    if (Mem[GRAPHICS_MEM_FLAG] == 0) {
+        res.clear();
+        Mem[GRAPHICS_MEM_FLAG] = 1;
+        for (int i = 0; i < GRAPHICS_LENGTH; i++) {
+            json line;
+            for (int j = 0; j < GRAPHICS_LENGTH; j++) {
+                int shift = (8 * i + j) * 4 + GRAPHICS_MEM_START;
+                json rgba{{"r", Mem[shift]},
+                          {"g", Mem[shift + 1]},
+                          {"b", Mem[shift + 2]},
+                          {"a", Mem[shift + 3]}};
+                line[j] = rgba;
+            }
+            res[i] = line;
+        }
+    }
+    return res;
 }

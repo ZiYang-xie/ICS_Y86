@@ -161,6 +161,7 @@ json OutputToJsonCycle(const Device& d) {
                             {"dstE", GetRegName(d.W.dstE)},
                             {"detM", GetRegName(d.W.dstM)}}}};
     res["Console"] = d.GetConsoleOutput();
+    res["Graphics"] = d.GetGraphicsOutput();
     return res;
 }
 void OutputToJsonFinal(int cycle_num, int ins_num,

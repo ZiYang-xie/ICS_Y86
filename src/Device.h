@@ -1,6 +1,8 @@
 //
 // Created by 王少文 on 2020/11/27.
 //
+#ifndef ICS_Y86_DEVICE_H
+#define ICS_Y86_DEVICE_H
 #include <cstdint>
 #include <cstring>
 #include <functional>
@@ -10,13 +12,15 @@
 
 #include "index_const.h"
 #include "pipeline_registers.h"
-#ifndef ICS_Y86_DEVICE_H
-#define ICS_Y86_DEVICE_H
+#include "../library/json.hpp"
 const int MEM_SIZE = 0x1000;
-const int GRAPHICS_MEM_START = 0x800;
-const int GRAPHICS_MEM_SIZE = 0x100;
 const int CONSOLE_MEM_START = 0x900;
 const int CONSOLE_MEM_SIZE = 0x99;
+const int GRAPHICS_MEM_FLAG = 0x7f8;
+const int GRAPHICS_LENGTH = 4;
+constexpr int GRAPHICS_MEM_SIZE = GRAPHICS_LENGTH*GRAPHICS_LENGTH*4;
+constexpr int GRAPHICS_MEM_START = 0x800;
+
 const int REG_SIZE = 0xf;
 class Device {
    public:
@@ -35,7 +39,7 @@ class Device {
     void SetDSrcA();
     void SetDSrcB();
     uint64_t Reg[REG_SIZE]{};
-    uint8_t Mem[MEM_SIZE]{};
+    mutable uint8_t Mem[MEM_SIZE]{};
     //按ZF, SF, OF的顺序为0, 1, 2
     bool CFLAG[3]{true, false, false};
     uint8_t Stat{};
@@ -84,7 +88,9 @@ class Device {
     //更新if_jump_state状态机
     void UpdateIfJumpState();
     //读取Console的结果
-    std::string GetConsoleOutput() const;
+    [[nodiscard]] std::string GetConsoleOutput() const;
+    //读取Graphics的结果
+    nlohmann::json GetGraphicsOutput() const;
 
    private:
     uint64_t text_section_end{0};
@@ -133,7 +139,9 @@ class Device {
     void WriteReg(uint8_t reg_idx, uint8_t ifun, uint64_t val);
     void ReadMemToValM(uint64_t mem_addr);
     void WriteMemFromValA(uint64_t mem_addr);
+#ifdef HARDWARE_STACK
     bool IfMispredictRet() const;
+#endif
 };
 
 #endif  // ICS_Y86_DEVICE_H
