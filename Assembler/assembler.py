@@ -465,6 +465,8 @@ def get_memaddr(lines: list):
                 res.append(res[idx - 1] + 1)
             elif line[0] == '.string':
                 res.append(res[idx - 1] + 2 * len(line[1]))
+            elif line[0] == '.define':
+                res.append(res[idx-1])
             elif ':' in line[0]:
                 res.append(res[idx - 1])
             else:
@@ -475,9 +477,14 @@ def get_memaddr(lines: list):
             exit(1)
     return res[:-1]
 
+def get_def_label(lines):
+    labels={}
+    for line in lines:
+        if line[0]=='.define':
+            labels[line[1]]=line[2]
+    return labels
 
-def replace_label(lines, mem):
-    labels = {}
+def replace_label(lines, mem, labels={}):
     res = []
     for i in range(len(lines)):
         if ':' in lines[i][0]:
@@ -497,7 +504,7 @@ def gen_byte_code(lines):
     res = []
     for line in lines:
         try:
-            if line[0] == '.pos' or line[0] == '.align' or ':' in line[0]:
+            if line[0] in ('.pos','.align','.define') or ':' in line[0]:
                 res.append('')
             elif line[0] == '.quad':
                 res.append(get_hex_repr(int(line[1].replace("$", ""), 16), 8))
@@ -576,7 +583,8 @@ def process_to_yo(lines: list):
     lines = detach_label(lines)
     lines_ref = copy.deepcopy(lines)
     mem = get_memaddr(lines)
-    lines = replace_label(lines, mem)
+    labels = get_def_label(lines)
+    lines = replace_label(lines, mem, labels)
     byte_code = gen_byte_code(lines)
     return get_output(mem, lines_ref, byte_code)
 
