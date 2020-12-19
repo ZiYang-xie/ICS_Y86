@@ -164,7 +164,7 @@ json OutputToJsonCycle(const Device& d) {
     res["Graphics"] = d.GetGraphicsOutput();
     return res;
 }
-void OutputToJsonFinal(int cycle_num, int ins_num,
+void OutputToJsonFinal(uint64_t cycle_num, uint64_t ins_num,
                        const std::vector<json>& cycle, std::ostream& os) {
     json res;
     res["CycleNum"] = cycle_num;

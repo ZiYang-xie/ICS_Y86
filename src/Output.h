@@ -28,7 +28,7 @@ void OutputProcedure(std::ostream& os, int idx, const Device& d);
 void OutputFinal(const Device& d);
 #ifdef OUTPUT_JSON
 json OutputToJsonCycle(const Device& d);
-void OutputToJsonFinal(int cycle_num, int ins_num,
+void OutputToJsonFinal(uint64_t cycle_num, uint64_t ins_num,
                        const std::vector<json>& cycle, std::ostream& os);
 #endif
 #endif

@@ -93,6 +93,13 @@ class Device {
     nlohmann::json GetGraphicsOutput() const;
 
    private:
+    uint64_t bad_instr_num{0};
+
+   public:
+    uint64_t GetBadInstrNum() const;
+
+   private:
+    // 这是可执行的最后一个内存地址
     uint64_t text_section_end{0};
     // 这是一个硬件中并不存在的queue，用于方便我们在前端显示PC
     // 这个Addr的大小始终为5，因为我们总是显示在Writeback阶段的PC值

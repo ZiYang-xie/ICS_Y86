@@ -597,6 +597,7 @@ void Device::SetFControl() {
 #else
     if (!IfMispredicted() && (IfLoadUseH() || IfRet())) {
         F.control = CSTALL;
+        bad_instr_num += 1;
     } else {
         F.control = CNORMAL;
     }
@@ -614,8 +615,10 @@ void Device::SetDControl() {
 #else
     if (IfLoadUseH()) {
         D.control = CSTALL;
+        bad_instr_num += 1;
     } else if (IfRet() || IfMispredicted() || M.icode == IRET) {
         D.control = CBUBBLE;
+        bad_instr_num += 1;
     } else {
         D.control = CNORMAL;
     }
@@ -631,6 +634,7 @@ void Device::SetEControl() {
 #else
     if (IfMispredicted() || IfLoadUseH() || E.icode == IRET) {
         E.control = CBUBBLE;
+        bad_instr_num += 1;
     } else {
         E.control = CNORMAL;
     }
@@ -715,3 +719,4 @@ json Device::GetGraphicsOutput() const {
     }
     return res;
 }
+uint64_t Device::GetBadInstrNum() const { return bad_instr_num; }

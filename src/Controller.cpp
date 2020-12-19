@@ -60,6 +60,6 @@ void Controller::Run(bool if_output, int max_cycle, std::ostream& os) {
         }
     }
 #ifdef OUTPUT_JSON
-    OutputToJsonFinal(idx - 1, idx * 0.8, cycle_vec, os);
+    OutputToJsonFinal(idx - 1, idx - 1 - d.GetBadInstrNum(), cycle_vec, os);
 #endif
 }
