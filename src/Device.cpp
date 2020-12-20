@@ -707,7 +707,7 @@ json Device::GetGraphicsOutput() const {
         for (int i = 0; i < GRAPHICS_LENGTH; i++) {
             json line;
             for (int j = 0; j < GRAPHICS_LENGTH; j++) {
-                int shift = (8 * i + j) * 4 + GRAPHICS_MEM_START;
+                int shift = (GRAPHICS_LENGTH * i + j) * 4 + GRAPHICS_MEM_START;
                 json rgba{{"r", Mem[shift]},
                           {"g", Mem[shift + 1]},
                           {"b", Mem[shift + 2]},

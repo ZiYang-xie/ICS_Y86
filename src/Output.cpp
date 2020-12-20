@@ -170,8 +170,6 @@ void OutputToJsonFinal(uint64_t cycle_num, uint64_t ins_num,
     res["CycleNum"] = cycle_num;
     res["InsNum"] = ins_num;
     res["Cycle"] = json(cycle);
-    os << "json_data(";
     os << res;
-    os << ");";
 }
 #endif

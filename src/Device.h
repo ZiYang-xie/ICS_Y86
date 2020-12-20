@@ -14,12 +14,12 @@
 #include "pipeline_registers.h"
 #include "../library/json.hpp"
 const int MEM_SIZE = 0x1000;
-const int CONSOLE_MEM_START = 0x900;
+const int CONSOLE_MEM_START = 0xf00;
 const int CONSOLE_MEM_SIZE = 0x99;
-const int GRAPHICS_MEM_FLAG = 0x7f8;
-const int GRAPHICS_LENGTH = 4;
+const int GRAPHICS_MEM_FLAG = 0xdf8;
+const int GRAPHICS_LENGTH = 8;
 constexpr int GRAPHICS_MEM_SIZE = GRAPHICS_LENGTH*GRAPHICS_LENGTH*4;
-constexpr int GRAPHICS_MEM_START = 0x800;
+constexpr int GRAPHICS_MEM_START = 0xe00;
 
 const int REG_SIZE = 0xf;
 class Device {

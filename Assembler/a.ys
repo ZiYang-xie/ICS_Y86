@@ -1,0 +1,13 @@
+mrmovq 0x150(%rsp) %rax
+mrmovq $0x100 %rax
+
+for(int i = 0;i<10;i++){
+    a[i] = 0;//a at 0x100
+}
+irmovq $0 %rsi
+irmovq $0 %rcx
+rmmovq %rcx 0x100(%rsi)
+iaddq $8 %rsi
+cmpq $rsi 10
+
+

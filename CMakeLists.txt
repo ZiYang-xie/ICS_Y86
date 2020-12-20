@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.10)
 project(ICS_Y86)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./build)

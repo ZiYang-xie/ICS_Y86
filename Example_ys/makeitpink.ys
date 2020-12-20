@@ -1,0 +1,20 @@
+.define start $0xe00
+.define flag $0xdf8
+.define pink $0xf699cd
+.pos 0
+irmovq pink %rax
+irmovq $0 %rbx
+irmovq start %rsp
+irmovq $64 %rcx
+irmovq $1 %rdx
+loop:
+    rmmovq %rax (%rsp)
+    iaddq $4 %rsp
+    iaddq $1 %rcx
+    rmmovq %rbx flag
+    subq %rdx %rcx
+    jne loop 
+    nop
+    nop
+halt
+
