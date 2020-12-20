@@ -5,11 +5,9 @@ import os
  
 app = Flask("glue")#实例化app对象
  
-testInfo = {}
 CORS(app, resources=r'/*')
 
 @app.route('/post',methods=['GET','POST'])#路由
- 
 
 @app.route('/')
 def upload():

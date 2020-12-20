@@ -3,9 +3,14 @@
     width: 40%!important;
 }
 
+.terminal_card
+{
+    width: 30%!important;
+}
+
 .now_card
 {
-    width: 55%!important;
+    width: 25%!important;
 }
 
 .main_card

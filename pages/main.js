@@ -376,6 +376,8 @@ export default {
             current_text:[{pc:"*", instr:"------- 目前没有指令 -------"}],
             current_pc: "",
             current_id: -1,
+            terminal: "",
+
             progress: 0,
             cpi: 0,
             progress_slide: 0,
@@ -390,10 +392,10 @@ export default {
     },
     methods: {
         getData: function() {
-            this.$http.jsonp('/flask/data.json', {jsonpCallback: "json_data"}).then(function (res){
+            this.$http.jsonp('/data.json', {jsonpCallback: "json_data"}).then(function (res){
                 this.json_data = JSON.parse(res.bodyText);
                 //this.task_name = this.json_data.fileName;
-                this.file_path = "./static/source/tmp.yo";
+                this.file_path = "../static/source/tmp.yo";
                 this.cycle_num = this.json_data.CycleNum;
                 this.ratio = Math.floor(10000/this.cycle_num);
             })
@@ -508,6 +510,8 @@ export default {
             {
                 this.info_data[0].PC = data.PC;
                 this.info_data[0].State = data.State;
+                this.terminal = data.Console;
+                console.log(this.terminal);
                 
                 for(let key in this.cc_data[0])
                     this.cc_data[0][key] = data.CC[key];
@@ -632,8 +636,8 @@ export default {
                                     </Col>
                                 </Row>
                                 <Row type="flex" justify="start" style="margin-top: 30px; margin-left: 5px">
-                                    <Col span="3" style="height:30px;">
-                                        <b style="line-height: 30px; margin-right: 10px">主频选择</b>
+                                    <Col span="2" style="height:30px;">
+                                        <b style="line-height: 30px; width: 100%">主频</b>
                                     </Col>
                                     <Col span="14" style="height:30px;">
                                         <Slider v-model="speed" :min="1" :step="1" show-input></Slider>
@@ -658,7 +662,7 @@ export default {
                         <Upload
                             ref="upload"
                             type="drag"
-                            action="//192.168.3.5:7777/post"
+                            action="//localhost:7777/post"
                             :format="file_format"
                             :on-format-error="handleFormatError"
                             :on-success="handleUploadSuccess"
@@ -673,7 +677,7 @@ export default {
                 <Divider></Divider>
                 <div class="body_card_wraper">
                     <Card class="reg_card">
-                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 寄存器</p>
+                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 寄存器 Registers</p>
                         <div style="min-height: 200px;">
                             <Table :row-class-name="reg_table_class" border stripe :columns="reg_list1" :data="reg_data1" ></Table>
                             <Table :row-class-name="reg_table_class" border stripe :columns="reg_list2" :data="reg_data2" ></Table>
@@ -681,7 +685,7 @@ export default {
                         </div>
                     </Card>
                     <Card class="now_card">
-                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 当前指令</p>
+                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 当前指令 Current Ins</p>
                         <div style="min-height: 200px;">
                             <List border item-layout="vertical">
                                 <ListItem v-for="(item, i) in current_text">
@@ -696,6 +700,11 @@ export default {
                                 </ListItem>
                             </List>
                         </div>
+                    </Card>
+                    <Card class="terminal_card">
+                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 终端 Terminal</p>
+                        <p v-if="terminal == ''">None Output</p>
+                        <b class="terminal_text" v-else>{{terminal}}</b>
                     </Card>
                 </div>
                 <Divider></Divider>

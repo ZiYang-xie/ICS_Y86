@@ -3,10 +3,11 @@ import Main from "./main.js"
 export default {
     data: function (){
         return {
+            terminal: ""
         }
     },
     created: function() {
-        this.text = Main.data().task_name;
+        this.text = Main.data();
         console.log(this.text)
     },
     template:`
@@ -21,20 +22,9 @@ export default {
         
         <Card shadow dis-hover="true">
             <div class="left_card_wrapper">
-                <Card class="text_card">
-                    <List>
-                        <ListItem>
-                            <ListItemMeta :title=text />
-                            <template slot="action">
-                                <li>
-                                    <a href="">Edit</a>
-                                </li>
-                                <li>
-                                    <a href="">More</a>
-                                </li>
-                            </template>
-                        </ListItem>
-                    </List>
+                <Card class="text_card" :bordered="false">
+                    <p slot="title">Terminal</p>
+                    <p></p>
                 </Card>
             </div>
         </Card>

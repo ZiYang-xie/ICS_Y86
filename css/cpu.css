@@ -38,3 +38,8 @@
     font-weight: bold!important;
     color: rgb(170, 170, 170);
 }
+
+.terminal_text
+{
+    font-size: 25px;
+}
