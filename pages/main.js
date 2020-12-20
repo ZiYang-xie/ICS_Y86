@@ -574,7 +574,7 @@ export default {
             }
         },
         BreakPointOk () {
-            this.$Message.info('Clicked ok');
+            this.$Message.success('断点设置成功');
         },
         BreakPointCancel () {
             return;
