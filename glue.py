@@ -28,24 +28,25 @@ def handleYoFile(f):
     with open('./static/json/filename.json', 'w') as name_file:
         name_file.write(filename_json)
     args = ['python3', './cpu/Assembler/assembler.py', filepath, '-r', '|', './cpu/ICS_Y86', '>', './static/json/data.json']
-    command = ""
-    for arg in args:
-        command = command + ' ' + arg
-    os.system(command)
+    execute_command(args)
 
 def handleYsFile(f):
-    filepath = './static/source/task.ys'
-    f.save(filepath)
+    f.save('./static/source/task.ys')
+    args1 = ['python3', './cpu/Assembler/assembler.py', './static/source/task.ys', '>', './static/source/task.yo']
+    execute_command(args1)
     filename_dict = [ {'filename':f.filename + " [编译模式] "} ]
     filename_json = json.dumps(filename_dict)
     with open('./static/json/filename.json', 'w') as name_file:
         name_file.write(filename_json)
-    args = ['python3', './cpu/Assembler/assembler.py', filepath, '-r', '|', './cpu/ICS_Y86', '>', './static/json/data.json']
+    
+    args2 = ['python3', './cpu/Assembler/assembler.py', './static/source/task.yo', '-r', '|', './cpu/ICS_Y86', '>', './static/json/data.json']
+    execute_command(args2)
+
+def execute_command(args):
     command = ""
     for arg in args:
         command = command + ' ' + arg
     os.system(command)
-
  
 if __name__ == '__main__':
     ip = "localhost" #填写ip

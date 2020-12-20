@@ -409,14 +409,15 @@ export default {
         },
         readFile: function() {
             this.$http.get(this.file_path).then(function(res){
+                this.text = [];
                 var tmp = res.bodyText.split('\n');
                 for(let i = 0; i < tmp.length; ++i)
                 {
                     var item = { pc: 0, instr: "" }; 
-                    if(tmp[i][0] == "0")
+                    if(tmp[i][0] == "0" && tmp[i][8] != " " && $.trim(tmp[i].slice(32))[0] != ".")
                     {
                         item.pc = tmp[i].slice(0,5);
-                        let tmp_ins = $.trim(tmp[i].slice(29));
+                        let tmp_ins = $.trim(tmp[i].slice(32));
                         var j;
                         for(j = 0; j < tmp_ins.length; ++j)
                         {
@@ -474,6 +475,7 @@ export default {
             this.getFileInfo();
             this.getData();
             this.readFile();
+            this.break_pc = [];
             this.cpi = 0;
             this.progress_slide = 0;
         },
@@ -625,7 +627,7 @@ export default {
             this.handleInfoUpdate();
             this.loadCurrentText();
             this.progress = Math.round(this.progress_slide / 100);
-            this.cpi = (this.text.length/this.cycle_num).toFixed(2);
+            this.cpi = (this.cycle_num/this.text.length).toFixed(2);
             if(this.handleBreakPoint() && !this.break_state)
                 return;
         }
