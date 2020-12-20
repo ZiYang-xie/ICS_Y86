@@ -6,7 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(src)
 add_subdirectory(test)
 #add_definitions("-DADVANCED_JUMP -DOUTPUT_JSON")
-add_definitions("-DADVANCED_JUMP -DTEXT_CHECK -DOUTPUT_JSON")
+#if(NOJSON)
+ #       add_definitions("-DADVANCED_JUMP -DTEXT_CHECK")
+#else()
+        add_definitions("-DADVANCED_JUMP -DTEXT_CHECK -DOUTPUT_JSON")
+#endif()
 add_executable(ICS_Y86
         src/main.cpp
         src/Device.cpp

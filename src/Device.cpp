@@ -675,7 +675,7 @@ void Device::SetDSrcB() {
     }
 }
 void Device::SetCC() {
-    bool set_cc = In(E.icode, IOPQ, IIOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
+    bool set_cc = In(E.icode, IOPQ, IIOPQ, IOPQN,IIOPQN) && !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
     if (set_cc) {
         for (int i = 0; i < 3; i++) {
