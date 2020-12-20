@@ -41,5 +41,21 @@
 
 .terminal_text
 {
-    font-size: 25px;
+    font-size: 20px;
+}
+
+.terminal_grid
+{
+    margin: 10px;
+    width: 120px;
+    height: 120px;
+    display: grid;
+    grid-template-columns: repeat(4, 30px);
+    grid-template-rows: repeat(4, 30px);
+}
+
+.grid_block
+{
+    width: 30px;
+    height: 30px;
 }

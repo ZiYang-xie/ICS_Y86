@@ -10,6 +10,7 @@
 
 .now_card
 {
+    cursor: pointer;
     width: 25%!important;
 }
 
@@ -30,7 +31,7 @@
 
 .controller_card
 {
-    width: 55%!important;
+    width: 56%!important;
 }
 
 .pipeline_card

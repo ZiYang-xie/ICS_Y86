@@ -7,7 +7,7 @@
 
 .button_class
 {
-    width: 70%;
+    width: 75%;
 }
 
 .circle
@@ -17,10 +17,17 @@
 
 .controller_circle
 {
-    display: block;
+    display: flex;
+    justify-content: right;
 }
 
 .fb_button
 {
     padding: 10px;
+}
+
+.controller_btn
+{
+    display: flex;
+    justify-content: start;
 }

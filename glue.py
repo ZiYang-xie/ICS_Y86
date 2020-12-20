@@ -13,17 +13,42 @@ CORS(app, resources=r'/*')
 def upload():
     if(request.method == "POST"):
         f = request.files['file']
-        filepath = './static/source/tmp.yo'
-        f.save(filepath)
-        args = ['python3', './cpu/striper.py', filepath, '|', './cpu/ICS_Y86', '>', 'data.json']
-        for arg in args:
-            command = arg + ' '
-        os.system(command)
-    return 'OK'
+        if(f.filename[-2:] == "yo"):
+            handleYoFile(f)
+            return 'Upload Yo Success'
+        elif(f.filename[-2:] == "ys"):
+            handleYsFile(f)
+            return 'Upload Ys Success'
  
+def handleYoFile(f):
+    filepath = './static/source/task.yo'
+    f.save(filepath)
+    filename_dict = [ {'filename':f.filename} ]
+    filename_json = json.dumps(filename_dict)
+    with open('./static/json/filename.json', 'w') as name_file:
+        name_file.write(filename_json)
+    args = ['python3', './cpu/Assembler/assembler.py', filepath, '-r', '|', './cpu/ICS_Y86', '>', './static/json/data.json']
+    command = ""
+    for arg in args:
+        command = command + ' ' + arg
+    os.system(command)
+
+def handleYsFile(f):
+    filepath = './static/source/task.ys'
+    f.save(filepath)
+    filename_dict = [ {'filename':f.filename + " [编译模式] "} ]
+    filename_json = json.dumps(filename_dict)
+    with open('./static/json/filename.json', 'w') as name_file:
+        name_file.write(filename_json)
+    args = ['python3', './cpu/Assembler/assembler.py', filepath, '-r', '|', './cpu/ICS_Y86', '>', './static/json/data.json']
+    command = ""
+    for arg in args:
+        command = command + ' ' + arg
+    os.system(command)
+
  
 if __name__ == '__main__':
-    ip = "127.0.0.1" #填写ip
+    ip = "localhost" #填写ip
     app.run(host=ip,#任何ip都可以访问
         port=7777,#端口
         debug=True

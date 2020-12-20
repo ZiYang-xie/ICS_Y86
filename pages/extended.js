@@ -17,7 +17,6 @@ export default {
             <p>断点添加 / </p>
             <p>终端输出 / </p>
             <p>彩色矩阵输出 / </p>
-            <p>{{text}} / </p>
         </div>
         
         <Card shadow dis-hover="true">

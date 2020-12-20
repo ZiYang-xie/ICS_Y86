@@ -2,7 +2,7 @@ export default {
     data: function (){
         return {
             task_name:"None",
-            file_path: "",
+            file_path: "../static/source/task.yo",
             file_format: ["yo","ys"],
             upload_list: [],
             reg_list1: [
@@ -319,33 +319,33 @@ export default {
                 f_reg_data: [
                     {
                         name: "F_REG",
-                        predPC: "0x001"
+                        predPC: "0x000"
                     }
                 ],
                 d_reg_data: [
                     {
                         name: "D_REG",
-                        Stat: "Bubble",
-                        icode: "3",
+                        Stat: "AOK",
+                        icode: "0",
                         ifun : "0",
                         rA: "None",
-                        rB: "RCX",
-                        valC: "0x64",
-                        valP: "0x14",
+                        rB: "None",
+                        valC: "0x00",
+                        valP: "0x00",
                     }
                 ],
                 e_reg_data: [
                     {
                         name: "E_REG",
-                        Stat: "Stall",
-                        icode: "3",
+                        Stat: "AOK",
+                        icode: "0",
                         ifun: "0",
                         valC: "0x0",
-                        valA: "0x1bd5b7dde",
-                        valB: "0x1bd5b7dde",
+                        valA: "0x00",
+                        valB: "0x00",
                         srcA: "None",
                         srcB: "None",
-                        dstE: "RAX",
+                        dstE: "None",
                         detM: "None"
                     }
                 ],
@@ -354,8 +354,8 @@ export default {
                         name: "M_REG",
                         Stat: "AOK",
                         icode: "0",
-                        valE: "0x1bd5b7dde",
-                        valA: "0x1bd5b7dde",
+                        valE: "0x00",
+                        valA: "0x00",
                         dstE: "None",
                         detM: "None"
                     }
@@ -364,8 +364,8 @@ export default {
                     {
                         name: "W_REG",
                         Stat: "AOK",
-                        icode: "hhhh",
-                        valE: "123123123",
+                        icode: "0",
+                        valE: "0x0",
                         valM: "0x0",
                         dstE: "None",
                         detM: "None"
@@ -374,28 +374,35 @@ export default {
             },
             text: [],
             current_text:[{pc:"*", instr:"------- 目前没有指令 -------"}],
+            break_pc: [],
+            break_state: false,
             current_pc: "",
             current_id: -1,
+            current_cycle: 0,
             terminal: "",
-
+            grid_color: [[],[],[],[]],
             progress: 0,
             cpi: 0,
             progress_slide: 0,
             speed: 20,
             ratio: 0,
             cycle_num: 0,
-            timer_flag: false
+            timer_flag: false,
+            breakpoint_toggle: false
         }
     },
     created: function(){
-        this.getData();
+        
     },
     methods: {
+        getFileInfo: function() {
+            this.$http.get('/static/json/filename.json').then(function (res){
+                this.task_name = JSON.parse(res.bodyText)[0].filename;
+            })
+        },
         getData: function() {
-            this.$http.jsonp('/data.json', {jsonpCallback: "json_data"}).then(function (res){
+            this.$http.get('/static/json/data.json').then(function (res){
                 this.json_data = JSON.parse(res.bodyText);
-                //this.task_name = this.json_data.fileName;
-                this.file_path = "../static/source/tmp.yo";
                 this.cycle_num = this.json_data.CycleNum;
                 this.ratio = Math.floor(10000/this.cycle_num);
             })
@@ -421,6 +428,17 @@ export default {
                     }
                 }
             });
+        },
+        checkState: function() {
+            if(this.task_name == "None")
+            {
+                this.$Notice.warning({
+                    title: '请先上传文件',
+                    duration: 1
+                });
+                return false;
+            }
+            return true;
         },
         loadCurrentText: function() {
             this.current_pc = "";
@@ -453,7 +471,11 @@ export default {
             this.$Message.error('上传文件 ' + file.name + ' 格式不支持');
         },
         handleUploadSuccess(res, file) {
+            this.getFileInfo();
             this.getData();
+            this.readFile();
+            this.cpi = 0;
+            this.progress_slide = 0;
         },
         handleBeforeUpload () {
             this.$refs.upload.clearFiles();
@@ -467,14 +489,19 @@ export default {
             return check;
         },
         inc_pg() {
-            this.progress_slide += this.ratio;
+            if(this.checkState())
+                this.progress_slide += this.ratio;
         },
         dec_pg() {
-            this.progress_slide -= this.ratio;
+            if(this.checkState())
+                this.progress_slide -= this.ratio;
         },
         reset() {
-            this.cpi = 0;
-            this.progress_slide = 0;
+            if(this.checkState())
+            {
+                this.cpi = 0;
+                this.progress_slide = 0;
+            }
         },
         progress_format() {
             return this.progress + "%";
@@ -486,15 +513,19 @@ export default {
             });
         },
         start: function(){
-            if(!this.timer_flag)
+            if(!this.timer_flag && this.checkState())
             {
                 this.timer = setInterval(this.inc_pg, 1000/this.speed);
                 this.timer_flag = true;
+                this.break_state = false;
             }
         },
         stop: function(){
-            clearInterval(this.timer);
-            this.timer_flag = false;
+            if(this.checkState())
+            {
+                clearInterval(this.timer);
+                this.timer_flag = false;
+            }
         },
         info_table_class (row, index) {
             return 'info_table';
@@ -504,15 +535,16 @@ export default {
         },
         handleInfoUpdate () {
             // 懒得整了，就这几个寄存器，就这样写点shitcode吧
-            let cycle_key = Math.floor(this.progress_slide/this.ratio);
-            let data = this.json_data.Cycle[cycle_key];
+            this.current_cycle = Math.floor(this.progress_slide/this.ratio);
+            let data = this.json_data.Cycle[this.current_cycle];
             if(data)
             {
                 this.info_data[0].PC = data.PC;
                 this.info_data[0].State = data.State;
                 this.terminal = data.Console;
-                console.log(this.terminal);
-                
+                for(let i = 0; i < 4; ++i)
+                    for(let j = 0; j < 4; ++j)
+                        this.grid_color[i][j] = "rgba(" + data.Graphics[j][i].r + "," + data.Graphics[j][i].g + "," + data.Graphics[j][i].b + "," + data.Graphics[j][i].a + ")";
                 for(let key in this.cc_data[0])
                     this.cc_data[0][key] = data.CC[key];
                 for(let key in this.reg_data1[0])
@@ -538,6 +570,25 @@ export default {
                     this.pipline_reg_data.w_reg_data[0][key] = data.PipelineReg.W_Reg[key];
                 this.pipline_reg_data.w_reg_data[0]["name"] = "W_REG";
             }
+        },
+        BreakPointOk () {
+            this.$Message.info('Clicked ok');
+        },
+        BreakPointCancel () {
+            return;
+        },
+        handleBreakPoint() {
+            var len = this.break_pc.length;
+            for(let i = 0; i < len; ++i)
+            {
+                if(this.break_pc[i] == this.current_pc)
+                {
+                    this.stop();
+                    this.break_state = true;
+                    return true;
+                }
+            }
+            return false;
         }
     },
     computed: {
@@ -567,30 +618,35 @@ export default {
             if(val > 10000 || val < 0)
                 return;
             if(val == 10000)
+            {
                 this.stop();
-            this.progress = this.progress_slide / 100;
-            this.cpi = (this.text.length/this.cycle_num).toFixed(2);
+                return;
+            }
             this.handleInfoUpdate();
-        },
-        file_path() {
-            this.readFile();
-        },
-        info_data: {
-            handler() {
-                this.loadCurrentText();
-            },
-            deep: true
+            this.loadCurrentText();
+            this.progress = Math.round(this.progress_slide / 100);
+            this.cpi = (this.text.length/this.cycle_num).toFixed(2);
+            if(this.handleBreakPoint() && !this.break_state)
+                return;
         }
     },
     template:`
     <Content :style="{padding: '0 50px'}">
+            <Modal
+                v-model="breakpoint_toggle"
+                title="断点设置"
+                @on-ok="BreakPointOk"
+                @on-cancel="BreakPointCancel">
+                <Select v-model="break_pc" style="width:100%;" multiple :max-tag-count="2">
+                    <Option v-for="item in text" :value="item.pc" :key="item.instr">{{ item.instr }}</Option>
+                </Select>
+            </Modal>
             <div class="topInfo_style">
                 <p>基础功能 / </p>
-                <p>寄存器信息 / </p>
-                <p>内存信息 / </p>
-                <p>PC / </p>
-                <p>CC / </p>
-                <p>CPI</p>
+                <p>扩展信息 / </p>
+                <p>断点添加 / </p>
+                <p>终端输出 / </p>
+                <p>彩色矩阵输出 / </p>
             </div>
             
             <Card shadow dis-hover="true">
@@ -610,31 +666,19 @@ export default {
                         </p>
                         <div class="controller_wraper">
                             <div class="button_class">
-                                <Row type="flex" justify="start" :gutter="2">
-                                    <Col span="4" style="height: 30px">
-                                        <Button @click="start" type="primary"><Icon suze="30" type="md-arrow-round-forward" color="#ecf0f1"></Icon> 开始运行 </Button>
-                                    </Col>
-                                    <Col span="4" style="height: 30px">
-                                        <Button @click="stop" type="primary"><Icon suze="20" type="md-pause" color="#ecf0f1"></Icon> 停止运行</Button>
-                                    </Col>
-                                    <Col span="6" style="margin-left: 5%">
-                                        <button-group :size="30" shape="circle">
-                                            <Button @click="dec_pg"  :size="20" type="primary">
-                                                <Icon type="ios-arrow-back" ></Icon>
-                                                后退
-                                            </Button>
-                                            <Button @click="inc_pg" :size="20" type="primary">
-                                                前进
-                                                <Icon type="ios-arrow-forward" ></Icon>
-                                            </Button>
-                                        </button-group>
-                                    </Col>
-                                    <Col span="3" style="margin-left: 2%">
-                                        <Button @click="reset" shape="circle"  :size="20" type="primary">
-                                            <Icon type="md-refresh" ></Icon>
+                                <div class="controller_btn">
+                                    <Button style="margin-left: 10px" @click="start" icon="md-play" type="primary">开始运行</Button>
+                                    <Button style="margin-left: 10px" @click="stop" icon="md-pause" type="primary">停止运行</Button>
+                                    <Button style="margin-left: 10px" @click="reset" icon="md-refresh" shape="circle"  :size="20" type="primary"></Button>
+                                    <ButtonGroup style="margin-inline: 10px" :size="20" shape="circle">
+                                        <Button @click="dec_pg"  :size="20" type="primary">
+                                            <Icon type="ios-arrow-back" ></Icon>
                                         </Button>
-                                    </Col>
-                                </Row>
+                                        <Button @click="inc_pg" :size="20" type="primary">
+                                            <Icon type="ios-arrow-forward" ></Icon>
+                                        </Button>
+                                    </ButtonGroup>
+                                </div>
                                 <Row type="flex" justify="start" style="margin-top: 30px; margin-left: 5px">
                                     <Col span="2" style="height:30px;">
                                         <b style="line-height: 30px; width: 100%">主频</b>
@@ -644,7 +688,7 @@ export default {
                                     </Col>
                                     <Col span="2" style="height:30px;">
                                         <b style="line-height: 30px; margin-left: 10px">HZ</b>
-                                    <Col>
+                                    </Col>
                                 </Row>
                             </div>
                             <div class="controller_circle">
@@ -677,15 +721,16 @@ export default {
                 <Divider></Divider>
                 <div class="body_card_wraper">
                     <Card class="reg_card">
-                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 寄存器 Registers</p>
+                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 寄存器</p>
                         <div style="min-height: 200px;">
                             <Table :row-class-name="reg_table_class" border stripe :columns="reg_list1" :data="reg_data1" ></Table>
                             <Table :row-class-name="reg_table_class" border stripe :columns="reg_list2" :data="reg_data2" ></Table>
                             <Table :row-class-name="reg_table_class" border stripe :columns="reg_list3" :data="reg_data3" ></Table>
                         </div>
                     </Card>
-                    <Card class="now_card">
-                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 当前指令 Current Ins</p>
+                    <Card class="now_card" v-on:click.native="breakpoint_toggle=true">
+                        <p slot="title"><Icon size="20" type="md-code"></Icon> 当前指令</p>
+                        <p class="info_extra" slot="extra">当前Cycle: {{current_cycle + 1}}</p>
                         <div style="min-height: 200px;">
                             <List border item-layout="vertical">
                                 <ListItem v-for="(item, i) in current_text">
@@ -702,9 +747,14 @@ export default {
                         </div>
                     </Card>
                     <Card class="terminal_card">
-                        <p slot="title"><Icon size="20" type="ios-cog"></Icon> 终端 Terminal</p>
+                        <p slot="title"><Icon size="20" type="md-grid"></Icon> 终端</p>
                         <p v-if="terminal == ''">None Output</p>
                         <b class="terminal_text" v-else>{{terminal}}</b>
+                        <div class="terminal_grid">
+                            <div v-for="list in grid_color">
+                                <div v-for="item in list" class="grid_block" :style="{background:item}"><div>
+                            </div>
+                        </div>
                     </Card>
                 </div>
                 <Divider></Divider>
