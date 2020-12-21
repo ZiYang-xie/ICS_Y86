@@ -1,6 +1,6 @@
 .define start $0xe00
 .define flag $0xdf8
-.define pink $0xf699cd
+.define pink $0xfff699cd
 .pos 0
 irmovq pink %rax
 irmovq $0 %rbx
