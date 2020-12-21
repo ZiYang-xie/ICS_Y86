@@ -1,4 +1,26 @@
-0x000:                         |     .pos 0
-0x000: 30f14000000000000000    |     irmovq $64 %rcx
-0x00a: c1f10100000000000000    |     isubq $1 %rcx
-0x014: 00                      |     halt
+                            | # Execution begins at address 0 
+0x0:                        | 	.pos 0
+0x0: 30f40002000000000000   | 	irmovq stack, %rsp  	# Set up stack pointer
+0xa: 803800000000000000     | 	call main		# Execute main program
+0x13: 00                    | 	halt			# Terminate program 
+                            | 
+                            | # Array of 4 elements
+0x18:                       | 	.align 8
+0x18: 0001000000000000      | array:	.quad 0x100
+0x20: 0002000000000000      | 	.quad 0x200
+0x28: 0003000000000000      | 	.quad 0x300
+0x30: 0004000000000000      | 	.quad 0x400
+                            | 
+                            | #Load Forwarding
+0x38: 30f11800000000000000  | main:	irmovq array, %rcx
+0x42: 30f03412000000000000  | 	irmovq $0x1234, %rax
+0x4c: 50210000000000000000  | 	mrmovq 0(%rcx), %rdx
+0x56: a02f                  | 	pushq %rdx	#No bubble
+0x58: 10                    | 	nop
+0x59: b02f                  | 	popq %rdx
+0x5b: 40020000000000000000  | 	rmmovq %rax, 0(%rdx)
+0x65: 90                    | 	ret
+                            | 	
+                            | # Stack starts here and grows to lower addresses
+0x200:                      | 	.pos 0x200
+0x200:                      | stack:

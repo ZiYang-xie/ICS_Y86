@@ -416,10 +416,11 @@ export default {
                 for(let i = 0; i < tmp.length; ++i)
                 {
                     var item = { pc: 0, instr: "" }; 
-                    if(tmp[i][0] == "0" && tmp[i][8] != " " && $.trim(tmp[i].slice(32))[0] != ".")
+                    let k = tmp[i][31] == '|' ? 2 : 0 
+                    if(tmp[i][0] == "0" && tmp[i][8] != " " && $.trim(tmp[i].slice(30 + k))[0] != ".")
                     {
-                        item.pc = tmp[i].slice(0,5);
-                        let tmp_ins = $.trim(tmp[i].slice(32));
+                        item.pc = $.trim(tmp[i].slice(0,5));
+                        let tmp_ins = $.trim(tmp[i].slice(30 + k));
                         var j;
                         for(j = 0; j < tmp_ins.length; ++j)
                         {
