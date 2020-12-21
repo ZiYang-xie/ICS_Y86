@@ -8,7 +8,6 @@ export default {
     },
     created: function() {
         this.text = Main.data();
-        console.log(this.text)
     },
     template:`
     <Content :style="{padding: '0 50px'}">
@@ -17,12 +16,7 @@ export default {
         </div>
         
         <Card shadow dis-hover="true">
-            <div class="left_card_wrapper">
-                <Card class="text_card" :bordered="false">
-                    <p slot="title">Terminal</p>
-                    <p></p>
-                </Card>
-            </div>
+            
         </Card>
     </Content>
     `

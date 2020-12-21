@@ -1,5 +1,6 @@
 import Main from './pages/main.js'
 import Extended from './pages/extended.js'
+import About from './pages/about.js'
 
 let app = new Vue({
     el: '#app',
@@ -20,6 +21,10 @@ let app = new Vue({
             {
                 path:"/extended",
                 component: Extended
+            },
+            {
+                path:"/about",
+                component: About
             }
         ]
     })

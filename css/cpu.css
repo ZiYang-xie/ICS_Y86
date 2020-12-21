@@ -52,12 +52,12 @@
     width: 120px;
     height: 120px;
     display: grid;
-    grid-template-columns: repeat(4, 30px);
-    grid-template-rows: repeat(4, 30px);
+    grid-template-columns: repeat(8, 15px);
+    grid-template-rows: repeat(8, 15px);
 }
 
 .grid_block
 {
-    width: 30px;
-    height: 30px;
+    width: 15px;
+    height: 15px;
 }

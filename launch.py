@@ -2,9 +2,10 @@ from flask import Flask, request
 from flask_cors import CORS
 import json
 import os
- 
-app = Flask("glue")#实例化app对象
- 
+import threading
+
+ip = "localhost" #填写ip
+app = Flask("backend")#实例化app对象
 CORS(app, resources=r'/*')
 
 @app.route('/post',methods=['GET','POST'])#路由
@@ -19,7 +20,7 @@ def upload():
         elif(f.filename[-2:] == "ys"):
             handleYsFile(f)
             return 'Upload Ys Success'
- 
+
 def handleYoFile(f):
     filepath = './static/source/task.yo'
     f.save(filepath)
@@ -47,10 +48,16 @@ def execute_command(args):
     for arg in args:
         command = command + ' ' + arg
     os.system(command)
- 
-if __name__ == '__main__':
-    ip = "localhost" #填写ip
-    app.run(host=ip,#任何ip都可以访问
-        port=7777,#端口
+
+def run_flask_server():
+    app.run(host=ip,
+        port=7777,
         debug=True
     )
+
+def run_anywhere():
+    os.system('./anywhere')
+
+if __name__ == '__main__':
+    run_flask_server()
+    

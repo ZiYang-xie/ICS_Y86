@@ -380,13 +380,14 @@ export default {
             current_id: -1,
             current_cycle: 0,
             terminal: "",
-            grid_color: [[],[],[],[]],
+            grid_color: [[],[],[],[],[],[],[],[]],
             progress: 0,
             cpi: 0,
             progress_slide: 0,
             speed: 20,
             ratio: 0,
             cycle_num: 0,
+            ins_num: 1,
             timer_flag: false,
             breakpoint_toggle: false
         }
@@ -404,6 +405,7 @@ export default {
             this.$http.get('/static/json/data.json').then(function (res){
                 this.json_data = JSON.parse(res.bodyText);
                 this.cycle_num = this.json_data.CycleNum;
+                this.ins_num = this.json_data.InsNum;
                 this.ratio = Math.floor(10000/this.cycle_num);
             })
         },
@@ -478,6 +480,10 @@ export default {
             this.break_pc = [];
             this.progress_slide = 0;
             this.cpi = 0;
+            this.$Notice.success({
+                title: '上传文件成功!',
+                duration: 2
+            });
         },
         handleBeforeUpload () {
             this.$refs.upload.clearFiles();
@@ -485,7 +491,8 @@ export default {
             const check = fileList.length < 1;
             if (!check) {
                 this.$Notice.warning({
-                    title: '最多只能同时上传一个文件'
+                    title: '最多只能同时上传一个文件',
+                    duration: 2
                 });
             }
             return check;
@@ -501,8 +508,8 @@ export default {
         reset() {
             if(this.checkState())
             {
-                this.cpi = 0;
                 this.progress_slide = 0;
+                this.cpi = 0;
             }
         },
         progress_format() {
@@ -511,9 +518,10 @@ export default {
         complete () {
             this.$Notice.success({
                 title: '执行完成',
-                duration: 1
+                duration: 2
             });
         },
+
         start: function(){
             if(!this.timer_flag && this.checkState())
             {
@@ -543,8 +551,8 @@ export default {
                 this.info_data[0].PC = data.PC;
                 this.info_data[0].State = data.State;
                 this.terminal = data.Console;
-                for(let i = 0; i < 4; ++i)
-                    for(let j = 0; j < 4; ++j)
+                for(let i = 0; i < 8; ++i)
+                    for(let j = 0; j < 8; ++j)
                         this.grid_color[i][j] = "rgba(" + data.Graphics[j][i].r + "," + data.Graphics[j][i].g + "," + data.Graphics[j][i].b + "," + data.Graphics[j][i].a + ")";
                 for(let key in this.cc_data[0])
                     this.cc_data[0][key] = data.CC[key];
@@ -617,10 +625,16 @@ export default {
             if(val > 10000 || val < 0)
                 return;
             if(val == 10000)
+            {
+                this.complete();
                 this.stop();
+            }
+            if(val)
+                this.cpi = (this.cycle_num/this.ins_num).toFixed(2);
+            else
+                this.cpi = 0;
             this.handleInfoUpdate();
             this.loadCurrentText();
-            this.cpi = (this.cycle_num/this.text.length).toFixed(2);
             this.progress = Math.round(this.progress_slide / 100);
             this.handleBreakPoint()
         },
@@ -679,7 +693,7 @@ export default {
                                 </div>
                                 <Row type="flex" justify="start" style="margin-top: 30px; margin-left: 5px">
                                     <Col span="2" style="height:30px;">
-                                        <b style="line-height: 30px; width: 100%">主频</b>
+                                        <b style="line-height: 30px; width: 100%">主频 </b>
                                     </Col>
                                     <Col span="14" style="height:30px;">
                                         <Slider v-model="speed" :min="1" :step="1" show-input></Slider>
@@ -760,15 +774,15 @@ export default {
                     <Card class="pipeline_card">
                         <p slot="title"><Icon size="20" type="md-aperture"></Icon> 流水线寄存器</p>
                         <div style="min-height: 200px;">
-                            <Table :row-class-name="reg_table_class" border :columns="pipline_reg_list.f_reg_list" :data="pipline_reg_data.f_reg_data" ></Table>
+                            <Table no-data-text="None" :row-class-name="reg_table_class" border :columns="pipline_reg_list.f_reg_list" :data="pipline_reg_data.f_reg_data" ></Table>
                             <br><br>
-                            <Table :row-class-name="reg_table_class" border :columns="pipline_reg_list.d_reg_list" :data="pipline_reg_data.d_reg_data" ></Table>
+                            <Table no-data-text="None" :row-class-name="reg_table_class" border :columns="pipline_reg_list.d_reg_list" :data="pipline_reg_data.d_reg_data" ></Table>
                             <br><br>
-                            <Table :row-class-name="reg_table_class" border :columns="pipline_reg_list.e_reg_list" :data="pipline_reg_data.e_reg_data" ></Table>
+                            <Table no-data-text="None" :row-class-name="reg_table_class" border :columns="pipline_reg_list.e_reg_list" :data="pipline_reg_data.e_reg_data" ></Table>
                             <br><br>
-                            <Table :row-class-name="reg_table_class" border :columns="pipline_reg_list.m_reg_list" :data="pipline_reg_data.m_reg_data" ></Table>
+                            <Table no-data-text="None" :row-class-name="reg_table_class" border :columns="pipline_reg_list.m_reg_list" :data="pipline_reg_data.m_reg_data" ></Table>
                             <br><br>
-                            <Table :row-class-name="reg_table_class" border :columns="pipline_reg_list.w_reg_list" :data="pipline_reg_data.w_reg_data" ></Table>
+                            <Table no-data-text="None" :row-class-name="reg_table_class" border :columns="pipline_reg_list.w_reg_list" :data="pipline_reg_data.w_reg_data" ></Table>
                         </div>
                     </Card>
                 </div>
