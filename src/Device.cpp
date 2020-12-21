@@ -140,7 +140,7 @@ void Device::Fetch() {
     f.ifun = ReadLow4Bits(f.pc);
     f.Stat = SelectFStat();
     bool need_regids = In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ,
-                          IRMMOVQ, IMRMOVQ, IIOPQ, IOPQ, IIOPQN);
+                          IRMMOVQ, IMRMOVQ, IIOPQ, IOPQ, IOPQN, IIOPQN);
     bool need_valC =
         In(f.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIOPQ, IIOPQN);
     if (need_regids) {
@@ -320,9 +320,10 @@ void Device::Execute() {
     // 设置aluB
     uint64_t aluB = SelectAluB();
     // 设置alufun
-    uint8_t alufun = In(E.icode, IOPQ, IIOPQ) ? E.ifun : ALUADD;
+    uint8_t alufun = In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) ? E.ifun : ALUADD;
     // 设置set_cc
-    bool set_cc = In(E.icode, IOPQ, IIOPQ) && !In(m.stat, SADR, SINS, SHLT) &&
+    bool set_cc = In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) &&
+                  !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
     // ALU计算
     auto func = GetALUFunc(alufun);
@@ -351,8 +352,8 @@ void Device::Execute() {
     e.valC = E.valC;
 }
 uint64_t Device::SelectAluB() const {
-    if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ,
-           IIOPQ)) {
+    if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ, IIOPQ,
+           IIOPQN, IOPQN)) {
         return E.valB;
     } else if (In(E.icode, IRRMOVQ, IIRMOVQ, IJXX)) {
         return 0;
@@ -361,9 +362,9 @@ uint64_t Device::SelectAluB() const {
     }
 }
 uint64_t Device::SelectAluA() const {
-    if (In(E.icode, IRRMOVQ, IOPQ, IJXX)) {
+    if (In(E.icode, IRRMOVQ, IOPQ, IJXX, IOPQN)) {
         return E.valA;
-    } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IIOPQ)) {
+    } else if (In(E.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IIOPQ, IIOPQN)) {
         return E.valC;
     } else if (In(E.icode, ICALL, IPUSHQ)) {
         return -8;
@@ -675,7 +676,8 @@ void Device::SetDSrcB() {
     }
 }
 void Device::SetCC() {
-    bool set_cc = In(E.icode, IOPQ, IIOPQ, IOPQN,IIOPQN) && !In(m.stat, SADR, SINS, SHLT) &&
+    bool set_cc = In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) &&
+                  !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
     if (set_cc) {
         for (int i = 0; i < 3; i++) {

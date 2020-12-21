@@ -1,3 +1,0 @@
-.pos 0
-irmovq $0 %rax
-iaddq $0

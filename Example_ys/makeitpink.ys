@@ -4,20 +4,15 @@
 .pos 0
 irmovq pink %rax
 irmovq $0 %rbx
+irmovq $0 %rcx
 irmovq start %rsp
-irmovq $64 %r8
 irmovq $1 %rdx
 loop:
     rmmovq %rax (%rsp)
     iaddq $4 %rsp
     iaddq $1 %rcx
-    rmmovq %rbx flag
-    iaddq $-1 %r8
-    nop
-    nop
-    nop
-    jne loop 
-    nop
-    nop
+    rmmovq %rbx flag #翻转flag
+    icmpq $64 %rcx
+    jl loop
 halt
 

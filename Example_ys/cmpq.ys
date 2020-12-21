@@ -1,0 +1,5 @@
+.pos 0
+irmovq $3 %rcx
+irmovq $5 %rdx
+cmpq %rdx %rcx
+halt

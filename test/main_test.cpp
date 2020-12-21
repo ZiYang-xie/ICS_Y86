@@ -51,7 +51,6 @@ TEST_F(FlashCodeTest, test_FlashCode) {
     EXPECT_EQ(c.d.Mem[6], 0xf);
     EXPECT_EQ(c.d.Mem[7], 0xf * 16);
 }
-
 class RealCodeTest : public testing::Test {
    protected:
     Controller c;
@@ -527,4 +526,51 @@ TEST_F(HonorCodeTest, test_memtest) {
     EXPECT_EQ(c.d.CFLAG[1], 0);
     EXPECT_EQ(c.d.CFLAG[2], 0);
     EXPECT_EQ(c.d.Reg[RSI], 0x0000000000000001);
+}
+
+class AdditionalTest : public testing::Test {
+   protected:
+    Controller c;
+};
+
+//.pos 0
+// irmovq $64 %rcx
+//    isubq $1 %rcx
+//    halt
+TEST_F(AdditionalTest, test_isubq) {
+    c.FlashCode("150000000000000030f14000000000000000c1f1010000000000000000");
+    c.Run();
+    EXPECT_EQ(c.d.Stat, SHLT);
+    EXPECT_EQ(c.d.CFLAG[0], 0);
+    EXPECT_EQ(c.d.CFLAG[1], 0);
+    EXPECT_EQ(c.d.CFLAG[2], 0);
+    EXPECT_EQ(c.d.Reg[RRCX], 63);
+}
+
+TEST_F(AdditionalTest, test_cmpq) {
+    c.FlashCode(
+        "170000000000000030f1030000000000000030f20500000000000000d12100");
+    c.Run();
+    EXPECT_EQ(c.d.Stat, SHLT);
+    EXPECT_EQ(c.d.CFLAG[0], 0);
+    EXPECT_EQ(c.d.CFLAG[1], 1);
+    EXPECT_EQ(c.d.CFLAG[2], 0);
+    EXPECT_EQ(c.d.Reg[RRCX], 3);
+    EXPECT_EQ(c.d.Reg[RRDX], 5);
+}
+
+TEST_F(AdditionalTest, test_makeitpink) {
+    c.FlashCode(
+        "6e0000000000000030f0cd99f6000000000030f3000000000000000030f10000000000"
+        "00000030f4000e00000000000030f2010000000000000040040000000000000000c0f4"
+        "0400000000000000c0f10100000000000000403ff80d000000000000e1f14000000000"
+        "00000072320000000000000000");
+    c.Run();
+    EXPECT_EQ(c.d.Stat, SHLT);
+    EXPECT_EQ(c.d.CFLAG[0], 1);
+    EXPECT_EQ(c.d.CFLAG[1], 0);
+    EXPECT_EQ(c.d.CFLAG[2], 0);
+    EXPECT_EQ(c.d.Reg[RRAX], 0xf699cd);
+    EXPECT_EQ(c.d.Reg[RRBX], 0);
+    EXPECT_EQ(c.d.Reg[RRCX], 64);
 }
