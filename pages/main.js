@@ -476,8 +476,8 @@ export default {
             this.getData();
             this.readFile();
             this.break_pc = [];
-            this.cpi = 0;
             this.progress_slide = 0;
+            this.cpi = 0;
         },
         handleBeforeUpload () {
             this.$refs.upload.clearFiles();
@@ -519,7 +519,6 @@ export default {
             {
                 this.timer = setInterval(this.inc_pg, 1000/this.speed);
                 this.timer_flag = true;
-                this.break_state = false;
             }
         },
         stop: function(){
@@ -583,14 +582,12 @@ export default {
             var len = this.break_pc.length;
             for(let i = 0; i < len; ++i)
             {
-                if(this.break_pc[i] == this.current_pc)
+                if(this.break_pc[i] == this.current_pc && !this.break_state)
                 {
                     this.stop();
                     this.break_state = true;
-                    return true;
                 }
             }
-            return false;
         }
     },
     computed: {
@@ -620,16 +617,15 @@ export default {
             if(val > 10000 || val < 0)
                 return;
             if(val == 10000)
-            {
                 this.stop();
-                return;
-            }
             this.handleInfoUpdate();
             this.loadCurrentText();
-            this.progress = Math.round(this.progress_slide / 100);
             this.cpi = (this.cycle_num/this.text.length).toFixed(2);
-            if(this.handleBreakPoint() && !this.break_state)
-                return;
+            this.progress = Math.round(this.progress_slide / 100);
+            this.handleBreakPoint()
+        },
+        current_pc() {
+            this.break_state = false;
         }
     },
     template:`
