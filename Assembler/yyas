@@ -4,6 +4,8 @@ import copy
 import traceback
 
 
+
+
 def get_hex_repr(h, size):
     if h < 0:
         h = 1 << 64 + h
@@ -477,12 +479,14 @@ def get_memaddr(lines: list):
             exit(1)
     return res[:-1]
 
+
 def get_def_label(lines):
-    labels={}
+    labels = {}
     for line in lines:
-        if line[0]=='.define':
-            labels[line[1]]=line[2]
+        if line[0] == '.define':
+            labels[line[1]] = line[2]
     return labels
+
 
 def replace_label(lines, mem, labels={}):
     res = []
@@ -504,7 +508,7 @@ def gen_byte_code(lines):
     res = []
     for line in lines:
         try:
-            if line[0] in ('.pos','.align','.define') or ':' in line[0]:
+            if line[0] in ('.pos', '.align', '.define') or ':' in line[0]:
                 res.append('')
             elif line[0] == '.quad':
                 res.append(get_hex_repr(int(line[1].replace("$", ""), 16), 8))
@@ -613,9 +617,21 @@ def assemble_file(filename):
         return process_to_yo(f.readlines())
 
 
+
+def get_version():
+    yyas = r'''
+    m   m  m   m   mmm    mmm  
+    "m m"  "m m"  "   #  #   " 
+    #m#    #m#   m"""#   """m 
+    "#     "#    "mm"#  "mmm" 
+    m"     m"                 
+    ""     ""
+    '''
+    return yyas+"\nyyas 0.1.1\n"+"This is free software see the source for copying conditions.\nThere is NO warranty not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Assemble .ys file to .yo file or/and .yo file to  raw byte file')
+        description='yyas: Assemble .ys file to .yo file or/and .yo file to raw byte file',formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("sourcefile", help="The source file to be assembled")
     parser.add_argument("-o", "--output", dest='outfile',
                         action='store', help="Assign the output file")
@@ -623,6 +639,8 @@ if __name__ == "__main__":
                         action="store_true", help="Generate raw byte file")
     parser.add_argument("-np", "--noprefix", dest="noprefix",
                         action="store_true", help="Do not generate prefix in raw output")
+    parser.add_argument("-v", "--version", action="version",
+                        version=get_version(), help="show version")
     args = parser.parse_args()
     if args.sourcefile.split('.')[-1] == 'ys':
         res = assemble_file(args.sourcefile)
