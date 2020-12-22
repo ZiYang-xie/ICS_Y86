@@ -1,10 +1,10 @@
 .define graph $0xe00
 .define flag $0xdf8
 .define console $0xf00
-.define red $0xff000080 # to 0xffff0000
-.define orange $0xf910080f # to 0xffff9100
+.define red    $0xff000080 # to 0xffff0000
+.define orange $0xf9100080 # to 0xffff9100
 .define yellow $0xfbff0080 # to 0xfffbff00
-.define green $0x26ff0080 # to 0xfffbff00
+.define green  $0x26ff0080 # to 0xfffbff00
 
 .pos 0
 irmovq str %rdi
@@ -27,13 +27,13 @@ loop:
         rmmovl %rax (%rsp)
         iaddq $4 %rsp
         iaddq $1 %rcx
-        iaddq $0x10000000 %rax
+        iaddq $10 %rax
         rmmovq %rbx flag #翻转flag
         icmpq $8 %rcx
         jl eachline
     iaddq $4 %rsi
     icmpq $32 %rsi
-    jle loop
+    jl loop
 halt
 
 .align 8
@@ -47,5 +47,7 @@ color:
     .word green
     .word green
     .word green
+.align 8
 str:
-    .string "hello,world!"
+    .string "hello,world!\n"
+.byte 0

@@ -727,7 +727,7 @@ void Device::UpdateIfJumpState() {
     }
 }
 std::string Device::GetConsoleOutput() const {
-    char dst[0x100] = {0};
+    char dst[CONSOLE_MEM_SIZE + 1] = {0};
     memcpy(dst, Mem + CONSOLE_MEM_START, CONSOLE_MEM_SIZE);
     return std::string(dst);
 }
