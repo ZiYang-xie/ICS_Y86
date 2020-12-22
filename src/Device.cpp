@@ -312,6 +312,8 @@ uint8_t Device::SelectSrcA() const {
     }
 }
 void Device::Execute() {
+    static uint8_t counter =
+        0;  // 假定乘法、除法和求余指令需要10个周期来完成，这是他们的状态机counter
     if (E.control == CBUBBLE) {
         E.reset();
     }
@@ -325,6 +327,19 @@ void Device::Execute() {
     bool set_cc = In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) &&
                   !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
+    // 开始10周期的计算
+    if (In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) &&
+        In(E.ifun, ALUMULQ, ALUDIVQ, ALUREMQ) && counter == 0) {
+        counter = 10;
+    }
+    // 还在计算中
+    if (counter > 0) {
+        counter--;
+        E.ifDone = false;
+        return;
+    } else {
+        E.ifDone = true;
+    }
     // ALU计算
     auto func = GetALUFunc(alufun);
     e.valE = func(aluA, aluB);
@@ -575,6 +590,7 @@ void Device::Writeback() {
         Stat = W.stat;
     }
 }
+bool Device::IfExecuteDone() const { return E.ifDone; }
 bool Device::IfLoadUseH() const {
     return In(E.icode, IMRMOVQ, IPOPQ) && In(E.dstM, d.srcA, d.srcB);
 }
@@ -596,7 +612,7 @@ void Device::SetFControl() {
         F.control = CNORMAL;
     }
 #else
-    if (!IfMispredicted() && (IfLoadUseH() || IfRet())) {
+    if (!IfMispredicted() && (IfLoadUseH() || IfRet()) && !IfExecuteDone()) {
         F.control = CSTALL;
         bad_instr_num += 1;
     } else {
@@ -606,7 +622,7 @@ void Device::SetFControl() {
 }
 void Device::SetDControl() {
 #ifdef HARDWARE_STACK
-    if (IfLoadUseH()) {
+    if (IfLoadUseH() && !IfExecuteDone()) {
         D.control = CSTALL;
     } else if (IfMispredictRet() || IfMispredicted()) {
         D.control = CBUBBLE;

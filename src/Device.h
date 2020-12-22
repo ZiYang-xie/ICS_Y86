@@ -118,6 +118,8 @@ class Device {
     static bool IfInstrValid(uint8_t icode);
     //选择ALU计算的函数
     std::function<uint64_t(uint64_t, uint64_t)> GetALUFunc(uint8_t ifun);
+    //判断执行阶段是否结束（有一些指令需要多个周期的时间来计算）
+    [[nodiscard]] bool IfExecuteDone() const;
     //根据CFLAG返回cond
     [[nodiscard]] bool CalcCond(bool cflag[3]);
     // 判断是否是Load/Use Hazard

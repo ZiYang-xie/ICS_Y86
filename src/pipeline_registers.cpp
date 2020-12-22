@@ -20,9 +20,11 @@ void E_Reg::reset() {
     stat = SBUB;
     icode = INOP;
     dstE = RNONE;
-  dstM = RNONE;
-  srcA = RNONE;
-  srcB = RNONE;
+    dstM = RNONE;
+    srcA = RNONE;
+    srcB = RNONE;
+    ifDone = true;
+    ifJump = true;
 }
 void D_Reg::reset() {
     stat = SBUB;
@@ -31,4 +33,5 @@ void D_Reg::reset() {
     rB = RNONE;
     ifJump = true;
 }
-void F_Reg::reset() {}
+void F_Reg::reset() {
+}

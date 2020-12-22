@@ -44,6 +44,7 @@ struct E_Reg {
     uint8_t srcB{RNONE};
     void reset();
     bool ifJump{true};
+    bool ifDone{true};
 };
 struct D_Reg {
     uint8_t control{CNORMAL};
@@ -51,9 +52,7 @@ struct D_Reg {
     uint8_t icode{0};
     uint8_t ifun{0};
     uint8_t rA{RNONE};
-    ;
     uint8_t rB{RNONE};
-    ;
     uint64_t valC{0};
     uint64_t valP{0};
     bool ifJump{true};
@@ -61,8 +60,8 @@ struct D_Reg {
 };
 struct F_Reg {
     uint8_t control{CNORMAL};
-  uint64_t predPC{0};
-  void reset();
+    uint64_t predPC{0};
+    void reset();
 };
 struct f_wire {
     uint8_t icode{INOP};
@@ -114,4 +113,4 @@ struct m_wire {
     uint64_t valM{0};
 };
 
-#endif // ICS_Y86_PIPELINE_REGISTERS_H
+#endif  // ICS_Y86_PIPELINE_REGISTERS_H
