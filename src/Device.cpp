@@ -29,7 +29,7 @@ Device::Device(std::string str) {
     auto p = str.begin();
 #ifdef TEXT_CHECK
     for (int j = 15; j > 0; j -= 2) {
-        text_section_end = 16 * text_section_end +
+        text_section_end = 256 * text_section_end +
                            16 * CharToUint8(*(p + j - 1)) +
                            CharToUint8(*(p + j));
     }
@@ -86,9 +86,7 @@ void Device::Write4Bytes(uint64_t pos, uint64_t val) {
 void Device::Write2Bytes(uint64_t pos, uint64_t val) {
     *(uint16_t *)(Mem + pos) = val;
 }
-void Device::Write1Bytes(uint64_t pos, uint64_t val) {
-    *(uint8_t *)(Mem + pos) = val;
-}
+void Device::Write1Bytes(uint64_t pos, uint64_t val) { *(Mem + pos) = val; }
 uint64_t Device::ReadReg(uint8_t reg_idx, uint8_t ifun) {
     switch (ifun) {
         case (RQU):
@@ -258,14 +256,14 @@ void Device::Decode() {
     //写dstM
     d.dstM = SelectDstM();
     //计算valA,valB
-    uint64_t rvalA;
-    uint64_t rvalB;
+    volatile uint64_t rvalA;
+    volatile uint64_t rvalB;
     if (D.icode == IRMMOVQ) {
-        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, D.ifun) : 0;
-        rvalB = d.srcB != RNONE ? ReadReg(d.srcB, D.ifun) : 0;
+        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, d.ifun) : 0;
+        rvalB = d.srcB != RNONE ? ReadReg(d.srcB, RQU) : 0;
     } else {
-        rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
-        rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
+        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, RQU) : 0;
+        rvalB = d.srcB != RNONE ? ReadReg(d.srcB, RQU) : 0;
     }
     //写valA
     d.valA = rvalA;
@@ -695,10 +693,10 @@ void Device::SetDSrcB() {
     }
     if (d.srcB == e.dstE) {
         d.valB = e.valE;
-    } else if (d.srcB == M.dstM) {
+    } else if (d.srcB == m.dstM) {
         d.valB = m.valM;
     } else if (d.srcB == M.dstE) {
-        d.valB = M.valE;
+        d.valB = m.valE;
     } else if (d.srcB == W.dstM) {
         d.valB = W.valM;
     } else if (d.srcB == W.dstE) {

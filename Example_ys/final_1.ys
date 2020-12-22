@@ -13,10 +13,16 @@
 .pos 0
 irmovq str %rdi
 irmovq console %rsi
-mrmovq (%rdi) %rax
-rmmovq %rax console
-iaddq $8 %rdi
-iaddq $8 %rsi
+irmovq $0 %rsp
+printloop:
+    mrmovbu (%rdi) %rax
+    rmmovb %rax (%rsi)
+    iaddq $1 %rdi
+    iaddq $1 %rsi
+    iaddq $1 %rsp
+    icmpq $32 %rsp
+    jle printloop
+
 mrmovq (%rdi) %rax
 rmmovq %rax (%rsi)
 irmovq $0 %rdi
@@ -52,5 +58,5 @@ color:
     .word black
 .align 8
 str:
-    .string "hello,world!\n"
+    .string "hello, world!\n I am booting now"
 .byte 0
