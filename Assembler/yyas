@@ -497,7 +497,7 @@ def replace_label(lines, mem, labels={}):
         temp = []
         for s in l:
             for la in labels.keys():
-                if la == s and ':' not in s and '.' not in s:
+                if la in s and ':' not in s and '.' not in s:
                     s = s.replace(la, labels[la])
             temp.append(s)
         res.append(temp)
