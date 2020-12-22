@@ -594,14 +594,30 @@ TEST_F(AdditionalTest, test_rmovs) {
     EXPECT_EQ(c.d.Reg[RR11], 0x78);
 }
 
-TEST_F(AdditionalTest, test_mrmovs){
-    c.FlashCode("3d0000000000000030f0efbeadde0000000030f6000000000000000041063d00000000000000c0f6040000000000000041063d00000000000000503f3d0000000000000000");
+TEST_F(AdditionalTest, test_mrmovs) {
+    c.FlashCode(
+        "3d0000000000000030f0efbeadde0000000030f6000000000000000041063d00000000"
+        "000000c0f6040000000000000041063d00000000000000503f3d0000000000000000");
     c.Run();
     EXPECT_EQ(c.d.Stat, SHLT);
     EXPECT_EQ(c.d.CFLAG[0], 0);
     EXPECT_EQ(c.d.CFLAG[1], 0);
     EXPECT_EQ(c.d.CFLAG[2], 0);
-    EXPECT_EQ(c.d.Reg[RRAX],0xdeadbeef);
-    EXPECT_EQ(c.d.Reg[RRSI],4);
+    EXPECT_EQ(c.d.Reg[RRAX], 0xdeadbeef);
+    EXPECT_EQ(c.d.Reg[RRSI], 4);
     EXPECT_EQ(c.d.Reg[RRBX], 0xdeadbeefdeadbeef);
+}
+
+TEST_F(AdditionalTest, test_arith) {
+    c.FlashCode(
+        "230000000000000030f0030000000000000030f3100000000000000030f10100000000"
+        "0000006830651000");
+    c.Run();
+    EXPECT_EQ(c.d.Stat, SHLT);
+    EXPECT_EQ(c.d.CFLAG[0], 0);
+    EXPECT_EQ(c.d.CFLAG[1], 0);
+    EXPECT_EQ(c.d.CFLAG[2], 0);
+    EXPECT_EQ(c.d.Reg[RRAX], 0x60);
+    EXPECT_EQ(c.d.Reg[RRBX], 0x10);
+    EXPECT_EQ(c.d.Reg[RRCX], 1);
 }

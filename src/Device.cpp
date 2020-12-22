@@ -139,8 +139,8 @@ void Device::Fetch() {
     f.icode = ReadHigh4Bits(f.pc);
     f.ifun = ReadLow4Bits(f.pc);
     f.Stat = SelectFStat();
-    bool need_regids = In(f.icode, IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, IIRMOVQ,
-                          IRMMOVQ, IMRMOVQ, IIOPQ, IOPQ, IOPQN, IIOPQN);
+    bool need_regids = In(f.icode, IRRMOVQ, IPUSHQ, IPOPQ, IIRMOVQ, IRMMOVQ,
+                          IMRMOVQ, IOPQ, IIOPQ, IOPQN, IIOPQN);
     bool need_valC =
         In(f.icode, IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIOPQ, IIOPQN);
     if (need_regids) {
@@ -231,6 +231,9 @@ uint64_t Device::GetFPredPc() {
     }
 }
 void Device::F2D() {
+    if (F.control == CSTALL) {
+        return;
+    }
     D.stat = f.Stat;
     D.icode = f.icode;
     D.ifun = f.ifun;
@@ -257,9 +260,9 @@ void Device::Decode() {
     //计算valA,valB
     uint64_t rvalA;
     uint64_t rvalB;
-    if (E.icode == IRMMOVQ) {
-        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, E.ifun) : 0;
-        rvalB = d.srcB != RNONE ? ReadReg(d.srcB, E.ifun) : 0;
+    if (D.icode == IRMMOVQ) {
+        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, D.ifun) : 0;
+        rvalB = d.srcB != RNONE ? ReadReg(d.srcB, D.ifun) : 0;
     } else {
         rvalA = d.srcA != RNONE ? Reg[d.srcA] : 0;
         rvalB = d.srcB != RNONE ? Reg[d.srcB] : 0;
@@ -314,6 +317,7 @@ uint8_t Device::SelectSrcA() const {
 void Device::Execute() {
     static uint8_t counter =
         0;  // 假定乘法、除法和求余指令需要10个周期来完成，这是他们的状态机counter
+    static uint64_t store_evalE;
     if (E.control == CBUBBLE) {
         E.reset();
     }
@@ -327,22 +331,26 @@ void Device::Execute() {
     bool set_cc = In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) &&
                   !In(m.stat, SADR, SINS, SHLT) &&
                   !In(W.stat, SADR, SINS, SHLT);
+    // ALU计算
+    auto func = GetALUFunc(alufun);
+    e.valE = func(aluA, aluB);
     // 开始10周期的计算
     if (In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) &&
         In(E.ifun, ALUMULQ, ALUDIVQ, ALUREMQ) && counter == 0) {
         counter = 10;
+        store_evalE = e.valE;
     }
     // 还在计算中
-    if (counter > 0) {
+    if (counter > 1) {
         counter--;
         E.ifDone = false;
         return;
-    } else {
+    } else if (counter == 1) {
+        counter--;
         E.ifDone = true;
+        e.valE = store_evalE;
     }
-    // ALU计算
-    auto func = GetALUFunc(alufun);
-    e.valE = func(aluA, aluB);
+    { E.ifDone = true; }
     // 计算cnd
     if (set_cc) {
         e.CFLAG[CZF] = (e.valE == 0);
@@ -391,6 +399,9 @@ uint64_t Device::SelectAluA() const {
     }
 }
 void Device::D2E() {
+    if (D.control == CSTALL) {
+        return;
+    }
     E.stat = d.stat;
     E.icode = d.icode;
     E.ifun = d.ifun;
@@ -461,6 +472,9 @@ bool Device::CalcCond(bool cflag[3]) {
     }
 }
 void Device::E2M() {
+    if (!IfExecuteDone()) {
+        return;
+    }
     M.stat = e.stat;
     M.icode = e.icode;
     M.ifun = e.ifun;
@@ -612,7 +626,7 @@ void Device::SetFControl() {
         F.control = CNORMAL;
     }
 #else
-    if (!IfMispredicted() && (IfLoadUseH() || IfRet()) && !IfExecuteDone()) {
+    if (!IfMispredicted() && (IfLoadUseH() || IfRet() || !IfExecuteDone())) {
         F.control = CSTALL;
         bad_instr_num += 1;
     } else {
@@ -630,7 +644,7 @@ void Device::SetDControl() {
         D.control = CNORMAL;
     }
 #else
-    if (IfLoadUseH()) {
+    if (IfLoadUseH() || !IfExecuteDone()) {
         D.control = CSTALL;
         bad_instr_num += 1;
     } else if (IfRet() || IfMispredicted() || M.icode == IRET) {
