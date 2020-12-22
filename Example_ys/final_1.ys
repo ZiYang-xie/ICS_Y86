@@ -1,0 +1,53 @@
+.define graph $0xe00
+.define flag $0xdf8
+.define console $0xf00
+.define red $0x80ff0000 # to 0xffff0000
+.define orange $0x80ff9100 # to 0xffff9100
+.define yellow $0x80fbff00 # to 0xfffbff00
+.define green $0x8026ff00 # to 0xfffbff00
+
+.pos 0
+
+.pos 0
+irmovq str %rdi
+irmovq console %rsi
+mrmovq (%rdi) %rax
+rmmovq %rax console
+iaddq $8 %rdi
+iaddq $8 %rsi
+mrmovq (%rdi) %rax
+rmmovq %rax (%rsi)
+irmovq $0 %rdi
+irmovq $0 %rax
+irmovq $0 %rbx
+irmovq graph %rsp
+irmovq $0 %rsi
+loop:
+    irmovq $0 %rcx
+    mrmovq color(%rsi) %rax
+    eachline:
+        rmmovl %rax (%rsp)
+        iaddq $4 %rsp
+        iaddq $1 %rcx
+        iaddq $0x10000000 %rax
+        rmmovq %rbx flag #翻转flag
+        icmpq $8 %rcx
+        jl eachline
+    iaddq $4 %rsi
+    icmpq $32 %rsi
+    jle loop
+halt
+
+.align 8
+color:
+    .word red
+    .word red
+    .word orange
+    .word orange
+    .word yellow
+    .word yellow
+    .word green
+    .word green
+    .word green
+str:
+    .string "hello,world!"

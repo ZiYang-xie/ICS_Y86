@@ -119,13 +119,13 @@ void Device::WriteReg(uint8_t reg_idx, uint8_t ifun, uint64_t val) {
             Reg[reg_idx] = (uint8_t)val;
             break;
         case (RLS):
-            Reg[reg_idx] = (int64_t)(uint32_t)val;
+            Reg[reg_idx] = (int32_t)val;
             break;
         case (RWS):
-            Reg[reg_idx] = (int64_t)(uint16_t)val;
+            Reg[reg_idx] = (int16_t)val;
             break;
         case (RBS):
-            Reg[reg_idx] = (int64_t)(uint8_t)val;
+            Reg[reg_idx] = (int8_t)val;
             break;
         default:
             D.stat = SINS;

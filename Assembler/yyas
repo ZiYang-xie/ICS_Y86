@@ -4,8 +4,6 @@ import copy
 import traceback
 
 
-
-
 def get_hex_repr(h, size):
     if h < 0:
         h = 1 << 64 + h
@@ -19,10 +17,13 @@ def get_hex_repr(h, size):
     return res
 
 
-def get_raw_str_repr(s):
+def get_raw_str_repr(s:str):
     res = ''
-    for c in s:
-        res += f"{ord(c):x}"
+    s = s.replace("\\t","\t").replace("\\n","\n")
+    idx = 0
+    while idx < len(s):
+            res += f"{ord(s[idx]):02x}"
+            idx += 1
     return res
 
 
@@ -466,7 +467,7 @@ def get_memaddr(lines: list):
             elif line[0] == '.byte':
                 res.append(res[idx - 1] + 1)
             elif line[0] == '.string':
-                res.append(res[idx - 1] + 2 * len(line[1]))
+                res.append(res[idx - 1] + len(line[1]))
             elif line[0] == '.define':
                 res.append(res[idx-1])
             elif ':' in line[0]:
@@ -617,7 +618,6 @@ def assemble_file(filename):
         return process_to_yo(f.readlines())
 
 
-
 def get_version():
     yyas = r'''
     m   m  m   m   mmm    mmm  
@@ -629,9 +629,10 @@ def get_version():
     '''
     return yyas+"\nyyas 0.1.1\n"+"This is free software see the source for copying conditions.\nThere is NO warranty not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='yyas: Assemble .ys file to .yo file or/and .yo file to raw byte file',formatter_class=argparse.RawTextHelpFormatter)
+        description='yyas: Assemble .ys file to .yo file or/and .yo file to raw byte file', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("sourcefile", help="The source file to be assembled")
     parser.add_argument("-o", "--output", dest='outfile',
                         action='store', help="Assign the output file")

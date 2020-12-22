@@ -574,3 +574,34 @@ TEST_F(AdditionalTest, test_makeitpink) {
     EXPECT_EQ(c.d.Reg[RRBX], 0);
     EXPECT_EQ(c.d.Reg[RRCX], 64);
 }
+
+TEST_F(AdditionalTest, test_rmovs) {
+    c.FlashCode(
+        "5b0000000000000030f078563482efbeadde400f5b00000000000000503f5b00000000"
+        "000000511f5b00000000000000542f5b00000000000000528f5b00000000000000559f"
+        "5b0000000000000053af5b0000000000000056bf5b0000000000000000");
+    c.Run();
+    EXPECT_EQ(c.d.Stat, SHLT);
+    EXPECT_EQ(c.d.CFLAG[0], 1);
+    EXPECT_EQ(c.d.CFLAG[1], 0);
+    EXPECT_EQ(c.d.CFLAG[2], 0);
+    EXPECT_EQ(c.d.Reg[RRAX], 0xdeadbeef82345678);
+    EXPECT_EQ(c.d.Reg[RRCX], 0x82345678);
+    EXPECT_EQ(c.d.Reg[RRDX], 0xffffffff82345678);
+    EXPECT_EQ(c.d.Reg[RR8], 0x5678);
+    EXPECT_EQ(c.d.Reg[RR9], 0x5678);
+    EXPECT_EQ(c.d.Reg[RR10], 0x78);
+    EXPECT_EQ(c.d.Reg[RR11], 0x78);
+}
+
+TEST_F(AdditionalTest, test_mrmovs){
+    c.FlashCode("3d0000000000000030f0efbeadde0000000030f6000000000000000041063d00000000000000c0f6040000000000000041063d00000000000000503f3d0000000000000000");
+    c.Run();
+    EXPECT_EQ(c.d.Stat, SHLT);
+    EXPECT_EQ(c.d.CFLAG[0], 0);
+    EXPECT_EQ(c.d.CFLAG[1], 0);
+    EXPECT_EQ(c.d.CFLAG[2], 0);
+    EXPECT_EQ(c.d.Reg[RRAX],0xdeadbeef);
+    EXPECT_EQ(c.d.Reg[RRSI],4);
+    EXPECT_EQ(c.d.Reg[RRBX], 0xdeadbeefdeadbeef);
+}
