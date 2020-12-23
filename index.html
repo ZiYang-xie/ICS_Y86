@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="./css/card.css">
     <link rel="stylesheet" type="text/css" href="./css/controller.css">
     <link rel="stylesheet" type="text/css" href="./css/about.css">
+    <link rel="stylesheet" type="text/css" href="./css/animation.css">
     <!-- CDN Js -->
     <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
     <script type="text/javascript" src="http://vuejs.org/js/vue.min.js"></script>
@@ -18,8 +19,15 @@
 </head>
 <body>
 <div id="app" class="main">
-    <div class="layout">
+    
+    <transition name="fade" >
+        <div v-if="banner_show" class="banner">
+            <h1 class="banner_title"> Y86 Extended </h1>
+            <h1 class="banner_text">未来已来</h1> 
+        </div>
+    </transition>
 
+    <div class="layout">
         <Layout>
             <Header>
                 <i-menu mode="horizontal" theme="dark" active-name="1">
@@ -31,7 +39,7 @@
                             <Icon type="md-home" size="20"></Icon>
                             主要功能
                         </menu-item>
-                        <menu-item name="2" to='/extended'>
+                        <menu-item name="2" to='/info'>
                             <Icon type="md-list" size="20"></Icon>
                             说明文档
                         </menu-item>
@@ -49,6 +57,6 @@
         </Layout>
     </div>  
 </div>
-<script type="module" src="./vue.js"></script> 
+<script type="module" src="./index.js"></script> 
 </body>
 </html>

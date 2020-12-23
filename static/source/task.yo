@@ -1,26 +1,14 @@
-                            | # Execution begins at address 0 
-0x0:                        | 	.pos 0
-0x0: 30f40002000000000000   | 	irmovq stack, %rsp  	# Set up stack pointer
-0xa: 803800000000000000     | 	call main		# Execute main program
-0x13: 00                    | 	halt			# Terminate program 
-                            | 
-                            | # Array of 4 elements
-0x18:                       | 	.align 8
-0x18: 0001000000000000      | array:	.quad 0x100
-0x20: 0002000000000000      | 	.quad 0x200
-0x28: 0003000000000000      | 	.quad 0x300
-0x30: 0004000000000000      | 	.quad 0x400
-                            | 
-                            | #Load Forwarding
-0x38: 30f11800000000000000  | main:	irmovq array, %rcx
-0x42: 30f03412000000000000  | 	irmovq $0x1234, %rax
-0x4c: 50210000000000000000  | 	mrmovq 0(%rcx), %rdx
-0x56: a02f                  | 	pushq %rdx	#No bubble
-0x58: 10                    | 	nop
-0x59: b02f                  | 	popq %rdx
-0x5b: 40020000000000000000  | 	rmmovq %rax, 0(%rdx)
-0x65: 90                    | 	ret
-                            | 	
-                            | # Stack starts here and grows to lower addresses
-0x200:                      | 	.pos 0x200
-0x200:                      | stack:
+0x000:                         |     .pos 0
+0x000:                         |     .define console $0xf00
+0x000: 30f74b00000000000000    |     irmovq str %rdi
+0x00a: 30f6000f000000000000    |     irmovq console %rsi
+0x014: 30f10800000000000000    |     irmovq $8 %rcx
+0x01e: 50070000000000000000    |     mrmovq (%rdi) %rax
+0x028: 400f000f000000000000    |     rmmovq %rax $console
+0x032: 6017                    |     addq %rcx %rdi
+0x034: 6016                    |     addq %rcx %rsi
+0x036: 50070000000000000000    |     mrmovq (%rdi) %rax
+0x040: 40060000000000000000    |     rmmovq %rax (%rsi)
+0x04a: 00                      |     halt
+0x04b:                         | str:
+0x04b: 68656c6c6f2c776f726c6421|     .string hello,world!

@@ -28,19 +28,19 @@ def handleYoFile(f):
     filename_json = json.dumps(filename_dict)
     with open('./static/json/filename.json', 'w') as name_file:
         name_file.write(filename_json)
-    args = ['python3', './cpu/Assembler/assembler.py', filepath, '-r', '|', './cpu/ICS_Y86', '>', './static/json/data.json']
+    args = ['python3', '../Backend/Assembler', filepath, '-r', '|', '../Backend/build/ICS_Y86', '>', './static/json/data.json']
     execute_command(args)
 
 def handleYsFile(f):
     f.save('./static/source/task.ys')
-    args1 = ['python3', './cpu/Assembler/assembler.py', './static/source/task.ys', '>', './static/source/task.yo']
+    args1 = ['python3', '../Backend/Assembler/yyas', './static/source/task.ys', '>', './static/source/task.yo']
     execute_command(args1)
     filename_dict = [ {'filename':f.filename + " [编译模式] "} ]
     filename_json = json.dumps(filename_dict)
     with open('./static/json/filename.json', 'w') as name_file:
         name_file.write(filename_json)
     
-    args2 = ['python3', './cpu/Assembler/assembler.py', './static/source/task.yo', '-r', '|', './cpu/ICS_Y86', '>', './static/json/data.json']
+    args2 = ['python3', '../Backend/Assembler/yyas', './static/source/task.yo', '-r', '|', '../Backend/build/ICS_Y86', '>', './static/json/data.json']
     execute_command(args2)
 
 def execute_command(args):

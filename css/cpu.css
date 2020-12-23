@@ -61,3 +61,37 @@
     width: 15px;
     height: 15px;
 }
+
+.fade-leave-active
+{
+    animation: fade-out-ani 0.5s forwards;
+}
+
+.banner
+{
+    position: absolute;
+    overflow: hidden;
+    height: 100vh;
+    width: 100%;
+    z-index: 9999;
+    object-fit: cover;
+    background-color: white;
+}
+.banner_title
+{
+    font-size: 170px;
+    text-align: center;
+    animation-delay: 0.2s;
+    animation: banner-title 1s forwards ease-in-out;
+    z-index: 100;
+}
+
+.banner_text
+{
+    font-size: 100px;
+    text-align: center;
+    animation-delay: 0.2s;
+    animation: banner-text-ani 1s forwards ease-in-out;
+    z-index: 100;
+}
+

@@ -415,12 +415,11 @@ export default {
                 var tmp = res.bodyText.split('\n');
                 for(let i = 0; i < tmp.length; ++i)
                 {
-                    var item = { pc: 0, instr: "" }; 
-                    let k = tmp[i][31] == '|' ? 2 : 0 
-                    if(tmp[i][0] == "0" && tmp[i][8] != " " && $.trim(tmp[i].slice(30 + k))[0] != ".")
+                    var item = { pc: 0, instr: "" };
+                    if(tmp[i][0] == "0" && tmp[i][8] != " " && $.trim(tmp[i].slice(32))[0] != ".")
                     {
                         item.pc = $.trim(tmp[i].slice(0,5));
-                        let tmp_ins = $.trim(tmp[i].slice(30 + k));
+                        let tmp_ins = $.trim(tmp[i].slice(32));
                         var j;
                         for(j = 0; j < tmp_ins.length; ++j)
                         {
@@ -551,10 +550,10 @@ export default {
             {
                 this.info_data[0].PC = data.PC;
                 this.info_data[0].State = data.State;
-                this.terminal = data.Console;
+                this.terminal = data.Console.replace(/\n/g,"<br/>");
                 for(let i = 0; i < 8; ++i)
                     for(let j = 0; j < 8; ++j)
-                        this.grid_color[i][j] = "rgba(" + data.Graphics[j][i].r + "," + data.Graphics[j][i].g + "," + data.Graphics[j][i].b + "," + data.Graphics[j][i].a + ")";
+                        this.grid_color[i][j] = "rgba(" + data.Graphics[j][i].r + "," + data.Graphics[j][i].g + "," + data.Graphics[j][i].b + "," + data.Graphics[j][i].a / 255 + ")";
                 for(let key in this.cc_data[0])
                     this.cc_data[0][key] = data.CC[key];
                 for(let key in this.reg_data1[0])
@@ -651,7 +650,7 @@ export default {
                 @on-ok="BreakPointOk"
                 @on-cancel="BreakPointCancel">
                 <Select v-model="break_pc" style="width:100%;" multiple :max-tag-count="2">
-                    <Option v-for="item in text" :value="item.pc" :key="item.instr">{{ item.instr }}</Option>
+                    <Option v-for="item in text" :value="item.pc">{{ item.instr }}</Option>
                 </Select>
             </Modal>
             <div class="topInfo_style">
@@ -762,11 +761,11 @@ export default {
                     <Card class="terminal_card">
                         <p slot="title"><Icon size="20" type="md-grid"></Icon> 终端</p>
                         <p v-if="terminal == ''">None Output</p>
-                        <b class="terminal_text" v-else>{{terminal}}</b>
+                        <b class="terminal_text" v-else v-html="terminal"></b>
                         <div class="terminal_grid">
-                            <div v-for="list in grid_color">
-                                <div v-for="item in list" class="grid_block" :style="{background:item}"><div>
-                            </div>
+                            <span v-for="list in grid_color">
+                                <div v-for="item in list" class="grid_block" :style="{'background-color':item}"></div>
+                            </span>
                         </div>
                     </Card>
                 </div>

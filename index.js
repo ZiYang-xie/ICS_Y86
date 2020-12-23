@@ -1,11 +1,17 @@
 import Main from './pages/main.js'
-import Extended from './pages/extended.js'
+import Info from './pages/info.js'
 import About from './pages/about.js'
 
 let app = new Vue({
     el: '#app',
     data: {
-        text: ""
+        banner_show: true,
+        banner_class: "fade_out"
+    },
+    mounted() {
+        this.timer = setTimeout(()=>{   //设置延迟执行
+            this.banner_show = false;
+        },2300);
     },
     router: new VueRouter({
         mode: "history",
@@ -19,8 +25,8 @@ let app = new Vue({
                 component: Main
             },
             {
-                path:"/extended",
-                component: Extended
+                path:"/info",
+                component: Info
             },
             {
                 path:"/about",
@@ -29,5 +35,3 @@ let app = new Vue({
         ]
     })
 })
-
-export default app;

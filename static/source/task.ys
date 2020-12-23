@@ -1,15 +1,14 @@
-	      irmovq $1, %rsi
-	      irmovq $2, %rdi
-	      irmovq $4, %rbp
-	      irmovq $-32, %rax
-	      irmovq $64, %rdx
-	      subq %rdx,%rax
-	      je target
-	      nop
-              halt
-target:
-	      addq %rsi,%rdx
-	      nop
-              nop
-              nop
-	      halt
+.pos 0
+.define console $0xf00
+irmovq str %rdi
+irmovq console %rsi
+irmovq $8 %rcx
+mrmovq (%rdi) %rax
+rmmovq %rax $console
+addq %rcx %rdi
+addq %rcx %rsi
+mrmovq (%rdi) %rax
+rmmovq %rax (%rsi)
+halt
+str:
+    .string "hello,world!"

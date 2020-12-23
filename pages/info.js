@@ -16,7 +16,7 @@ export default {
         </div>
         
         <Card shadow dis-hover="true">
-            
+            <h1> To be continue </h1>
         </Card>
     </Content>
     `
