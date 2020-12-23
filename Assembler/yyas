@@ -381,6 +381,7 @@ def gen_list(lines: list):
             res[-1] = [x for x in res[-1] if x != '']
         except Exception as e:
             print(f"Syntax Error At: {line}")
+            traceback.print_exc()
             print("Assemble Terminated")
             exit(1)
     return res
@@ -401,6 +402,7 @@ def remove_single_line_annot(lines: list):
                 res.append(l[0:idx])
         except Exception as e:
             print(f"Syntax Error At: {l}")
+            traceback.print_exc()
             print("Assemble Terminated")
             exit(1)
     return res
@@ -425,6 +427,7 @@ def remove_multi_line_annot(lines: list):
                 res.append(temp)
         except Exception as e:
             print(f"Syntax Error At: {line}")
+            traceback.print_exc()
             print("Assemble Terminated")
             exit(1)
     return res
@@ -441,6 +444,7 @@ def detach_label(lines: list):
                 res.append(line)
         except Exception as e:
             print(f"Syntax Error At: {line}")
+            traceback.print_exc()
             print("Assemble Terminated")
             exit(1)
     return res
@@ -476,6 +480,7 @@ def get_memaddr(lines: list):
                 res.append(res[idx - 1] + instr[line[0]].size)
         except Exception as e:
             print(f"Syntax Error At: {line}")
+            traceback.print_exc()
             print("Assemble Terminated")
             exit(1)
     return res[:-1]

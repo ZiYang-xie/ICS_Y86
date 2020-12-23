@@ -20,11 +20,10 @@ printloop:
     iaddq $1 %rdi
     iaddq $1 %rsi
     iaddq $1 %rsp
-    icmpq $32 %rsp
+    icmpq $36 %rsp
     jle printloop
 
-mrmovq (%rdi) %rax
-rmmovq %rax (%rsi)
+
 irmovq $0 %rdi
 irmovq $0 %rax
 irmovq $0 %rbx
@@ -32,7 +31,7 @@ irmovq graph %rsp
 irmovq $0 %rsi
 loop:
     irmovq $0 %rcx
-    mrmovq color(%rsi) %rax
+    mrmovlu color(%rsi) %rax
     eachline:
         rmmovl %rax (%rsp)
         iaddq $4 %rsp
@@ -58,5 +57,5 @@ color:
     .word black
 .align 8
 str:
-    .string "hello, world!\n I am booting now"
+    .string "hello, world!\n I am booting now..."
 .byte 0

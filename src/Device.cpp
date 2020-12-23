@@ -86,7 +86,7 @@ void Device::Write4Bytes(uint64_t pos, uint64_t val) {
 void Device::Write2Bytes(uint64_t pos, uint64_t val) {
     *(uint16_t *)(Mem + pos) = val;
 }
-void Device::Write1Bytes(uint64_t pos, uint64_t val) { *(Mem + pos) = val; }
+void Device::Write1Bytes(uint64_t pos, uint64_t val) { *(uint8_t *)(Mem + pos) = val; }
 uint64_t Device::ReadReg(uint8_t reg_idx, uint8_t ifun) {
     switch (ifun) {
         case (RQU):
@@ -260,7 +260,7 @@ void Device::Decode() {
     volatile uint64_t rvalA;
     volatile uint64_t rvalB;
     if (D.icode == IRMMOVQ) {
-        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, d.ifun) : 0;
+        rvalA = d.srcA != RNONE ? ReadReg(d.srcA, D.ifun) : 0;
         rvalB = d.srcB != RNONE ? ReadReg(d.srcB, RQU) : 0;
     } else {
         rvalA = d.srcA != RNONE ? ReadReg(d.srcA, RQU) : 0;
@@ -631,6 +631,7 @@ void Device::SetFControl() {
     if (!(IfMispredicted() || IfMispredictRet()) &&
         (IfLoadUseH() || !IfExecuteDone())) {
         F.control = CSTALL;
+        bad_instr_num += 1;
     } else {
         F.control = CNORMAL;
     }
@@ -647,8 +648,10 @@ void Device::SetDControl() {
 #ifdef HARDWARE_STACK
     if (IfLoadUseH() && !IfExecuteDone()) {
         D.control = CSTALL;
+        bad_instr_num += 1;
     } else if (IfMispredictRet() || IfMispredicted()) {
         D.control = CBUBBLE;
+        bad_instr_num += 1;
     } else {
         D.control = CNORMAL;
     }
@@ -668,6 +671,7 @@ void Device::SetEControl() {
 #ifdef HARDWARE_STACK
     if (IfMispredicted() || IfMispredictRet() || IfLoadUseH()) {
         E.control = CBUBBLE;
+        bad_instr_num += 1;
     } else {
         E.control = CNORMAL;
     }
@@ -684,6 +688,7 @@ void Device::SetMControl() {
 #ifdef HARDWARE_STACK
     if (IfMispredictRet()) {
         M.control = CBUBBLE;
+        bad_instr_num += 1;
     } else
 #endif
     {
