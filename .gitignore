@@ -68,6 +68,7 @@ lib/
 library/
 
 #
+build/
 test/build/CMakeFiles/cmake.check_cache
 test/build/CMakeFiles/CMakeOutput.log
 test/build/CMakeFiles/feature_tests.bin
