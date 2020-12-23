@@ -16,9 +16,11 @@ struct W_Reg {
     uint64_t valM{0};
     uint8_t dstE{RNONE};
     uint8_t dstM{RNONE};
+    uint64_t predPC{0};
     void reset();
 };
 struct M_Reg {
+    uint8_t control{CNORMAL};
     uint8_t stat{SAOK};
     uint8_t icode{0};
     uint8_t ifun{0};
@@ -27,6 +29,7 @@ struct M_Reg {
     uint64_t valA{0};
     uint8_t dstE{RNONE};
     uint8_t dstM{RNONE};
+    uint64_t predPC{0};
     bool ifJump{true};
     void reset();
 };
@@ -43,6 +46,7 @@ struct E_Reg {
     uint8_t srcA{RNONE};
     uint8_t srcB{RNONE};
     void reset();
+    uint64_t predPC{0};
     bool ifJump{true};
     bool ifDone{true};
 };
@@ -56,6 +60,7 @@ struct D_Reg {
     uint64_t valC{0};
     uint64_t valP{0};
     bool ifJump{true};
+    uint64_t predPC{0};
     void reset();
 };
 struct F_Reg {
@@ -88,6 +93,7 @@ struct d_wire {
     uint64_t valB{0};
     bool ifJump{true};
     uint64_t pc{0};
+    uint64_t predPC{0};
 };
 struct e_wire {
     bool Cnd{false};
@@ -102,6 +108,7 @@ struct e_wire {
     uint64_t valC{0};
     bool ifJump{true};
     uint64_t pc{0};
+    uint64_t predPC{0};
 };
 struct m_wire {
     uint8_t icode{INOP};
@@ -111,6 +118,7 @@ struct m_wire {
     uint64_t dstM{0};
     uint8_t stat{SAOK};
     uint64_t valM{0};
+    uint64_t predPC{0};
 };
 
 #endif  // ICS_Y86_PIPELINE_REGISTERS_H

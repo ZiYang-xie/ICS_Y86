@@ -41,6 +41,7 @@ void Controller::Run(bool if_output, int max_cycle, std::ostream& os) {
         d.SetFControl();
         d.SetDControl();
         d.SetEControl();
+        d.SetMControl();
         d.F2D();
         d.D2E();
         d.E2M();

@@ -9,7 +9,7 @@ add_subdirectory(test)
 #if(NOJSON)
  #       add_definitions("-DADVANCED_JUMP -DTEXT_CHECK")
 #else()
-        add_definitions("-DADVANCED_JUMP -DTEXT_CHECK -DOUTPUT_JSON")
+        add_definitions("-DADVANCED_JUMP -DTEXT_CHECK -DOUTPUT_JSON -DHARDWARE_STACK")
 #endif()
 add_executable(ICS_Y86
         src/main.cpp

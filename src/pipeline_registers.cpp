@@ -8,13 +8,13 @@ void W_Reg::reset() {
     stat = SBUB;
     icode = INOP;
     dstE = RNONE;
-  dstM = RNONE;
+    dstM = RNONE;
 }
 void M_Reg::reset() {
     stat = SBUB;
     icode = INOP;
     dstE = RNONE;
-  dstM = RNONE;
+    dstM = RNONE;
 }
 void E_Reg::reset() {
     stat = SBUB;

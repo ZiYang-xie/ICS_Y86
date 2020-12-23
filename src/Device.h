@@ -83,6 +83,8 @@ class Device {
     void SetDControl();
     //取E的状态码
     void SetEControl();
+    //取M的状态码
+    void SetMControl();
     //计算set_cc,若为True,将e.CFLAG的内容写入CFLAG
     void SetCC();
     //更新if_jump_state状态机

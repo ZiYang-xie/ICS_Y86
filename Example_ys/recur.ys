@@ -1,0 +1,12 @@
+.pos 0
+irmovq $0x200 %rsp
+irmovq $30 %rax
+call recur
+halt
+recur:
+    icmpq $0 %rax
+    jle return
+    isubq $1 %rax
+    call recur
+return:
+    ret

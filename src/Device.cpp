@@ -165,7 +165,7 @@ void Device::Fetch() {
     addr_queue.push(F.predPC);
     addr_queue.pop();
 #ifdef HARDWARE_STACK
-    if (f.icode == ICALL) {
+    if (f.icode == ICALL && hardware_stack.size() < 0x20) {
         hardware_stack.push(f.valP);
     }
 #endif
@@ -187,8 +187,8 @@ uint64_t Device::SelectPC() {
             return M.valE;
     }
 #ifdef HARDWARE_STACK
-    else if (W.icode == IRET && W.valM != hardware_stack.top()) {
-        return W.valM;
+    else if (W.icode == IRET && W.valM != W.predPC) {
+        return W.valM;  // RET预测失败的情况
     } else if (D.icode == IRET) {
         if (hardware_stack.empty())
             return F.predPC;
@@ -240,6 +240,7 @@ void Device::F2D() {
     D.valC = f.valC;
     D.valP = f.valP;
     D.ifJump = f.ifJump;
+    D.predPC = f.pc;
 }
 void Device::Decode() {
     if (D.control == CSTALL) {
@@ -274,6 +275,7 @@ void Device::Decode() {
     d.ifun = D.ifun;
     d.valC = D.valC;
     d.ifJump = D.ifJump;
+    d.predPC = D.predPC;
 }
 uint8_t Device::SelectDstM() const {
     if (In(D.icode, IMRMOVQ, IPOPQ)) {
@@ -371,6 +373,7 @@ void Device::Execute() {
     e.valA = E.valA;
     e.dstM = E.dstM;
     e.valC = E.valC;
+    e.predPC = E.predPC;
 }
 uint64_t Device::SelectAluB() const {
     if (In(E.icode, IRMMOVQ, IMRMOVQ, IOPQ, ICALL, IPUSHQ, IRET, IPOPQ, IIOPQ,
@@ -411,6 +414,7 @@ void Device::D2E() {
     E.srcA = d.srcA;
     E.srcB = d.srcB;
     E.ifJump = d.ifJump;
+    E.predPC = d.predPC;
 }
 std::function<uint64_t(uint64_t, uint64_t)> Device::GetALUFunc(uint8_t ifun) {
     switch (ifun) {
@@ -482,8 +486,12 @@ void Device::E2M() {
     M.dstE = e.dstE;
     M.dstM = e.dstM;
     M.ifJump = e.ifJump;
+    M.predPC = e.predPC;
 }
 void Device::Memory() {
+    if (M.control == CBUBBLE) {
+        M.reset();
+    }
     // 写stat
     m.stat = M.stat;
     // 取mem_addr
@@ -523,6 +531,7 @@ void Device::Memory() {
     m.dstE = M.dstE;
     m.dstM = M.dstM;
     m.ifun = M.ifun;
+    m.predPC = M.predPC;
 }
 void Device::WriteMemFromValA(uint64_t mem_addr) {
     if (M.icode != IRMMOVQ) {
@@ -578,6 +587,7 @@ void Device::M2W() {
     W.valM = m.valM;
     W.dstE = m.dstE;
     W.dstM = m.dstM;
+    W.predPC = m.predPC;
 }
 void Device::Writeback() {
     //写回寄存器，如果遇到错误则不允许写入
@@ -611,14 +621,15 @@ bool Device::IfMispredicted() const {
 }
 #ifdef HARDWARE_STACK
 bool Device::IfMispredictRet() const {
-    return M.icode == IRET && (m.valM != hardware_stack.top());
+    return M.icode == IRET && (m.valM != M.predPC);
 }
 #else
 bool Device::IfRet() const { return In(IRET, D.icode, E.icode); }
 #endif
 void Device::SetFControl() {
 #ifdef HARDWARE_STACK
-    if (!IfMispredicted() && (IfLoadUseH())) {
+    if (!(IfMispredicted() || IfMispredictRet()) &&
+        (IfLoadUseH() || !IfExecuteDone())) {
         F.control = CSTALL;
     } else {
         F.control = CNORMAL;
@@ -669,6 +680,16 @@ void Device::SetEControl() {
     }
 #endif
 }
+void Device::SetMControl() {
+#ifdef HARDWARE_STACK
+    if (IfMispredictRet()) {
+        M.control = CBUBBLE;
+    } else
+#endif
+    {
+        M.control = CNORMAL;
+    }
+}
 uint64_t Device::GetPC() const { return addr_queue.front(); }
 void Device::SetDSrcA() {
     if (In(D.icode, ICALL, IJXX)) {
@@ -705,8 +726,7 @@ void Device::SetDSrcB() {
 }
 void Device::SetCC() {
     bool set_cc = In(E.icode, IOPQ, IIOPQ, IOPQN, IIOPQN) &&
-                  !In(m.stat, SADR, SINS, SHLT) &&
-                  !In(W.stat, SADR, SINS, SHLT);
+                  In(m.stat, SBUB, SAOK) && W.stat == SAOK;
     if (set_cc) {
         for (int i = 0; i < 3; i++) {
             CFLAG[i] = e.CFLAG[i];
