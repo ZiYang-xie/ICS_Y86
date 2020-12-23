@@ -1,0 +1,93 @@
+.reg_card
+{
+    width: 40%!important;
+}
+
+.terminal_card
+{
+    width: 30%!important;
+}
+
+.now_card
+{
+    cursor: pointer;
+    width: 25%!important;
+}
+
+.main_card
+{
+    width: 40%!important;
+}
+
+.text_card
+{
+    width: 100%!important;
+}
+
+.left_card_wrapper
+{
+    width: 45%!important;
+}
+
+.controller_card
+{
+    width: 56%!important;
+}
+
+.pipeline_card
+{
+    width: 100%!important;
+}
+
+.ivu-table .info_table td
+{
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.ivu-table .reg_table td
+{
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.progress
+{
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.info_wraper
+{
+    display: inline-block;
+    font-size: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.info_ele
+{
+    display: inline-block;
+}
+
+.info_res
+{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.head_cards_warper
+{
+    display: flex;
+    justify-content: space-around;
+}
+
+.body_card_wraper
+{
+    display: flex;
+    justify-content: space-around;
+}
+
+.footer_card_wraper
+{
+    display: flex;
+    justify-content: space-around;
+}
