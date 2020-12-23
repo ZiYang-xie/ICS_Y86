@@ -1,4 +1,0 @@
-.pos 0
-irmovq $64 %rcx
-isubq $1 %rcx
-halt

@@ -1,0 +1,37 @@
+@keyframes fade-out-ani {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+}
+
+@keyframes banner-title {
+    0% {
+        transform: translate(0, 60%);
+        opacity: 0;
+    }
+    20% {
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 50%);
+    }
+}
+
+
+@keyframes banner-text-ani {
+    0% {
+        transform: translate(0, 58%);
+        letter-spacing: 25px;
+        opacity: 0;
+    }
+    50% {
+        letter-spacing: 35px;
+    }
+    100% {
+        transform: translate(0, 75%);
+        letter-spacing: 15px;
+    }
+}

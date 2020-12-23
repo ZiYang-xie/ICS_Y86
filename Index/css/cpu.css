@@ -1,0 +1,97 @@
+*{ touch-action: pan-y; }
+
+.layout{
+    border: 1px solid #d7dde4;
+    background: #f5f7f9;
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.layout-logo{
+    width: 130px;
+    height: 35px;
+    border-radius: 3px;
+    float: left;
+    position: relative;
+    top: 15px;
+    left: 20px;
+}
+.title
+{
+    display: flex;
+    justify-content: center;
+    line-height: 30px;
+    color: white;
+}
+.layout-nav{
+    width: 350px;
+    margin: 0 auto;
+    margin-right: 20px;
+    font-weight: bold;
+}
+.layout-footer-center{
+    text-align: center;
+}
+
+.topInfo_style
+{
+    display: flex;
+    padding: 15px;
+    font-weight: bold!important;
+    color: rgb(170, 170, 170);
+}
+
+.terminal_text
+{
+    font-size: 20px;
+}
+
+.terminal_grid
+{
+    margin: 10px;
+    width: 120px;
+    height: 120px;
+    display: grid;
+    grid-template-columns: repeat(8, 15px);
+    grid-template-rows: repeat(8, 15px);
+}
+
+.grid_block
+{
+    width: 15px;
+    height: 15px;
+}
+
+.fade-leave-active
+{
+    animation: fade-out-ani 0.5s forwards;
+}
+
+.banner
+{
+    position: absolute;
+    overflow: hidden;
+    height: 100vh;
+    width: 100%;
+    z-index: 9999;
+    object-fit: cover;
+    background-color: white;
+}
+.banner_title
+{
+    font-size: 170px;
+    text-align: center;
+    animation-delay: 0.2s;
+    animation: banner-title 1s forwards ease-in-out;
+    z-index: 100;
+}
+
+.banner_text
+{
+    font-size: 100px;
+    text-align: center;
+    animation-delay: 0.2s;
+    animation: banner-text-ani 1s forwards ease-in-out;
+    z-index: 100;
+}
+

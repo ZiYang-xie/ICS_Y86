@@ -1,0 +1,14 @@
+.pos 0
+.define console $0xf00
+irmovq str %rdi
+irmovq console %rsi
+irmovq $8 %rcx
+mrmovq (%rdi) %rax
+rmmovq %rax $console
+addq %rcx %rdi
+addq %rcx %rsi
+mrmovq (%rdi) %rax
+rmmovq %rax (%rsi)
+halt
+str:
+    .string "hello,world!"

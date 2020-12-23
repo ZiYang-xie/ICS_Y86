@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Y86_Cpu</title>
+    <!-- Style Sheet -->
+    <link rel="stylesheet" type="text/css" href="http://unpkg.com/view-design/dist/styles/iview.css">
+    <link rel="stylesheet" type="text/css" href="./css/cpu.css">
+    <link rel="stylesheet" type="text/css" href="./css/card.css">
+    <link rel="stylesheet" type="text/css" href="./css/controller.css">
+    <link rel="stylesheet" type="text/css" href="./css/about.css">
+    <link rel="stylesheet" type="text/css" href="./css/animation.css">
+    <!-- CDN Js -->
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="http://vuejs.org/js/vue.min.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-iY48mspuUJ7KyIglN9JjM9stxRtuoz9/UMA9Ffe2uluL8ej5FjNsCxj4XNYv866H" src="https://lib.baomitu.com/vue-resource/1.5.1/vue-resource.js"></script>
+    <script type="text/javascript" src="http://unpkg.com/view-design/dist/iview.min.js"></script>
+</head>
+<body>
+<div id="app" class="main">
+    
+    <transition name="fade" >
+        <div v-if="banner_show" class="banner">
+            <h1 class="banner_title"> Y86 Extended </h1>
+            <h1 class="banner_text">未来已来</h1> 
+        </div>
+    </transition>
+
+    <div class="layout">
+        <Layout>
+            <Header>
+                <i-menu mode="horizontal" theme="dark" active-name="1">
+                    <div class="layout-logo">
+                        <h1 class="title">Y86 Cpu</h1>
+                    </div>
+                    <div class="layout-nav">
+                        <menu-item name="1" to='/main'>
+                            <Icon type="md-home" size="20"></Icon>
+                            主要功能
+                        </menu-item>
+                        <menu-item name="2" to='/info'>
+                            <Icon type="md-list" size="20"></Icon>
+                            说明文档
+                        </menu-item>
+                        <menu-item name="3" to='/about'>
+                            <Icon type="md-information-circle" size="20" ></Icon>
+                            关于
+                        </menu-item>
+                    </div>
+                </i-menu>
+            </Header>
+            <keep-alive>
+                <router-view></router-view>
+            </keep-alive>
+            <Footer class="layout-footer-center">2020 - 2077 &copy; Wsw & Xzy</Footer>
+        </Layout>
+    </div>  
+</div>
+<script type="module" src="./index.js"></script> 
+</body>
+</html>

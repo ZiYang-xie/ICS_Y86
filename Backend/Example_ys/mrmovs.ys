@@ -1,9 +1,0 @@
-.pos 0
-irmovq $0xdeadbeef %rax
-irmovq $0 %rsi
-rmmovl %rax mem(%rsi)
-iaddq $4 %rsi
-rmmovl %rax mem(%rsi)
-mrmovq mem %rbx
-halt
-mem:
