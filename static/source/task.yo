@@ -1,14 +1,153 @@
-0x000:                         |     .pos 0
+0x000:                         |     .define graph $0xe00
+0x000:                         |     .define flag $0xdf8
 0x000:                         |     .define console $0xf00
-0x000: 30f74b00000000000000    |     irmovq str %rdi
+0x000:                         |     .define red $0xff000080
+0x000:                         |     .define orange $0xff7d0080
+0x000:                         |     .define yellow $0xffff0080
+0x000:                         |     .define green $0x00ff0080
+0x000:                         |     .define blue $0x0000ff80
+0x000:                         |     .define cyan $0x00ffff80
+0x000:                         |     .define purple $0xff00ff80
+0x000:                         |     .define black $0x00000080
+0x000:                         |     .define white $0xffffffff
+0x000:                         |     .pos 0
+0x000: 30f7f801000000000000    |     irmovq str %rdi
 0x00a: 30f6000f000000000000    |     irmovq console %rsi
-0x014: 30f10800000000000000    |     irmovq $8 %rcx
-0x01e: 50070000000000000000    |     mrmovq (%rdi) %rax
-0x028: 400f000f000000000000    |     rmmovq %rax $console
-0x032: 6017                    |     addq %rcx %rdi
-0x034: 6016                    |     addq %rcx %rsi
-0x036: 50070000000000000000    |     mrmovq (%rdi) %rax
-0x040: 40060000000000000000    |     rmmovq %rax (%rsi)
-0x04a: 00                      |     halt
-0x04b:                         | str:
-0x04b: 68656c6c6f2c776f726c6421|     .string hello,world!
+0x014: 30f40000000000000000    |     irmovq $0 %rsp
+0x01e:                         | printloop:
+0x01e: 53070000000000000000    |     mrmovbu (%rdi) %rax
+0x028: 43060000000000000000    |     rmmovb %rax (%rsi)
+0x032: c0f70100000000000000    |     iaddq $1 %rdi
+0x03c: c0f60100000000000000    |     iaddq $1 %rsi
+0x046: c0f40100000000000000    |     iaddq $1 %rsp
+0x050: e1f42400000000000000    |     icmpq $36 %rsp
+0x05a: 711e00000000000000      |     jle printloop
+0x063: 206b                    |     rrmovq %rsi %r11
+0x065: 30f70000000000000000    |     irmovq $0 %rdi
+0x06f: 30f00000000000000000    |     irmovq $0 %rax
+0x079: 30f30000000000000000    |     irmovq $0 %rbx
+0x083: 30f4000e000000000000    |     irmovq graph %rsp
+0x08d: 30f60000000000000000    |     irmovq $0 %rsi
+0x097:                         | loop:
+0x097: 30f10000000000000000    |     irmovq $0 %rcx
+0x0a1: 5106d001000000000000    |     mrmovlu color(%rsi) %rax
+0x0ab:                         | eachline:
+0x0ab: 41040000000000000000    |     rmmovl %rax (%rsp)
+0x0b5: c0f40400000000000000    |     iaddq $4 %rsp
+0x0bf: c0f10100000000000000    |     iaddq $1 %rcx
+0x0c9: c0f00a00000000000000    |     iaddq $10 %rax
+0x0d3: 403ff80d000000000000    |     rmmovq %rbx flag #翻转flag
+0x0dd: e1f10800000000000000    |     icmpq $8 %rcx
+0x0e7: 72ab00000000000000      |     jl eachline
+0x0f0: c0f60400000000000000    |     iaddq $4 %rsi
+0x0fa: e1f62000000000000000    |     icmpq $32 %rsi
+0x104: 729700000000000000      |     jl loop
+0x10d: 30f10000000000000000    |     irmovq $0 %rcx
+0x117: 30f60000000000000000    |     irmovq $0 %rsi
+0x121:                         | drawheart:
+0x121: 51062002000000000000    |     mrmovlu heart(%rsi) %rax
+0x12b: 4106000e000000000000    |     rmmovl %rax graph(%rsi)
+0x135: c0f60400000000000000    |     iaddq $4 %rsi
+0x13f: c0f10100000000000000    |     iaddq $1 %rcx
+0x149: e1f14000000000000000    |     icmpq $64 %rcx
+0x153: 722101000000000000      |     jl drawheart
+0x15c: 403ff80d000000000000    |     rmmovq %rbx flag
+0x166: 10                      |     nop
+0x167: 10                      |     nop
+0x168: 30f72803000000000000    |     irmovq bootdone %rdi
+0x172: 20b6                    |     rrmovq %r11 %rsi
+0x174: c0f6feffffffffffffff    |     iaddq $-2 %rsi
+0x17e: 30f40000000000000000    |     irmovq $0 %rsp
+0x188:                         | www:
+0x188: 53070000000000000000    |     mrmovbu (%rdi) %rax
+0x192: 43060000000000000000    |     rmmovb %rax (%rsi)
+0x19c: c0f70100000000000000    |     iaddq $1 %rdi
+0x1a6: c0f60100000000000000    |     iaddq $1 %rsi
+0x1b0: c0f40100000000000000    |     iaddq $1 %rsp
+0x1ba: e1f42400000000000000    |     icmpq $36 %rsp
+0x1c4: 718801000000000000      |     jle www
+0x1cd: 00                      |     halt
+0x1d0:                         |     .align 8
+0x1d0:                         | color:
+0x1d0: 800000ff                |     .word red
+0x1d4: 80007dff                |     .word orange
+0x1d8: 8000ffff                |     .word yellow
+0x1dc: 8000ff00                |     .word green
+0x1e0: 80ff0000                |     .word blue
+0x1e4: 80ffff00                |     .word cyan
+0x1e8: 80ff00ff                |     .word purple
+0x1ec: 80000000                |     .word black
+0x1f8:                         |     .align 8
+0x1f8:                         | str:
+0x1f8: 68656c6c6f2c20776f726c64210a204920616d20626f6f74696e67206e6f772e2e2e0a|     .string hello, world!\n I am booting now...\n
+0x21d: 00                      |     .byte 0
+0x220:                         |     .align 8
+0x220:                         | heart:
+0x220: ffffffff                |     .word white
+0x224: 800000ff                |     .word red
+0x228: 800000ff                |     .word red
+0x22c: ffffffff                |     .word white
+0x230: ffffffff                |     .word white
+0x234: 800000ff                |     .word red
+0x238: 800000ff                |     .word red
+0x23c: ffffffff                |     .word white
+0x240: 800000ff                |     .word red
+0x244: 800000ff                |     .word red
+0x248: 800000ff                |     .word red
+0x24c: 800000ff                |     .word red
+0x250: 800000ff                |     .word red
+0x254: 800000ff                |     .word red
+0x258: 800000ff                |     .word red
+0x25c: 800000ff                |     .word red
+0x260: 800000ff                |     .word red
+0x264: 800000ff                |     .word red
+0x268: 800000ff                |     .word red
+0x26c: 800000ff                |     .word red
+0x270: 800000ff                |     .word red
+0x274: 800000ff                |     .word red
+0x278: 800000ff                |     .word red
+0x27c: 800000ff                |     .word red
+0x280: 800000ff                |     .word red
+0x284: 800000ff                |     .word red
+0x288: 800000ff                |     .word red
+0x28c: 800000ff                |     .word red
+0x290: 800000ff                |     .word red
+0x294: 800000ff                |     .word red
+0x298: 800000ff                |     .word red
+0x29c: 800000ff                |     .word red
+0x2a0: ffffffff                |     .word white
+0x2a4: 800000ff                |     .word red
+0x2a8: 800000ff                |     .word red
+0x2ac: 800000ff                |     .word red
+0x2b0: 800000ff                |     .word red
+0x2b4: 800000ff                |     .word red
+0x2b8: 800000ff                |     .word red
+0x2bc: ffffffff                |     .word white
+0x2c0: ffffffff                |     .word white
+0x2c4: ffffffff                |     .word white
+0x2c8: 800000ff                |     .word red
+0x2cc: 800000ff                |     .word red
+0x2d0: 800000ff                |     .word red
+0x2d4: 800000ff                |     .word red
+0x2d8: ffffffff                |     .word white
+0x2dc: ffffffff                |     .word white
+0x2e0: ffffffff                |     .word white
+0x2e4: ffffffff                |     .word white
+0x2e8: ffffffff                |     .word white
+0x2ec: 800000ff                |     .word red
+0x2f0: 800000ff                |     .word red
+0x2f4: ffffffff                |     .word white
+0x2f8: ffffffff                |     .word white
+0x2fc: ffffffff                |     .word white
+0x300: 80ff0000                |     .word blue
+0x304: 8000ff00                |     .word green
+0x308: 80ff0000                |     .word blue
+0x30c: 8000ff00                |     .word green
+0x310: 80ff0000                |     .word blue
+0x314: 8000ff00                |     .word green
+0x318: 80ff0000                |     .word blue
+0x31c: 8000ff00                |     .word green
+0x328:                         |     .align 8
+0x328:                         | bootdone:
+0x328: 426f6f7420436f6d706c6574652c2057656c636f6d6520746f204f75722053686f7721|     .string Boot Complete, Welcome to Our Show!
+0x34b: 0000000000000000        |     .quad $0
