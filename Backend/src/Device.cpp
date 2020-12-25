@@ -40,9 +40,7 @@ Device::Device(std::string str) {
         Mem[i] = 16 * CharToUint8(*p++) + CharToUint8(*p++);
         i++;
     }
-    for (int k = 0; k <= 5; k++) {
-        addr_queue.push(0);
-    }
+    addr = 0;
 }
 bool Device::IfAddrReadable(uint64_t pos) { return pos >= 0 && pos < MEM_SIZE; }
 bool Device::IfAddrWriteable(uint64_t pos) const {
@@ -162,8 +160,6 @@ void Device::Fetch() {
     } else {
         F.predPC = GetFPredPc();
     }
-    addr_queue.push(F.predPC);
-    addr_queue.pop();
 #ifdef HARDWARE_STACK
     if (f.icode == ICALL && hardware_stack.size() < 0x20) {
         hardware_stack.push(f.valP);
@@ -611,6 +607,7 @@ void Device::Writeback() {
     } else {
         Stat = W.stat;
     }
+    addr = W.predPC;
 }
 bool Device::IfExecuteDone() const { return E.ifDone; }
 bool Device::IfLoadUseH() const {
@@ -695,7 +692,7 @@ void Device::SetMControl() {
         M.control = CNORMAL;
     }
 }
-uint64_t Device::GetPC() const { return addr_queue.front(); }
+uint64_t Device::GetPC() const { return addr; }
 void Device::SetDSrcA() {
     if (In(D.icode, ICALL, IJXX)) {
         d.valA = D.valP;

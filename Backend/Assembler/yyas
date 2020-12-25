@@ -499,13 +499,13 @@ def replace_label(lines, mem, labels={}):
     for i in range(len(lines)):
         if ':' in lines[i][0]:
             labels[lines[i][0].replace(':', '')] = '$' + hex(mem[i])
-    for l in lines:
+    for each_line in lines:
         temp = []
-        for s in l:
+        for token in each_line:
             for la in labels.keys():
-                if la == s and ':' not in s and '.' not in s:
-                    s = s.replace(la, labels[la])
-            temp.append(s)
+                if la == token  or (token not in labels.keys() and la in token and ':' not in token and '.' not in token):
+                    token = token.replace(la, labels[la])
+            temp.append(token)
         res.append(temp)
     return res
 

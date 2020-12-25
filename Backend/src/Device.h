@@ -105,7 +105,7 @@ class Device {
     uint64_t text_section_end{0};
     // 这是一个硬件中并不存在的queue，用于方便我们在前端显示PC
     // 这个Addr的大小始终为5，因为我们总是显示在Writeback阶段的PC值
-    std::queue<uint64_t> addr_queue;
+    uint64_t addr;
     // 这是一个实际存在的硬件栈，用于缓存CALL的结果以更好的分支预测
     std::stack<uint64_t> hardware_stack;
     // 这是一个跳转的状态机(2-bit saturating counter)，工作原理如下

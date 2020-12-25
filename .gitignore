@@ -13,3 +13,9 @@ CTestTestfile.cmake
 _deps
 Backend/.DS_Store
 *.cmake
+*.a
+Backend/build/ICS_Y86
+Backend/test/build/Google_Tests_run
+Index/static/source/task.yo
+Index/static/source/task.ys
+Index/static/json/data.json
