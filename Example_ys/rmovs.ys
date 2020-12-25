@@ -1,0 +1,12 @@
+.pos 0
+irmovq $0xdeadbeef82345678 %rax
+rmmovq %rax mem
+mrmovq mem %rbx
+mrmovlu mem %rcx
+mrmovls mem %rdx
+mrmovwu mem %r8
+mrmovws mem %r9
+mrmovbu mem %r10
+mrmovbs mem %r11
+halt
+mem:

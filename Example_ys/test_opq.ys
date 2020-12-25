@@ -1,0 +1,7 @@
+.pos 0
+irmovq $123 %rax
+iaddq $1 %rbx
+iaddq $1 %rcx
+iaddq $1 %rdx
+iaddq $1 %rdi
+cmpq %rcx %rsi

@@ -28,7 +28,7 @@ def handleYoFile(f):
     filename_json = json.dumps(filename_dict)
     with open('./static/json/filename.json', 'w') as name_file:
         name_file.write(filename_json)
-    args = ['python3', '../Backend/Assembler', filepath, '-r', '|', '../Backend/build/ICS_Y86', '>', '../Index/static/json/data.json']
+    args = ['python3', '../Backend/Assembler/yyas', filepath, '-r', '|', '../Backend/build/ICS_Y86', '>', '../Index/static/json/data.json']
     execute_command(args)
 
 def handleYsFile(f):
