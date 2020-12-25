@@ -581,7 +581,7 @@ def gen_byte_code(lines):
 
 def get_output(mem_addr, lines, byte_code):
     res = '\n'.join(
-        [f"0x{mem_addr[i]:03x}: {byte_code[i]:24s}| {'' if ':' in lines[i][0] else '    '}{' '.join(lines[i])}" for i in
+        [f"0x{mem_addr[i]:03x}: {byte_code[i]:23s}| {'' if ':' in lines[i][0] else '    '}{' '.join(lines[i])}" for i in
          range(len(lines))])
     return res
 
